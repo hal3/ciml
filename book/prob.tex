@@ -1,0 +1,794 @@
+\chapter{Probabilistic Modeling} \label{sec:prob}
+
+\chapterquote{}{}
+
+\begin{learningobjectives}
+\item Define the generative story for a naive Bayes classifier.
+\item Derive relative frequency as the solution to a constrained
+  optimization problem.
+\item Compare and contrast generative, conditional and discriminative
+  learning.
+\item Explain when generative models are likely to fail.
+\item Derive logistic loss with an $\ell_2$ regularizer from a
+  probabilistic perspective.
+%\item Explain the maximum entropy principle and relate it to logistic
+%  regression.
+\end{learningobjectives}
+
+\dependencies{}
+
+\newthought{Many of the models and algorithms} you have learned about
+thus far are relatively \emph{disconnected}.  There is an alternative
+view of machine learning that unites and generalizes much of what you
+have already learned.  This is the \concept{probabilistic modeling}
+framework, in which you will explicitly think of learning as a problem
+of \concept{statistical inference}.
+
+In this chapter, you will learn about two flavors of probabilistic
+models: generative and conditional.  You will see that many of the
+approaches (both supervised and unsupervised) we have seen already can
+be cast as probabilistic models.  Through this new view, you will be
+able to develop learning algorithms that have inductive biases closer
+to what you, as a designer, believe.  Moreover, the two chapters that
+follow will make heavy use of the probabilistic modeling approach to
+open doors to other learning problems.
+
+\section{Classification by Density Estimation}
+
+
+\begin{mathreview}{Rules of probability}
+  chain rule, marginalization and Bayes' rule
+\end{mathreview}
+
+Our underlying assumption for the majority of this book is that
+learning problems are characterized by some unknown probability
+distribution $\cD$ over input/output pairs $(x,y) \in \cX \times \cY$.
+Suppose that someone \emph{told} you what $\cD$ was.  In particular,
+they gave you a Python function \FUN{computeD} that took two inputs,
+$x$ and $y$, and returned the probability of that $x,y$ pair under
+$\cD$.  If you had access to such a function, classification becomes
+simple.  We can define the \concept{Bayes optimal classifier} as the
+classifier that, for any test input $\hat x$, simply returns the $\hat
+y$ that maximizes \FUN{computeD}$(\hat x, \hat y)$, or, more formally:
+%
+\begin{equation} \label{eq:prob:bayesopt}
+  f\xth{BO}(\hat x) = \arg\max_{\hat y \in \cY} \cD(\hat x, \hat y)
+\end{equation}
+%
+This classifier is optimal in one specific sense: of \emph{all
+  possible} classifiers, it achieves the smallest zero/one error.
+
+\begin{theorem}[Bayes Optimal Classifier] \label{thm:prob:bayesopt}
+  The Bayes Optimal Classifier $f\xth{BO}$ achieves minimal zero/one
+  error of any deterministic classifier.
+\end{theorem}
+
+This theorem assumes that you are comparing against
+\emph{deterministic} classifiers.  You can actually prove a stronger
+result that $f\xth{BO}$ is optimal for randomized classifiers as well,
+but the proof is a bit messier.  However, the intuition is the same:
+for a given $x$, $f\xth{BO}$ chooses the label with highest
+probability, thus \emph{minimizing} the probability that it makes an
+error.
+
+\begin{myproof}{\ref{thm:prob:bayesopt}}
+  Consider some other classifier $g$ that claims to be better than
+  $f$.  Then, there must be some $x$ on which $g(x) \neq f(x)$.  Fix
+  such an $x$.  Now, the probability that $f$ makes an error on this
+  particular $x$ is $1 - \cD(x, f\xth{BO}(x))$ and the probability
+  that $g$ makes an error on this $x$ is $1 - \cD(x, g(x))$.  But
+  $f\xth{BO}$ was chosen in such a way to \emph{maximize} $\cD(x,
+  f\xth{BO}(x))$, so this \emph{must} be greater than $\cD(x, g(x))$.
+  Thus, the probability that $f$ errs on this particular $x$ is
+  smaller than the probability that $g$ errs on it.  This applies to
+  any $x$ for which $f(x) \neq g(x)$ and therefore $f$ achieves
+  smaller zero/one error than any $g$.
+\end{myproof}
+
+The \concept{Bayes error rate} (or \concept{Bayes optimal error rate})
+is the error rate of the Bayes optimal classifier.  It is the best
+error rate you can ever hope to achieve on this classification problem
+(under zero/one loss).
+
+The take-home message is that if someone gave you access to the data
+distribution, forming an \emph{optimal} classifier would be trivial.
+Unfortunately, no one gave you this distribution, but this analysis
+suggests that good way to build a classifier is to try to
+\emph{estimate} $\cD$.  In other words, you try to learn a
+distribution $\hat \cD$, which you hope to very similar to $\cD$, and
+then use this distribution for classification.  Just as in the
+preceding chapters, you can try to form your estimate of $\cD$ based
+on a finite training set.
+
+The most direct way that you can attempt to construct such a
+probability distribution is to select a \emph{family} of parametric
+distributions.  For instance, a Gaussian (or Normal) distribution is
+parametric: it's parameters are its mean and covariance.  The job of
+learning is then to infer which parameters are ``best'' as far as the
+observed training data is concerned, as well as whatever inductive
+bias you bring.  A key assumption that you will need to make is that
+the training data you have access to is drawn \concept{independently}
+from $\cD$.  In particular, as you draw examples $(x_1,y_1) \sim \cD$
+then $(x_2,y_2) \sim \cD$ and so on, the $n$th draw $(x_n,y_n)$ is
+drawn from $\cD$ and \emph{does not} otherwise depend on the previous
+$n-1$ samples.  This assumption is usually false, but is also usually
+sufficiently close to being true to be useful.  Together with the
+assumption that all the training data is drawn from the same
+distribution $\cD$ leads to the \concept{i.i.d. assumption} or
+\concept{independently and identically distributed} assumption.  This
+is a key assumption in almost all of machine learning.
+
+\section{Statistical Estimation}
+
+Suppose you need to model a coin that is possibly biased (you can
+think of this as modeling the \emph{label} in a binary classification
+problem), and that you observe data \texttt{HHTH} (where
+\texttt{H} means a flip came up heads and \texttt{T} means it came up
+tails).  You can assume that all the flips came from the same coin,
+and that each flip was independent (hence, the data was i.i.d.).
+Further, you may choose to believe that the coin has a fixed
+probability $\be$ of coming up heads (and hence $1-\be$ of coming up
+tails).  Thus, the parameter of your model is simply the scalar $\be$.
+
+\thinkaboutit{Describe a case in which at least one of the assumptions
+  we are making about the coin flip is false.}
+
+The most basic computation you might perform is \concept{maximum
+  likelihood estimation}: namely, select the paramter $\be$ the
+maximizes the probability of the data under that parameter.  In order
+to do so, you need to compute the probability of the data:
+%
+\begin{align} \label{eq:prob:binomial}
+  p_\be(D)
+  &= p_\be(\texttt{HHTH}) 
+     \becauseof{definition of $D$} \\
+  &= p_\be(\texttt{H})
+     p_\be(\texttt{H})
+     p_\be(\texttt{T})
+     p_\be(\texttt{H})
+      \becauseof{data is independent} \\
+  &= \be \be (1-\be) \be \\
+  &= \be^3 (1-\be) \\
+  &= \be^3 - \be^4
+\end{align}
+%
+Thus, if you want the parameter $\be$ that maximizes the probability
+of the data, you can take the derivative of $\be^3-\be^4$ with respect
+to $\be$, set it equal to zero and solve for $\be$:
+%
+\begin{align}
+  \frac {\partial} {\partial \be} \left[ \be^3 - \be^4 \right] &= 3 \be^2 -  4\be^3\\
+       & 4\be^3 = 3\be^2  \\
+  \Longleftrightarrow & 4\be = 3 \\
+  \Longleftrightarrow & \be  = \frac 3 4
+\end{align}
+%
+Thus, the maximum likelihood $\be$ is $0.75$, which is probably what
+you would have selected by intuition.
+%
+You can solve this problem more generally as follows.  If you have
+$H$-many heads and $T$-many tails, the probability of your data
+sequence is $\be^H (1-\be)^T$.  You can try to take the derivative of
+this with respect to $\be$ and follow the same recipe, but all of the
+products make things difficult.  A more friendly solution is to work
+with the \concept{log likelihood} or \concept{log probability}
+instead.  The log likelihood of this data sequence is $H \log \be + T
+\log (1-\be)$.  Differentiating with respect to $\be$, you get $H/\be
+- T/(1-\be)$.  To solve, you obtain $H/\be = T/(1-\be)$ so $H (1-\be)
+= T \be$.  Thus $H - H\be = T\be$ and so $H = (H+T) \be$, finally
+yeilding that $\be = H/(H+T)$ or, simply, the fraction of observed
+data that came up heads.  In this case, the maximum likelihood
+estimate is nothing but the relative frequency of observing heads!
+
+\thinkaboutit{How do you know that the solution of $\be=H/(H+T)$ is
+  actually a maximum?}
+
+Now, suppose that instead of flipping a coin, you're rolling a
+$K$-sided die (for instance, to pick the label for a multiclass
+classification problem).  You might model this by saying that there
+are parameters $\th_1, \th_2, \dots, \th_K$ specifying, respectively,
+the probabilities that any given side comes up on a role.  Since these
+are themselves probabilities, each $\th_k$ should be at least zero,
+and the sum of the $\th_k$s should be one.  Given a data set that
+consists of $x_1$ rolls of $1$, $x_2$ rolls of $2$ and so on, the
+probability of this data is $\prod_k \th_k^{x_k}$, yielding a log
+probability of $\sum_k x_k \log \th_k$.  If you pick some particular
+parameter, say $\th_3$, the derivative of this with respect to $\th_3$
+is $x_3 / \th_3$, which you want to equate to zero.  This leads
+to\dots $\th_3 \rightarrow \infty$.
+
+This is obviously ``wrong.''  From the mathematical formulation, it's
+correct: in fact, setting all of the $\th_k$s to $\infty$ \emph{does}
+maximize $\prod_k \th_k^{x_k}$ for any (non-negative) $x_k$s.  The
+problem is that you need to constrain the $\th$s to sum to one.  In
+particular, you have a constraint that $\sum_k \th_k = 1$ that you
+forgot to enforce.  A convenient way to enforce such constraints is
+through the technique of \concept{Lagrange multipliers}.  To make this
+problem consistent with standard minimization problems, it is
+convenient to minimize negative log probabilities, instead of
+maximizing log probabilities.  Thus, the \emph{constrainted}
+optimization problem is:
+%
+\optimize{prob:multinomial}{\vec\th}{ \textcolor{darkblue}{- \sum_k x_k \log \th_k}}%
+{\textcolor{darkergreen}{\sum_k \th_k - 1 = 0}}
+%
+The Lagrange multiplier approach involves adding a new variable $\la$
+to the problem (called the \concept{Lagrange variable}) corresponding
+to the constraint, and to use that to move the constraint into the
+objective.  The result, in this case, is:
+%
+\optimizeLagrange{prob:multinomial:lagrange}{\la}{\vec\th}{%
+  \textcolor{darkblue}{- \sum_k x_k \log \th_k} - \la \textcolor{darkergreen}{\left( \sum_k \th_k - 1 \right)}
+}
+%
+Turning a constrained optimization problem into it's corresponding
+\concept{Lagrangian} is straightforward.  The mystical aspect is why
+it works.  In this case, the idea is as follows.  Think of $\la$ as an
+adversary: $\la$ is trying to maximize this function (you're trying to
+minimize it).  If you pick some parameters $\vec\th$ that actually
+satisfy the constraint, then the green term in
+Eq~\eqref{opt:prob:multinomial:lagrangian} goes to zero, and therefore
+$\la$ does not matter: the adversary cannot do anything.  On the other
+hand, if the constraint is even \emph{slightly} unsatisfied, then
+$\la$ can tend toward $+\infty$ or $-\infty$ to blow up the objective.
+So, in order to have a non-infinite objective value, the optimizer
+\emph{must} find values of $\vec\th$ that satisfy the constraint.
+
+If we solve the \emph{inner} optimization of
+Eq~\eqref{opt:prob:multinomial:lagrangian} by differentiating with
+respect to $\th_1$, we get $x_1 / \th_1 = \la$, yielding $\th_1 = x_1
+/ \la$.  In general, the solution is $\th_k = x_k / \la$.  Remembering
+that the goal of $\la$ is to enforce the sums-to-one constraint, we
+can set $\la = \sum_k x_k$ and verify that this is a solution.  Thus,
+our optimal $\th_k = x_k / \sum_k x_k$, which again completely
+corresponds to intuition.
+
+\section{Naive Bayes Models}
+
+Now, consider the binary classification problem.  You are looking for
+a \emph{parameterized} probability distribution that can describe the
+training data you have.  To be concrete, your task might be to predict
+whether a movie review is positive or negative (label) based on what
+words (features) appear in that review.  Thus, the probability for a
+\emph{single} data point can be written as:
+%
+\begin{equation} \label{eq:prob:nb0}
+  \pth( (y, \vec x) )
+  = \pth( y, x_1, x_2, \dots, x_D )
+\end{equation}
+%
+The challenge in working with a probability distribution like
+Eq~\eqref{eq:prob:nb0} is that it's a distribution over a \emph{lot}
+of variables.  You can try to simplify it by applying the
+\concept{chain rule} of probabilities:
+%
+\begin{align} 
+  \pth( x_1, x_2, \dots, x_D, y )
+ &= \pth(y) \pth(x_1 \| y) 
+    \pth(x_2 \| y, x_1) 
+    \pth(x_3 \| y, x_1, x_2) \nonumber\\
+ &\quad\quad   \cdots 
+    \pth(x_D \| y, x_1, x_2, \dots, x_{D-1})
+  \\
+&= \pth(y) \prod_d \pth(x_d \| y, x_1, \dots, x_{d-1}) 
+\label{eq:prob:nbchain} 
+\end{align}
+%
+At this point, this equality is \emph{exact} for any probability
+distribution.  However, it might be difficult to craft a probability
+distribution for the $10000$th feature, given the previous $9999$.
+Even if you could, it might be difficult to accurately estimate it.
+At this point, you can make assumptions.  A classic assumption, called
+the \concept{naive Bayes assumption}, is that \emph{the features are
+  independent, conditioned on the label.}  In the movie review
+example, this is saying that \emph{once you know that it's a positive
+  review}, the probability that the word ``excellent'' appears is
+independent of whether ``amazing'' also appeared.  (Note that this
+does \emph{not} imply that these words are independent when you don't
+know the label---they most certainly are not.)  Formally this
+assumption states that:
+%
+\begin{equation} \label{eq:prob:nbassumption}
+\textbf{Assumption:}\quad
+  p(x_d \| y, x_{d'}) = p(x_d \| y) \quad,\quad \forall d \neq d'
+\end{equation}
+%
+Under this assumption, you can simplify Eq~\eqref{eq:prob:nbchain} to:
+%
+\begin{align} \label{eq:prob:nb}
+  \pth( (y, \vec x) )
+&= \pth(y) \prod_d \pth(x_d \| y) 
+\becauseof{naive Bayes assumption}
+\end{align}
+%
+At this point, you can start parameterizing $p$.  Suppose, for now,
+that your labels are binary \emph{and} your features are also binary.
+In this case, you could model the label as a biased coin, with
+probability of heads (eg., positive review) given by $\th_0$.  Then,
+for each label, you can imagine having one (biased) coin for each
+feature.  So if there are $D$-many features, you'll have $1+2D$ total
+coins: one for the label (call it $\th_0$) and one for each
+label/feature combination (call these $\vec\th_{+1}$ and as
+$\vec\th_{-1}$).  In the movie review example, we might expect $\th_0
+\approx 0.4$ (forty percent of movie reviews are positive) and also
+that $\th_{+1}$ might give high probability to words like
+``excellent'' and ``amazing'' and ``good'' and $\vec\th_{-1}$ might
+give high probability to words like ``terrible'' and ``boring'' and
+``hate''.  You can rewrite the probability of a single example as
+follows, eventually leading to the log probability of the entire data
+set:
+%
+\begin{align} \label{eq:prob:nbmult}
+  \pth( (y, \vec x) )
+&= \textcolor{darkergreen}{\pth(y)} \prod_d \textcolor{darkblue}{\pth(x_d \| y)}
+\becauseof{naive Bayes assumption}\\
+&= \left( \textcolor{darkergreen}{
+      \th_0^{[y=+1]} (1-\th_0)^{[y=-1]}
+    }\right)
+  \prod_d
+   \textcolor{darkblue}{
+       \th_{(y),d}^{[x_d=1]}
+       (1-\th_{(y),d})^{[x_d=0]}
+       } \becauseof{model assumptions}
+\end{align}
+
+% \log \pth( (y, \vec x) )
+% &= \textcolor{darkergreen}{[y=+1] \log \th_0
+%    + [y=-1] \log (1-\th_0)} 
+% \becauseof{take logs}
+% \nonumber\\
+% &\quad\quad +
+%    \sum_d
+%    \left( \textcolor{darkblue}{ [x_d=1] \log \th_{(y),d}
+%        + [x_d=0] \log (1-\th_{(y),d})} \right)
+% \\
+% \log\pth(D)
+% &= \sum_n \Big[
+% \textcolor{darkergreen}{[y_n=+1] \log \th_0
+%    + [y_n=-1] \log (1-\th_0)} 
+% \becauseof{i.i.d. assumption}
+% \nonumber\\
+% &\quad\quad +
+%    \sum_d
+%    \left( \textcolor{darkblue}{ [x_{n,d}=1] \log \th_{(y_n),d}
+%        + [x_{n,d}=0] \log (1-\th_{(y_n),d})} \right)
+% \Big]
+% \end{align}
+%
+Solving for $\th_0$ is identical to solving for the biased coin case
+from before: it is just the relative frequency of positive labels in
+your data (because $\th_0$ doesn't depend on $\vec x$ at all).  For
+the other parameters, you can repeat the same exercise as before for
+each of the $2D$ coins independently.  This yields:
+%
+\begin{align}
+  \hat\th_0 &= \frac 1 N \sum_n [y_n = +1] \\
+  \hat\th_{(+1),d} &= \frac {\sum_n [y_n = +1 \land x_{n,d} = 1]}  {\sum_n [y_n = +1]}\\
+  \hat\th_{(-1),d} &= \frac {\sum_n [y_n = -1 \land x_{n,d} = 1]}  {\sum_n [y_n = -1]}
+\end{align}
+%
+In the case that the features are \emph{not} binary, you need to
+choose a different model for $p(x_d \| y)$.  The model we chose here
+is the \concept{Bernouilli distribution}, which is effectively a
+distribution over independent coin flips.  For other types of data,
+other distributions become more appropriate.  The die example from
+before corresponds to a \concept{discrete distribution}.  If the data
+is continuous, you might choose to use a \concept{Gaussian
+  distribution} (aka \concept{Normal distribution}).  The choice of
+distribution is a form of \concept{inductive bias} by which you can
+inject your knowledge of the problem into the learning algorithm.
+
+\begin{mathreview}{Common probability distributions}
+  remove people about discrete, bernoulli, binomial, multinomial and
+  gaussian distributions
+\end{mathreview}
+
+
+\section{Prediction}
+
+Consider the \emph{predictions} made by the naive Bayes model with
+Bernoulli features in Eq~\eqref{eq:prob:nbmult}.  You can better
+understand this model by considering its decision boundary.  In the
+case of probabilistic models, the decision boundary is the set of
+inputs for which the likelihood of $y=+1$ is precisely $50\%$.  Or, in
+other words, the set of inputs $\vx$ for which $p(y=+1 \| \vx) /
+p(y=-1 \| \vx) = 1$.  In order to do this, the first thing to notice
+is that $p(y \| \vx) = p(y,\vx) / p(\vx)$.  In the ratio, the $p(\vx)$
+terms cancel, leaving $p(y=+1,\vx) / p(y=-1,\vx)$.  Instead of
+computing this ratio, it is easier to compute the
+\concept{log-likelihood ratio} (or LLR), $\log p(y=+1,\vx) - \log
+p(y=-1,\vx)$, computed below:
+%
+\begin{align}
+\text{LLR}
+&= \log \left[ \th_0 \prod_d \th_{(+1),d}^{[x_d=1]} (1-\th_{(+1),d})^{[x_d=0]} \right]
+ - \log \left[ (1-\th_0) \prod_d \th_{(-1),d}^{[x_d=1]} (1-\th_{(-1),d})^{[x_d=0]} \right]
+   \becauseof{model assumptions} \\
+&= \log \th_0 - \log (1-\th_0)  + \sum_d [x_d=1] \left( \log \th_{(+1),d} - \log \th_{(-1),d} \right) \nonumber\\
+&\qquad+ \sum_d [x_d=0] \left( \log (1-\th_{(+1),d}) - \log (1-\th_{(-1),d}) \right)
+   \becauseof{take logs and rearrange} \\
+&= \sum_d x_d \log \frac {\th_{(+1),d}} {\th_{(-1),d}}
+ + \sum_d (1-x_d) \log \frac {1-\th_{(+1),d}} {1-\th_{(-1),d}}
+ + \log \frac {\th_0} {1-\th_0}
+    \becauseof{simplify log terms} \\
+&= \sum_d x_d \left[ \log \frac {\th_{(+1),d}} {\th_{(-1),d}} - \log \frac {1-\th_{(+1),d}} {1-\th_{(-1),d}} \right]
+ + \sum_d \log \frac {1-\th_{(+1),d}} {1-\th_{(-1),d}}
+ + \log \frac {\th_0} {1-\th_0}
+    \becauseof{group $x$-terms} \\
+&= \dotp{\vx}{\vw} + b \\
+w_d &= \log \frac {\th_{(+1),d} (1-\th_{(-1),d})} {\th_{(-1),d} (1-\th_{(+1),d})}
+\quad,\quad
+b   = \sum_d \log \frac {1-\th_{(+1),d}} {1-\th_{(-1),d}}
+ + \log \frac {\th_0} {1-\th_0} 
+\end{align}
+%
+The result of the algebra is that the naive Bayes model has precisely
+the form of a linear model!  Thus, like perceptron and many of the
+other models you've previous studied, the decision boundary is linear.
+
+TODO: MBR
+
+% One advantage to working with probabilistic models is that the
+% \emph{same} model can be used to predict under a variety of loss
+% functions.  The prediction of ``choose the most likely class label''
+% is optimal under zero/one loss, but alternative predictions can be
+% made for other losses.  For example, consider the $\al$-Weighted
+% Binary Classification problem from Chapter~\ref{sec:complex}.  In this
+% problem, errors on positive examples cost $\al$, while errors on
+% negative examples cost $1$.  Given an estimated probabilistic model
+% $p(y \| \vx)$, you can minimize the \emph{expected error} by changing
+% the threshold for prediction from $0.5$ to something else.  Suppose
+% that the new threshold is $\be$; namely, if $p(y=+1\|\vx) > \be$ your
+% function $f(\vx)$ predicts $+1$ and otherwise it predicts $-1$.  In
+% this case, your error on \emph{positive examples} is $\al$ if
+% $p(y=+1\|\vx) \leq \be$; your error on \emph{negative examples} is $1$
+% if $p(y=+1\|\vx) > \be$ or equivalent $p(y=-1\|\vx) < 1-\be$.
+% %
+% \begin{align}
+%    \Ep_{(\vx,y) \sim p} \left[ \al^{[y=+1]} [ p(y\|\vx) 
+
+% f(\vx) \neq y \right]
+% &= \Ep_{(\vx,y) \sim p} \left[ \al^{[y=+1]} \frac {p(y=+1,\vx)} {p(y=-1,\vx)}
+    
+
+\section{Generative Stories}
+
+A useful way to develop probabilistic models is to tell a
+\concept{generative story}.  This is a \emph{fictional} story that
+explains how you believe your training data came into existence.  To
+make things interesting, consider a multiclass classification problem,
+with continuous features modeled by independent Gaussians.  Since the
+label can take values $1 \dots K$, you can use a discrete
+distribution (die roll) to model it (as opposed to the Bernoilli
+distribution from before):
+%
+\begin{enumerate}
+  \item \textcolor{darkpurple}{For each example} $n = 1 \dots N$:
+    \begin{enumerate}
+      \item \textcolor{darkblue}{Choose a label} $y_n \sim \Disc(\vec\th)$
+      \item \textcolor{darkred}{For each feature} $d = 1 \dots D$:
+        \begin{enumerate}
+          \item \textcolor{darkergreen}{Choose feature value} $x_{n,d} \sim \Nor(\mu_{y_n,d}, \si^2_{y_n,d})$
+         \end{enumerate}
+     \end{enumerate}
+\end{enumerate}
+%
+This generative story can be directly translated into a likelihood
+function by replacing the ``for each''s with products:
+%
+\begin{align}
+  p(D)
+  &=  \overbrace{
+      \prod_n
+       \underbrace{\th_{y_n}}_{\textsf{\textcolor{darkblue}{choose label}}}
+       \underbrace{
+       \prod_d
+         \underbrace{\frac 1 {\sqrt{2 \pi \si_{y_n,d}^2}}
+         \exp\left[
+           -\frac 1 {2 \si_{y_n,d}^2} (x_{n,d} - \mu_{y_n,d})^2
+           \right]}_{\textsf{\textcolor{darkergreen}{choose feature value}}}
+         }_{\textsf{\textcolor{darkred}{for each feature}}}}
+       ^{\textsf{\textcolor{darkpurple}{for each example}}}
+\end{align}
+%
+You can take logs to arrive at the log-likelihood:
+%
+\begin{align}
+\log p(D)
+&= 
+\sum_n
+  \left[
+    \log \th_{y_n} + 
+    \sum_d
+      -\frac 1 2 \log(\si_{y_n,d}^2)
+      -\frac 1 {2 \si_{y_n,d}^2} (x_{n,d} - \mu_{y_n,d})^2
+      \right]
+  + \textit{const}
+\end{align}
+%
+To optimize for $\vec\th$, you need to add a ``sums to one''
+constraint as before.  This leads to the previous solution where the
+$\th_k$s are proportional to the number of examples with label $k$.
+In the case of the $\mu$s you can take a derivative with respect to,
+say $\mu_{k,i}$ and obtain:
+%
+\begin{align}
+   \frac {\partial \log p(D)} {\partial \mu_{k,i}}
+&= \frac {\partial} {\partial \mu_{k,i}}
+     - \sum_n \sum_d \frac 1 {2 \si_{y_n,d}^2} (x_{n,d} - \mu_{y_n,d})^2
+   \becauseof{ignore irrelevant terms} \\
+&= \frac {\partial} {\partial \mu_{k,i}}
+     - \sum_{n:y_n=k} \frac 1 {2 \si_{k,d}^2} (x_{n,i} - \mu_{k,i})^2
+   \becauseof{ignore irrelevant terms} \\
+&= \sum_{n:y_n=k} \frac 1 {\si_{k,d}^2} (x_{n,i} - \mu_{k,i})
+   \becauseof{take derivative}
+\end{align}
+%
+Setting this equal to zero and solving yields:
+%
+\begin{align}
+  \mu_{k,i} &= \frac {\sum_{n:y_n=k} x_{n,i}} {\sum_{n:y_n=k} 1}
+\end{align}
+%
+Namely, the sample mean of the $i$th feature of the data points that
+fall in class $k$.  A similar analysis for $\si_{k,i}^2$ yields:
+%
+\begin{align}
+   \frac {\partial \log p(D)} {\partial \si^2_{k,i}}
+&= \frac {\partial} {\partial \si^2_{k,i}}
+     - \sum_{y:y_n=k} \left[ \frac 1 2 \log(\si_{k,i}^2) + 
+                            \frac 1 {2 \si_{k,i}^2} (x_{n,i} - \mu_{k,i})^2\right]
+   \becauseof{ignore irrelevant terms} \\
+&= - \sum_{y:y_n=k} \left[
+       \frac 1 {2 \si_{k,i}^2}
+     - \frac 1 {2 (\si_{k,i}^2)^2} (x_{n,i} - \mu_{k,i})^2 \right]
+   \becauseof{take derivative} \\
+&= \frac 1 {2 \si_{k,i}^4} \sum_{y:y_n=k} \left[ (x_{n,i} - \mu{k,i})^2 - \si_{k,i}^2 \right]
+   \becauseof{simplify}
+\end{align}
+%
+You can now set this equal to zero and solve, yielding:
+%
+\begin{align}
+  \si_{k,i}^2 &=
+    \frac {\sum_{n:y_n=k} (x_{n,i}-\mu_{k,i})^2} {\sum_{n:y_n=k} 1}
+\end{align}
+%
+Which is just the sample variance of feature $i$ for class $k$.
+
+\thinkaboutit{What would the estimate be if you decided that, for a
+  given class $k$, all features had equal variance?  What if you
+  assumed feature $i$ had equal variance for each class?  Under what
+  circumstances might it be a good idea to make such assumptions?}
+
+\section{Conditional Models}
+
+In the foregoing examples, the task was formulated as attempting to
+model the \concept{joint} distribution of $(\vx,y)$ pairs.  This may
+seem wasteful: at prediction time, all you care about is $p(y\|\vx)$,
+so why not model it directly?
+
+Starting with the case of regression is actually somewhat simpler than
+starting with classification in this case.  Suppose you ``believe''
+that the relationship between the real value $y$ and the vector $\vx$
+should be linear.  That is, you expect that $y = \dotp{\vw}{\vx}+b$
+\emph{should hold} for some parameters $(\vw,b)$.  Of course, the data
+that you get does not exactly obey this: that's fine, you can think of
+deviations from $y = \dotp{\vw}{\vx}+b$ as \emph{noise}.  To form a
+probabilistic model, you must assume some distribution over noise; a
+convenient choice is zero-mean Gaussian noise.  This leads to the
+following generative story:
+%
+\begin{enumerate}
+  \item For each example $n=1 \dots N$:
+    \begin{enumerate}
+      \item Compute $t_n = \dotp{\vw}{\vx_n} + b$
+      \item Choose noise $e_n \sim \Nor(0, \si^2)$
+      \item Return $y_n = t_n + e_n$
+    \end{enumerate}
+\end{enumerate}
+%
+In this story, the variable $t_n$ stands for ``target.''  It is the
+noiseless variable that you do not get to observe.  Similarly $e_n$ is
+the error (noise) on example $n$.  The value that you actually get to
+observe is $y_n = t_n + e_n$.  See Figure~\ref{fig:prob:regression}.
+
+\Figure{prob:regression}{pictorial view of targets versus labels}
+
+A basic property of the Gaussian distribution is additivity.  Namely,
+that if $a \sim \Nor(\mu,\si^2)$ and $b = a + c$, then $b \sim
+\Nor(\mu+c,\si^2)$.  Given this, from the generative story above, you
+can derive a shorter generative story:
+%
+\begin{enumerate}
+  \item For each example $n=1 \dots N$:
+    \begin{enumerate}
+      \item Choose $y_n \sim \Nor( \dotp{\vw}{\vx_n} + b, \si^2)$
+    \end{enumerate}
+\end{enumerate}
+%
+Reading off the log likelihood of a dataset from this generative
+story, you obtain:
+%
+\begin{align}
+   \log p(D)
+&= \sum_n \left[
+     - \frac 1 2 \log(\si^2)
+     - \frac 1 {2 \si^2} \left( \dotp{\vw}{\vx_n} + b - y_n \right)^2
+     \right]
+   \becauseof{model assumptions}\\
+&= - \frac 1 {2 \si^2}  \sum_n \left( \dotp{\vw}{\vx_n} + b - y_n \right)^2
+   + \textit{const}
+   \becauseof{remove constants}
+\end{align}
+%
+This is precisely the linear regression model you encountered in
+Section~\ref{sec:loss:reg}!  To minimizing the \emph{negative} log
+probability, you need only solve for the regression coefficients
+$\vw,b$ as before.
+
+In the case of binary classification, using a Gaussian noise model
+does not make sense.  Switching to a Bernoulli model, which describes
+binary outcomes, makes more sense.  The only remaining difficulty is
+that the parameter of a Bernoulli is a value between zero and one (the
+probability of ``heads'') so your model must produce such values.  A
+classic approach is to produce a real-valued target, as before, and
+then transform this target into a value between zero and one, so that
+$-\infty$ maps to $0$ and $+\infty$ maps to $1$.  A function that does
+this is the logistic function\footnote{Also called the
+  \concept{sigmoid function} because of it's ``S''-shape.}, defined
+below and plotted in Figure~\ref{fig:prob:logistic}:
+%
+\Figure{prob:sigmoid}{sketch of logistic function}
+%
+\begin{equation}
+\textsf{Logistic function:} \quad
+\si(z) = \frac 1 {1 + \exp[-z]} = \frac {\exp z}{1 + \exp z}
+\end{equation}
+%
+The logistic function has several nice properties that you can verify
+for yourself: $\si(-z) = 1 - \si(z)$ and $\partial \si/\partial z = z
+\si^2(z)$.
+
+Using the logistic function, you can write down a generative story for
+binary classification:
+
+\begin{enumerate}
+  \item For each example $n=1 \dots N$:
+    \begin{enumerate}
+      \item Compute $t_n = \si\left(\dotp{\vw}{\vx_n} + b\right)$
+      \item Compute $z_n \sim \Ber(t_n)$
+      \item Return $y_n = 2 z_n - 1$ (to make it $\pm 1$)
+    \end{enumerate}
+\end{enumerate}
+
+The log-likelihood for this model is:
+%
+\begin{align}
+   \log p(D)
+&= \sum_n \Big[ [y_n=+1] \log \si\left(\dotp{\vw}{\vx_n} + b\right)\nonumber\\
+&\qquad
+               + [y_n=-1] \log \si\left(-\dotp{\vw}{\vx_n} + b\right)
+            \Big]
+   \becauseof{model and properties of $\si$}\\
+&= \sum_n \log \si\left( y_n \left(\dotp{\vw}{\vx_n} + b\right)\right)
+   \becauseof{join terms} \\
+&= - \sum_n \log \left[ 1 + \exp\left( - y_n \left(\dotp{\vw}{\vx_n} +
+      b\right)\right) \right]
+    \becauseof{definition of $\si$}\\
+&= - \sum_n \ell\xth{log}(y_n, \dotp{\vw}{\vx_n} + b)
+    \becauseof{definition of $\ell\xth{log}$}
+\end{align}
+
+As you can see, the log-likelihood is \emph{precisely} the negative of
+(a scaled version of) the logistic loss from Chapter~\ref{sec:loss}.
+This model is the \concept{logistic regression} model, and this is
+where logisitic loss originally derived from.
+
+%One key question is: when should one prefer conditional models to
+%joint model
+
+TODO: conditional versus joint
+
+\section{Regularization via Priors}
+
+In the foregoing discussion, parameters of the model were selected
+according to the maximum likelihood criteria: find the parameters
+$\vec\th$ that maximize $p_{\vec\th}(D)$.  The trouble with this
+approach is easy to see even in a simple coin flipping example.  If
+you flip a coin twice and it comes up heads both times, the maximum
+likelihood estimate for the bias of the coin is $100\%$: it will
+\emph{always} come up heads.  This is true even if you had only
+flipped it once!  If course if you had flipped it one million times
+and it had come up heads every time, \emph{then} you might find this
+to be a reasonable solution.
+
+This is clearly undesirable behavior, especially since data is
+expensive in a machine learning setting.  One solution (there are
+others!) is to seek parameters that balance a tradeoff between the
+likelihood of the data and some prior belief you have about what
+values of those parameters are likely.  Taking the case of the
+logistic regression, you might a priori believe that small values of
+$\vw$ are more likely than large values, and choose to represent this
+as a Gaussian prior on each component of $\vw$.
+
+The \concept{maximum a posteriori} principle is a method for
+incoporating both data and prior beliefs to obtain a more balanced
+parameter estimate.  In abstract terms, consider a probabilistic model
+over data $D$ that is parameterized by parameters $\th$.  If you think
+of the parameters as just another random variable, then you can write
+this model as $p(D \| \th)$, and maximum likelihood amounts to
+choosing $\th$ to maximize $p(D \| \th)$.  However, you might instead
+with to maximize the probability of the \emph{parameters}, given the
+data.  Namely, maximize $p(\th \| D)$.  This term is known as the
+\concept{posterior} distribution on $\th$, and can be computed by
+Bayes' rule:
+%
+\begin{align}
+  \underbrace{p(\th \| D)}_{\text{posterior}} 
+  &= \frac {
+       \overbrace{p(\th)}^{\text{prior}}
+       \overbrace{p(D \| \th)}^{\text{likelihood}}
+     } {
+       \underbrace{p(D)}_{\text{evidence}}
+     }
+ \quad\text{, where}\quad
+ p(D) = \int \ud\th p(\th) p(D \| \th)
+\end{align}
+%
+This reads: the \concept{posterior} is equal to the \concept{prior}
+times the \concept{likelihood} divided by the
+\concept{evidence}.\footnote{The evidence is sometimes called the
+  \concept{marginal likelihood}.}  The evidence is a scary-looking
+term (it has an integral!) but note that from the perspective of
+seeking parameters $\th$ than maximize the posterior, the evidence is
+just a constant (it does not depend on $\th$) and therefore can be
+ignored.
+
+Returning to the logistic regression example with Gaussian priors on
+the weights, the \concept{log posterior} looks like:
+%
+\begin{align}
+   \log p(\th \| D)
+&= - \sum_n \ell\xth{log}(y_n, \dotp{\vw}{\vx_n} + b)
+   - \sum_d \frac 1 {2 \si^2} w_d^2
+   + \textit{const}
+   \becauseof{model definition}\\
+&= - \sum_n \ell\xth{log}(y_n, \dotp{\vw}{\vx_n} + b)
+   - \frac 1 {2 \si^2} \norm{\vw}^2
+\end{align}
+%
+and therefore reduces to a regularized logistic function, with a
+squared $2$-norm regularizer on the weights.  (A $1$-norm regularizer
+can be obtained by using a Laplace prior on $\vw$ rather than a
+Gaussian prior on $\vw$.)
+
+%\section{Maximum Entropy Principle}
+%calculus of variations
+%derivation of logistic regression
+
+
+\begin{comment}
+   - The i.i.d. assumption, and extended chain rule
+   - Logistic regression as a conditional model
+   - Maximum entropy models
+   - Generative modeling, non-naive Bayes and memorizing data
+   - Naive Bayes and feature independence
+   - Naive Bayes as a linear model
+\end{comment}
+
+\begin{exercises}
+\begin{Ex}
+\TODO
+
+\begin{solution}
+\TODO
+\end{solution}
+\end{Ex}
+
+\end{exercises}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "courseml"
+%%% End: 

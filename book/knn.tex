@@ -1,0 +1,845 @@
+\chapter{Geometry and Nearest Neighbors} \label{sec:knn}
+
+\chapterquote{Our brains have evolved to get us out of the rain, find where the berries are, and keep us from getting killed. Our brains did not evolve to help us grasp really large numbers or to look at things in a hundred thousand dimensions.}{Ronald~Graham}
+
+
+\begin{learningobjectives}
+\item Describe a data set as points in a high dimensional space.
+\item Explain the curse of dimensionality.
+\item Compute distances between points in high dimensional space.
+\item Implement a $K$-nearest neighbor model of learning.
+\item Draw decision boundaries.
+\item Implement the $K$-means algorithm for clustering.
+\end{learningobjectives}
+
+\dependencies{\chref{sec:dt}}
+
+\newthought{You can think of prediction tasks} as mapping inputs
+(course reviews) to outputs (course ratings).  As you learned in the
+previous chapter, decomposing an input into a collection of features
+% TODO: make sure this is covered in the previous chapter
+(eg., words that occur in the review) forms the useful abstraction for
+learning.  Therefore, inputs are nothing more than lists of feature
+values.  This suggests a \concept{geometric view} of data, where we
+have one dimension for every feature.  In this view, examples are
+points in a high-dimensional space.
+
+Once we think of a data set as a collection of points in high
+dimensional space, we can start performing geometric operations on
+this data.  For instance, suppose you need to predict whether Alice
+will like Algorithms.  Perhaps we can try to find another student who
+is most ``similar'' to Alice, in terms of favorite courses.  Say this
+student is Jeremy.  If Jeremy liked Algorithms, then we might guess
+that Alice will as well.  This is an example of a \concept{nearest
+  neighbor} model of learning.  By inspecting this model, we'll see a
+completely different set of answers to the key learning questions we
+discovered in \chref{sec:dt}.
+
+\section{From Data to Feature Vectors}
+
+An example, for instance the data in Table~\ref{tab:data:course} from
+the Appendix, is just a collection of feature values about that example.  To
+a person, these features have meaning.  One feature might count how
+many times the reviewer wrote ``excellent'' in a course review.
+Another might count the number of exclamation points.  A third might
+tell us if any text is underlined in the review.
+
+To a machine, the \concept{features} themselves have no meaning.  Only
+the \concept{feature values}, and how they vary across examples, mean
+something to the machine.  From this perspective, you can think about
+an example as being reprsented by a \concept{feature vector}
+consisting of one ``dimension'' for each feature, where each dimenion
+is simply some real value.
+
+Consider a review that said ``excellent'' three times, had one
+exclamation point and no underlined text.  This could be represented
+by the feature vector $\langle 3, 1, 0 \rangle$.  An almost identical
+review that happened to have underlined text would have the feature
+vector $\langle 3,1,1\rangle$.
+
+Note, here, that we have imposed the convention that for
+\concept{binary features} (yes/no features), the corresponding feature
+values are $0$ and $1$, respectively.  This was an arbitrary choice.
+We could have made them $0.92$ and $-16.1$ if we wanted.  But $0/1$ is
+convenient and helps us interpret the feature values.  When we discuss
+practical issues in Chapter~\ref{sec:prac}, you will see other reasons
+why $0/1$ is a good choice.
+
+\Figure{knn:projections}{A figure showing projections of data in
+  two dimension in three ways -- see text.  Top: horizontal axis
+  corresponds to the first feature (TODO) and the vertical axis
+  corresponds to the second feature (TODO); Middle: horizonal is
+  second feature and vertical is third; Bottom: horizonal is first and
+  vertical is third.}
+
+Figure~\ref{fig:knn:projections} shows the data from
+Table~\ref{tab:data:course} in three views.  These three views are
+constructed by considering two features at a time in different pairs.
+In all cases, the plusses denote positive examples and the minuses
+denote negative examples.  In some cases, the points fall on top of
+each other, which is why you cannot see 20 unique points in all
+figures.
+
+\thinkaboutit{Match the example ids from Table~\ref{tab:data:course}
+  with the points in Figure~\ref{fig:knn:projections}.}
+
+The mapping from feature values to vectors is straighforward in the
+case of real valued feature (trivial) and binary features (mapped to
+zero or one).  It is less clear what do do with \concept{categorical
+  features}. For example, if our goal is to identify whether an object
+in an image is a tomato, blueberry, cucumber or cockroach, we might
+want to know its color: is it \categ{Red}, \categ{Blue}, \categ{Green}
+or \categ{Black}?
+
+One option would be to map \categ{Red} to a value of $0$, \categ{Blue}
+to a value of $1$, \categ{Green} to a value of $2$ and \categ{Black}
+to a value of $3$.  The problem with this mapping is that it turns an
+unordered set (the set of colors) into an ordered set (the set
+$\{0,1,2,3\}$).  In itself, this is not necessarily a bad thing.  But
+when we go to \emph{use} these features, we will measure examples
+based on their distances to each other.  By doing this mapping, we are
+essentially saying that \categ{Red} and \categ{Blue} are more similar
+(distance of $1$) than \categ{Red} and \categ{Black} (distance of
+$3$).  This is probably not what we want to say!
+
+A solution is to turn a categorical feature that can take four
+different values (say: \categ{Red}, \categ{Blue}, \categ{Green} and
+\categ{Black}) into four binary features (say: IsItRed?, IsItBlue?,
+IsItGreen? and IsItBlack?).  In general, if we start from a
+categorical feature that takes $V$ values, we can map it to $V$-many
+binary indicator features.
+
+\thinkaboutit{The computer scientist in you might be saying: actually
+  we could map it to $\log_2 K$-many binary features!  Is this a good
+  idea or not?}
+
+With that, you should be able to take a data set and map each example
+to a feature vector through the following mapping:
+
+\begin{itemize}
+\item Real-valued features get copied directly.
+\item Binary features become $0$ (for false) or $1$ (for true).
+\item Categorical features with $V$ possible values get mapped to
+  $V$-many binary indicator features.
+\end{itemize}
+
+After this mapping, you can think of a single example as a
+\concept{vector} in a high-dimensional \concept{feature space}.  If
+you have $D$-many features (after expanding categorical features),
+then this \concept{feature vector} will have $D$-many components.  We
+will denote feature vectors as $\vec x = \langle x_1, x_2, \dots, x_D
+\rangle$, so that $x_d$ denotes the value of the $d$th feature of
+$\vec x$.  Since these are vectors with real-valued components in
+$D$-dimensions, we say that they belong to the space $\R^D$.
+
+For $D=2$, our feature vectors are just points in the plane, like in
+Figure~\ref{fig:knn:projections}.  For $D=3$ this is three dimensional
+space.  For $D>3$ it becomes quite hard to visualize.  (You should
+resist the temptation to think of $D=4$ as ``time'' -- this will just
+make things confusing.)  Unfortunately, for the sorts of problems you
+will encounter in machine learning, $D \approx 20$ is considered ``low
+dimensional,'' $D \approx 1000$ is ``medium dimensional'' and $D
+\approx 100000$ is ``high dimensional.''
+
+\thinkaboutit{Can you think of problems (perhaps ones already
+  mentioned in this book!) that are low dimensional?  That are medium
+  dimensional?  That are high dimensional?}
+
+\section[K-Nearest Neighbors]{$K$-Nearest Neighbors}
+
+The biggest advantage to thinking of examples as vectors in a high
+dimensional space is that it allows us to apply geometric concepts to
+machine learning.  For instance, one of the most basic things that one
+can do in a vector space is compute \koncept{distances}{distance}.  In
+two-dimensional space, the distance between $\langle 2,3\rangle$ and
+$\langle 6,1\rangle$ is given by $\sqrt{(2-6)^2 + (3-1)^2} = \sqrt{18}
+\approx 4.24$.  In general, in $D$-dimensional space, the
+\concept{Euclidean distance} between vectors $\vec a$ and $\vec b$ is
+given by Eq~\eqref{eq:euclidean} (see Figure~\ref{fig:knn:euclidean}
+for geometric intuition in three dimensions):
+
+
+\begin{equation} \label{eq:euclidean}
+d(\vec a, \vec b) = \left[ \sum_{d=1}^D (a_d - b_d)^2 \right]^{\frac 1 2}
+\end{equation}
+
+\Figure{knn:euclidean}{A figure showing Euclidean distance in
+  three dimensions}
+
+\thinkaboutit{Verify that $d$ from Eq~\eqref{eq:euclidean} gives the
+  same result ($4.24$) for the previous computation.}
+
+\TODOFigure{knn:classifyit}{A figure showing an easy NN classification
+  problem where the test point is a ? and should be positive.}
+
+Now that you have access to distances between examples, you can start
+thinking about what it means to learn again.  Consider
+Figure~\ref{fig:knn:classifyit}.  We have a collection of training
+data consisting of positive examples and negative examples.  There is
+a test point marked by a question mark.  Your job is to guess the
+correct label for that point.
+
+Most likely, you decided that the label of this test point is
+positive.  One reason why you might have thought that is that you
+believe that the label for an example should be similar to the label
+of nearby points.  This is an example of a new form of
+\concept{inductive bias}.
+
+The \concept{nearest neighbor} classifier is build upon this insight.
+In comparison to decision trees, the algorithm is ridiculously
+simple.  At training time, we simply store the entire training set.
+At test time, we get a test example $\hat\vx$.  To predict its label,
+we find the training example $\vx$ that is most similar to $\hat\vx$.
+In particular, we find the training example $\vx$ that
+\emph{minimizes} $d(\vx,\hat\vx)$.  Since $\vx$ is a training example,
+it has a corresponding label, $y$.  We predict that the label of
+$\hat\vx$ is also $y$.
+
+\Figure{knn:classifyitbad}{A figure showing an easy NN
+  classification problem where the test point is a ? and should be
+  positive, but its NN is actually a negative point that's noisy.}
+
+Despite its simplicity, this nearest neighbor classifier is incredibly
+effective.  (Some might say \emph{frustratingly} effective.)  However,
+it is particularly prone to overfitting label noise.  Consider the
+data in Figure~\ref{fig:knn:classifyitbad}.  You would probably want
+to label the test point positive.  Unfortunately, it's nearest
+neighbor happens to be negative.  Since the nearest neighbor algorithm
+only looks at the \emph{single} nearest neighbor, it cannot consider
+the ``preponderance of evidence'' that this point should probably
+actually be a positive example.  It will make an unnecessary error.
+
+A solution to this problem is to consider more than just the single
+nearest neighbor when making a classification decision.  We can
+consider the \koncept{$K$-nearest neighbors}{K-nearest neighbors} and
+let them \concept{vote} on the correct class for this test point.  If
+you consider the $3$-nearest neighbors of the test point in
+Figure~\ref{fig:knn:classifyitbad}, you will see that two of them are
+positive and one is negative.  Through voting, positive would win.
+
+\thinkaboutit{Why is it a good idea to use an odd number for $K$?}
+
+\newalgorithm%
+  {knn:knn}%
+  {\FUN{KNN-Predict}(\VAR{$\mat D$}, \VAR{K}, \VAR{$\hat\vx$})}
+  {
+\SETST{S}{\emptylist}
+\FOR{\VAR{$n$} $=\CON{1}$ \TO \VAR{$N$}}
+\SETST{S}{\VAR{S} \pushlist{$\langle$d(\VAR{$\vx_n$}, \VAR{$\hat\vx$}), \VAR{n}$\rangle$}} \COMMENT{store distance to training example $n$}
+\ENDFOR
+\SETST{S}{\FUN{sort}(\VAR{S})} \COMMENT{put lowest-distance objects first}
+\SETST{$\hat y$}{\CON{0}}
+\FOR{\VAR{k} $=\CON{1}$ \TO \VAR{K}}
+\SETST{$\langle$dist,n$\rangle$}{\VAR{S$_k$}} \COMMENT{$n$ this is the $k$th closest data point}
+\SETST{$\hat y$}{\VAR{$\hat y$} $+$ \VAR{$y_n$}} \COMMENT{vote
+  according to the label for the $n$th training point}
+\ENDFOR
+\RETURN \FUN{sign}(\VAR{$\hat y$}) \COMMENT{return $+1$ if $\hat y>0$
+  and $-1$ if $\hat y<0$}
+}
+
+The full algorithm for $K$-nearest neighbor classification is given in
+Algorithm~\ref{alg:knn:knn}.  Note that there actually is no
+``training'' phase for $K$-nearest neighbors.  In this algorithm we
+have introduced five new conventions:
+
+\begin{enumerate}
+\item The training data is denoted by \VAR{$\mat D$}.
+\item We assume that there are $N$-many training examples.
+\item These examples are pairs $(\vx_1,y_1), (\vx_2,y_2), \dots,
+  (\vx_N,y_N)$.\\(Warning: do not confuse $\vx_n$, the $n$th training
+  example, with $x_d$, the $d$th feature for example $\vx$.)
+\item We use \emptylist to denote an empty list and \pushlist{$\cdot$}
+  to append $\cdot$ to that list.
+\item Our prediction on $\hat\vx$ is called $\hat y$.
+\end{enumerate}
+
+The first step in this algorithm is to compute distances from the test
+point to all training points (lines 2-4).  The data points are then
+sorted according to distance.  We then apply a clever trick of
+\emph{summing} the class labels for each of the $K$ nearest neighbors
+(lines 6-10) and using the \FUN{sign} of this sum as our prediction.
+
+\thinkaboutit{Why is the sign of the sum computed in lines 2-4 the
+  same as the majority vote of the associated training examples?}
+
+The big question, of course, is how to choose $K$.  As we've seen,
+with $K=1$, we run the risk of overfitting.  On the other hand, if $K$
+is large (for instance, $K=N$), then \FUN{KNN-Predict} will always
+predict the majority class.  Clearly that is underfitting.  So, $K$ is
+a hyperparameter of the KNN algorithm that allows us to trade-off
+between overfitting (small value of $K$) and underfitting (large value
+of $K$).
+
+\thinkaboutit{Why can't you simply pick the value of $K$ that does
+  best on the training data?  In other words, why do we have to treat
+  it like a hyperparameter rather than just a parameter.}
+
+One aspect of \concept{inductive bias} that we've seen for KNN is that
+it assumes that nearby points should have the same label.  Another
+aspect, which is quite different from decision trees, is that all
+features are equally important!  Recall that for decision trees, the
+key question was \emph{which features are most useful for
+  classification?}  The whole learning algorithm for a decision tree
+hinged on finding a small set of good features.  This is all thrown
+away in KNN classifiers: every feature is used, and they are all used
+the same amount.  This means that if you have data with only a few
+relevant features and lots of irrelevant features, KNN is likely to do
+poorly.
+
+\Figure{knn:ski}{A figure of a ski and snowboard with width (mm)
+  and height (cm).}
+
+\Figure{knn:skidata}{Classification data for ski vs snowboard in
+  2d}
+
+A related issue with KNN is \concept{feature scale}.  Suppose that we
+are trying to classify whether some object is a ski or a snowboard
+(see Figure~\ref{fig:knn:ski}).  We are given two features about this
+data: the width and height.  As is standard in skiing, width is
+measured in millimeters and height is measured in centimeters.  Since
+there are only two features, we can actually plot the entire training
+set; see Figure~\ref{fig:knn:skidata} where ski is the positive class.
+Based on this data, you might guess that a KNN classifier would do
+well.
+
+\Figure{knn:skidatabad}{Classification data for ski vs snowboard in
+  2d, with width rescaled to mm.}
+
+Suppose, however, that our measurement of the width was computed in
+millimeters (instead of centimeters).  This yields the data shown in
+Figure~\ref{fig:knn:skidatabad}.  Since the width values are now tiny,
+in comparison to the height values, a KNN classifier will effectively
+\emph{ignore} the width values and classify almost purely based on
+height.  The predicted class for the displayed test point had changed
+because of this feature scaling.
+
+We will discuss feature scaling more in Chapter~\ref{sec:prac}.  For
+now, it is just important to keep in mind that KNN does not have the
+power to decide which features are important.
+
+\section{Decision Boundaries}
+
+The standard way that we've been thinking about learning algorithms up
+to now is in the \emph{query model}.  Based on training data, you
+learn something.  I then give you a query example and you have to
+guess it's label.
+
+\Figure{knn:db}{decision boundary for 1nn.}
+
+An alternative, less passive, way to think about a learned model is to
+ask: what sort of test examples will it classify as positive, and what
+sort will it classify as negative.  In Figure~\ref{fig:knn:db}, we have a
+set of training data.  The background of the image is colored blue in
+regions that \emph{would} be classified as positive (if a query were
+issued there) and colored red in regions that \emph{would} be
+classified as negative.  This coloring is based on a $1$-nearest
+neighbor classifier.
+
+In Figure~\ref{fig:knn:db}, there is a solid line separating the positive
+regions from the negative regions.  This line is called the
+\concept{decision boundary} for this classifier.  It is the line with
+positive land on one side and negative land on the other side.
+
+\Figure{knn:db}{decision boundary for knn with k=3.}
+
+Decision boundaries are useful ways to visualize the
+\concept{complexity} of a learned model.  Intuitively, a learned model
+with a decision boundary that is really jagged (like the coastline of
+Norway) is really complex and prone to overfitting.  A learned model
+with a decision boundary that is really simple (like the bounary
+between Arizona and Utah) is potentially underfit.  In
+Figure~\ref{fig:knn:dbmany}, you can see the decision boundaries for KNN
+models with $K \in \{1, 3, 5, 7\}$.  As you can see, the boundaries
+become simpler and simpler as $K$ gets bigger.
+
+\Figure{knn:dtski}{decision tree for ski vs. snowboard}
+
+Now that you know about decision boundaries, it is natural to ask:
+what do decision boundaries for decision trees look like?  In order to
+answer this question, we have to be a bit more formal about how to
+build a decision tree on real-valued features.  (Remember that the
+algorithm you learned in the previous chapter implicitly assumed
+\emph{binary} feature values.)  The idea is to allow the decision tree
+to ask questions of the form: ``is the value of feature $5$ greater
+than $0.2$?''  That is, for real-valued features, the decision tree
+nodes are parameterized by a feature and a threshold for that
+feature.  An example decision tree for classifying skis versus
+snowboards is shown in Figure~\ref{fig:knn:dtski}.
+
+\Figure{knn:dtdb}{decision boundary for dt in previous figure}
+
+Now that a decision tree can handle feature vectors, we can talk about
+decision boundaries.  By example, the decision boundary for the
+decision tree in Figure~\ref{fig:knn:dtski} is shown in
+Figure~\ref{fig:knn:dtdb}.  In the figure, space is first split in half
+according to the first query along one axis.  Then, depending on which
+half of the space you you look at, it is either split again along the
+other axis, or simple classified.
+
+%\TODOFigure{knn:dtdeepdb}{decision boundary for deep dt on ski data}
+
+Figure~\ref{fig:knn:dtdb} is a good visualization of decision boundaries
+for decision trees in general.  Their decision boundaries are
+axis-aligned cuts.  The cuts must be axis-aligned because nodes can
+only query on a single feature at a time.  In this case, since the
+decision tree was so shallow, the decision boundary was relatively
+simple.  
+%We could also train a deeper decision tree, which yields the
+%decision boundary in Figure~\ref{fig:knn:dtdeepdb}.  The depth of this
+%tree is TODO, yielding a significantly more complex decision boundary.
+
+\thinkaboutit{What sort of data might yield a very simple decision
+  boundary with a decision tree and very complex decision boundary
+  with 1-nearest neighbor?  What about the other way around?}
+
+\section[K-Means Clustering]{$K$-Means Clustering}
+\label{sec:knn:kmeans}
+
+Up through this point, you have learned all about supervised learning
+(in particular, binary classification).  As another example of the use
+of geometric intuitions and data, we are going to temporarily consider
+an \concept{unsupervised learning} problem.  In unsupervised learning,
+our data consists \emph{only} of examples $\vx_n$ and does \emph{not}
+contain corresponding labels.  Your job is to make sense of this data,
+even though no one has provided you with correct labels.  The
+particular notion of ``making sense of'' that we will talk about now
+is the \concept{clustering} task.
+
+\Figure{knn:clustering}{simple clustering data... clusters in UL,
+  UR and BC.}
+
+Consider the data shown in Figure~\ref{fig:knn:clustering}.  Since
+this is unsupervised learning and we do not have access to labels, the
+data points are simply drawn as black dots.  Your job is to split this
+data set into three clusters.  That is, you should label each data
+point as \categ{A}, \categ{B} or \categ{C} in whatever way you want.
+
+For this data set, it's pretty clear what you should do.  You probably
+labeled the upper-left set of points \categ{A}, the upper-right set of
+points \categ{B} and the bottom set of points \categ{C}.  Or perhaps
+you permuted these labels.  But chances are your clusters were the
+same as mine.
+
+The $K$-means clustering algorithm is a particularly simple and
+effective approach to producing clusters on data like you see in
+Figure~\ref{fig:knn:clustering}.  The idea is to represent each
+cluster by it's cluster center.  Given cluster centers, we can simply
+assign each point to its nearest center.  Similarly, if we know the
+assignment of points to clusters, we can compute the centers.  This
+introduces a chicken-and-egg problem.  If we knew the clusters, we
+could compute the centers.  If we knew the centers, we could compute
+the clusters.  But we don't know either.
+
+\Figure{knn:kmeans}{first few iterations of k-means running on
+  previous data set}
+
+The general computer science answer to chicken-and-egg problems is
+\concept{iteration}.  We will start with a guess of the cluster
+centers.  Based on that guess, we will assign each data point to its
+closest center.  Given these new assignments, we can recompute the
+cluster centers.  We repeat this process until clusters stop moving.
+The first few iterations of the $K$-means algorithm are shown in
+Figure~\ref{fig:knn:kmeans}.  In this example, the clusters converge
+very quickly.
+
+\newalgorithm%
+  {knn:kmeans}%
+  {\FUN{K-Means}(\VAR{$\mat D$}, \VAR{K})}
+  {
+\FOR{$\VAR{k} = \CON{1}$ \TO $\VAR{K}$}
+\SETST{$\vec\mu_k$}{some random location} \COMMENT{randomly initialize
+  mean for $k$th cluster}
+\ENDFOR
+\REPEAT
+\FOR{$\VAR{n} = \CON{1}$ \TO $\VAR{N}$}
+\SETST{$z_n$}{$\argmin_k \norm{\vec\mu_k - \vx_n}$}
+  \COMMENT{assign example $n$ to closest center}
+\ENDFOR
+\FOR{$\VAR{k} = \CON{1}$ \TO $\VAR{K}$}
+\SETST{$\mat X_k$}{$\{$ \VAR{$\vx_n$} : \VAR{$z_n$} = \VAR{$k$} $\}$}
+  \COMMENT{points assigned to cluster $k$}
+\SETST{$\vec\mu_k$}{\FUN{mean}(\VAR{$\mat X_k$})}
+  \COMMENT{re-estimate mean of cluster $k$}
+\ENDFOR
+\UNTIL{\VAR{$\vec\mu$}s stop changing}
+\RETURN \VAR{$\vec z$} \COMMENT{return cluster assignments}
+}
+
+Algorithm~\ref{alg:knn:kmeans} spells out the $K$-means clustering
+algorithm in detail.  The cluster centers are initialized randomly.
+In line 6, data point $\vx_n$ is compared against each cluster center
+$\vec\mu_k$.  It is assigned to cluster $k$ if $k$ is the center with
+the smallest distance.  (That is the ``$\argmin$'' step.)  The
+variable \VAR{$z_n$} stores the assignment (a value from $1$ to $K$)
+of example $n$.  In lines 8-12, the cluster centers are re-computed.
+First, $\mat X_k$ stores all examples that have been assigned to
+cluster $k$.  The center of cluster $k$, \VAR{$\vec\mu_k$} is then
+computed as the mean of the points assigned to it.  This process
+repeats until the means converge.
+
+\begin{mathreview}{Vector Arithmetic, Norms and Means}
+  define vector addition, scalar addition, subtraction, scalar
+  multiplication and norms.  define mean.
+\end{mathreview}
+
+An obvious question about this algorithm is: does it converge?  A
+second question is: how long does it take to converge.  The first
+question is actually easy to answer.  Yes, it does.  And in practice,
+it usually converges quite quickly (usually fewer than $20$
+iterations).  In Chapter~\ref{sec:unsup}, we will actually
+\emph{prove} that it converges.  The question of how long it takes to
+converge is actually a really interesting question.  Even though the
+$K$-means algorithm dates back to the mid 1950s, the best known
+convergence rates were \emph{terrible} for a long time.  Here,
+terrible means exponential in the number of data points.  This was a
+sad situation because empirically we knew that it converged very
+quickly.  New algorithm analysis techniques called ``smoothed
+analysis'' were invented in 2001 and have been used to show very fast
+convergence for $K$-means (among other algorithms).  These techniques
+are well beyond the scope of this book (and this author!) but suffice
+it to say that $K$-means is fast in practice and is provably fast in
+theory.
+
+%\TODOFigure{knn:kmeansbad}{first few iterations of k-means running on
+%  previous data set with BAD initialization}
+
+It is important to note that although $K$-means is guaranteed to
+converge and guaranteed to converge quickly, it is \emph{not}
+guaranteed to converge to the ``right answer.''  The key problem with
+unsupervised learning is that we have no way of knowing what the
+``right answer'' is.  Convergence to a bad solution is usually due to
+poor initialization.  For example, poor initialization in the data set
+from before yields convergence like that seen in
+Figure~\ref{fig:knn:kmeansbad}.  As you can see, the algorithm
+\emph{has} converged.  It has just converged to something less than
+satisfactory.
+
+\thinkaboutit{What is the difference between unsupervised and
+  supervised learning that means that we know what the ``right
+  answer'' is for supervised learning but not for unsupervised
+  learning?}
+
+\section{Warning: High Dimensions are Scary}
+
+Visualizing one hundred dimensional space is incredibly difficult for
+humans.  After huge amounts of training, some people have reported
+that they can visualize four dimensional space in their heads.  But
+beyond that seems impossible.\sidenote{If you want to try to get an
+  intuitive sense of what four dimensions looks like, I highly
+  recommend the short 1884 book \emph{Flatland: A Romance of Many
+    Dimensions} by Edwin Abbott Abbott.  You can even read it online
+  at \url{gutenberg.org/ebooks/201}.}
+
+In addition to being hard to visualize, there are at least two
+additional problems in high dimensions, both refered to as
+\concept{the curse of dimensionality}.  One is computational, the
+other is mathematical.
+
+\Figure{knn:grid:2d}{2d knn with an overlaid grid, cell with test
+  point highlighted}
+
+From a computational perspective, consider the following problem.
+For $K$-nearest neighbors, the speed of prediction is slow for a very
+large data set.  At the very least you have to look at every training
+example every time you want to make a prediction.  To speed things up
+you might want to create an \emph{indexing} data structure.  You can
+break the plane up into a grid like that shown in
+Figure~\ref{fig:knn:grid}.  Now, when the test point comes in, you can
+quickly identify the grid cell in which it lies.  Now, instead of
+considering \emph{all} training points, you can limit yourself to
+training points \emph{in that grid cell} (and perhaps the neighboring
+cells).  This can potentially lead to huge computational savings.
+
+In two dimensions, this procedure is effective.  If we want to break
+space up into a grid whose cells are $0.2 \times 0.2$, we can clearly
+do this with $25$ grid cells in two dimensions (assuming the range of
+the features is $0$ to $1$ for simplicity).  In three dimensions,
+we'll need $125 = 5 \times 5 \times 5$ grid cells.  In four
+dimensions, we'll need $625$.  By the time we get to ``low
+dimensional'' data in $20$ dimensions, we'll need $95,367,431,640,625$
+grid cells (that's $95$ trillion, which is about $6$ to $7$ times the
+US national dept as of January 2011).  So if you're in $20$
+dimensions, this gridding technique will only be useful if you have at
+least $95$ trillion training examples.
+
+For ``medium dimensional'' data (approximately $1000$) dimesions, the
+number of grid cells is a $9$ followed by $698$ numbers before the
+decimal point.  For comparison, the number of atoms in the universe is
+approximately $1$ followed by $80$ zeros.  So even if each atom
+yielding a googul training examples, we'd still have far fewer
+examples than grid cells.  For ``high dimensional'' data
+(approximately $100000$) dimensions, we have a $1$ followed by just
+under $70,000$ zeros.  Far too big a number to even really comprehend.
+
+Suffice it to say that for even moderately high dimensions, the amount
+of computation involved in these problems is enormous.
+
+\thinkaboutit{How does the above analysis relate to the number of data
+  points you would need to fill out a full decision tree with $D$-many
+  features?  What does this say about the importance of shallow
+  trees?}
+
+In addition to the computational difficulties of working in high
+dimensions, there are a large number of strange mathematical
+occurances there.  In particular, many of your intuitions that you've
+built up from working in two and three dimensions just do not carry
+over to high dimensions.  We will consider two effects, but there are
+countless others.  The first is that high dimensional spheres look
+more like porcupines than like balls.\sidenote{This results was
+  related to me by Mark Reid, who heard about it from Marcus Hutter.}
+The second is that distances between points in high dimensions are all
+approximately the same.
+
+\Figure{knn:cursetwo}{2d spheres in spheres}
+
+Let's start in two dimensions as in Figure~\ref{fig:knn:cursetwo}.
+We'll start with four green spheres, each of radius one and each
+touching exactly two other green spheres.  (Remember than in two
+dimensions a ``sphere'' is just a ``circle.'')  We'll place a red
+sphere in the middle so that it touches all four green spheres.  We
+can easily compute the radius of this small sphere.  The pythagorean
+theorem says that $1^2 + 1^2 = (1+r)^2$, so solving for $r$ we get $r
+= \sqrt 2 - 1 \approx 0.41$.  Thus, by calculation, the blue sphere
+lies entirely within the cube (cube = square) that contains the grey
+spheres.  (Yes, this is also obvious from the picture, but perhaps you
+can see where this is going.)
+
+\Figure{knn:cursethree}{3d spheres in spheres}
+
+Now we can do the same experiment in three dimensions, as shown in
+Figure~\ref{fig:knn:cursethree}.  Again, we can use the pythagorean
+theorem to compute the radius of the blue sphere.  Now, we get $1^2 +
+1^2 + 1^2 = (1+r)^2$, so $r = \sqrt3 - 1 \approx 0.73$.  This is still
+entirely enclosed in the cube of width four that holds all eight grey
+spheres.
+
+At this point it becomes difficult to produce figures, so you'll have
+to apply your imagination.  In four dimensions, we would have $16$
+green spheres (called \concept{hyperspheres}), each of radius one.
+They would still be inside a cube (called a \concept{hypercube}) of
+width four.  The blue hypersphere would have radius $r = \sqrt4 - 1 =
+1$.  Continuing to five dimensions, the blue hypersphere embedded in
+$256$ green hyperspheres would have radius $r = \sqrt5-1 \approx 1.23$
+and so on.
+
+In general, in $D$-dimensional space, there will be $2^D$ green
+hyperspheres of radius one.  Each green hypersphere will touch exactly
+$n$-many other hyperspheres.  The blue hyperspheres in the middle will
+touch them all and will have radius $r = \sqrt D - 1$.
+
+Think about this for a moment.  As the number of dimensions grows, the
+radius of the blue hypersphere \emph{grows without bound!}.  For
+example, in $9$-dimensional the radius of the blue hypersphere is now
+$\sqrt9-1 = 2$.  But with a radius of two, the blue hypersphere is now
+``squeezing'' between the green hypersphere and \emph{touching} the
+edges of the hypercube.  In $10$ dimensional space, the radius is
+approximately $2.16$ and it pokes outside the cube.
+
+\Figure{knn:porcupine}{porcupine versus ball}
+
+This is why we say that high dimensional spheres look like porcupines
+and not balls (see Figure~\ref{fig:knn:porcupine}).  The moral of this
+story from a \emph{machine learning} perspective is that intuitions
+you have about space might not carry over to high dimensions.  For
+example, what you think looks like a ``round'' cluster in two or three
+dimensions, might not look so ``round'' in high dimensions.
+
+\TODOFigure{knn:uniform}{100 uniform random points in 1, 2 and 3
+  dimensions}
+
+The second strange fact we will consider has to do with the distances
+between points in high dimensions.  We start by considering random
+points in one dimension.  That is, we generate a fake data set
+consisting of $100$ random points between zero and one.  We can do the
+same in two dimensions and in three dimensions.  See
+Figure~\ref{fig:knn:uniform} for data distributed uniformly on the
+\concept{unit hypercube} in different dimensions.
+
+Now, pick two of these points at random and compute the distance
+between them.  Repeat this process for all pairs of points and average
+the results.  For the data shown in Figure~\ref{fig:knn:uniform}, the
+average distance between points in one dimension is $TODO$; in two
+dimensions is $TODO$; and in three dimensions is $TODO$.
+
+You can actually compute these value analytically.  Write $\Uni_D$ for
+the uniform distribution in $D$ dimensions.  The quantity we are
+interested in computing is:
+\begin{equation} \label{eq:knn:dist}
+  \textit{avgDist}(D)
+  = \Ep_{\vec a \sim \Uni_D} \Big[
+    \Ep_{\vec b \sim \Uni_D} \Big[
+      \norm{\vec a - \vec b}
+      \Big] \Big]
+\end{equation}
+We can actually compute this in closed form (see
+Exercise~\ref{ex:knn:dist} for a bit of calculus refresher) and arrive
+at $\textit{avgDist}(D) = TODO$.  Consider what happens as $D
+\rightarrow \infty$.  As $D$ grows, the average distance between
+points in $D$ dimensions goes to $1$!  In other words, \emph{all}
+distances become about the same in high dimensions.
+
+\TODOFigure{knn:uniformhist}{histogram of distances in D=1,2,3,10,20,100}
+
+When I first saw and re-proved this result, I was skeptical, as I
+imagine you are.  So I implemented it.  In
+Figure~\ref{fig:knn:uniformhist} you can see the results.  This
+presents a \emph{histogram} of distances between random points in $D$
+dimensions for $D \in \{1,2,3,10,20,100\}$.  As you can see, all of
+these distances begin to concentrate around $1$, even for ``medium
+dimension'' problems.
+
+You should now be terrified: the only bit of information that KNN gets
+is distances.  And you've just seen that in moderately high dimensions,
+all distances becomes equal.  So then isn't is the case that KNN
+simply cannot work?
+
+\TODOFigure{knn:mnist}{histogram of distances in multiple D for mnist}
+
+\TODOFigure{knn:20ng}{histogram of distances in multiple D for 20ng}
+
+The answer has to be no.  The reason is that the data that we get is
+\emph{not} uniformly distributed over the unit hypercube.  We can see
+this by looking at two real-world data sets.  The first is an image
+data set of hand-written digits (zero through nine); see
+Section~\ref{sec:data:mnist}.  Although this data is originally in
+$256$ dimensions ($16$ pixels by $16$ pixels), we can artifically
+reduce the dimensionality of this data.  In Figure~\ref{fig:knn:mnist}
+you can see the histogram of average distances between points in this
+data at a number of dimensions.  Figure~\ref{fig:knn:20ng} shows the
+same sort of histogram for a text data set
+(Section~\ref{sec:data:20ng}.
+
+As you can see from these histograms, distances have \emph{not}
+concentrated around a single value.  This is very good news: it means
+that there is hope for learning algorithms to work!  Nevertheless, the
+moral is that high dimensions are weird.
+
+
+\section{Extensions to KNN}
+
+There are several fundamental problems with KNN classifiers.  First,
+some neighbors might be ``better'' than others.  Second, test-time
+performance scales badly as your number of training examples
+increases.  Third, it treats each dimension independently.  We will
+not address the third issue, as it has not really been solved (though
+it makes a great thought question!).
+
+\Figure{knn:badneighbors}{data set with 5nn, test point closest to
+  two negatives, then to three far positives}
+
+Regarding neighborliness, consider Figure~\ref{fig:knn:badneighbors}.
+Using $K=5$ nearest neighbors, the test point would be classified as
+positive.  However, we might actually believe that it should be
+classified negative because the two negative neighbors are \emph{much}
+closer than the three positive neighbors.
+
+\Figure{knn:badneighbors2}{same as previous with $\ep$ ball}
+
+There are at least two ways of addressing this issue.  The first is
+the \concept{$\ep$-ball} solution.  Instead of connecting each data
+point to some fixed number ($K$) of nearest neighbors, we simply
+connect it to \emph{all} neighbors that fall within some ball of
+radius $\ep$.  Then, the majority class of all the points in the $\ep$
+ball wins.  In the case of a tie, you would have to either guess, or
+report the majority class.  Figure~\ref{fig:knn:badneighbors2} shows an
+$\ep$ ball around the test point that happens to yield the proper
+classification.
+
+When using $\ep$-ball nearest neighbors rather than KNN, the
+hyperparameter changes from $K$ to $\ep$.  You would need to set it in
+the same way as you would for KNN.
+
+\thinkaboutit{One issue with $\ep$-balls is that the $\ep$-ball for
+  some test point might be empty.  How would you handle this?}
+
+An alternative to the $\ep$-ball solution is to do \concept{weighted
+  nearest neighbors}.  The idea here is to still consider the
+$K$-nearest neighbors of a test point, but give them uneven votes.
+Closer points get more vote than further points.  When classifying a
+point $\hat\vx$, the usual strategy is to give a training point
+$\vx_n$ a vote that decays exponentially in the distance between
+$\hat\vx$ and $\vx_n$.  Mathematically, the vote that neighbor $n$
+gets is:
+\begin{equation} \label{eq:expdecay}
+\exp\left[ - \frac 1 2 \norm{\hat\vx - \vx_n}^2 \right]
+\end{equation}
+Thus, nearby points get a vote very close to $1$ and far away points
+get a vote very close to $0$.  The overall prediction is positive if
+the sum of votes from positive neighbors outweighs the sum of votes
+from negative neighbors.
+
+\thinkaboutit{Could you combine the $\ep$-ball idea with the weighted
+  voting idea?  Does it make sense, or does one idea seem to trump the
+  other?}
+
+The second issue with KNN is scaling.  To predict the label of a
+single test point, we need to find the $K$ nearest neighbors of that
+test point in the training data.  With a standard implementation, this
+will take $\cO(N D + K \log K)$ time\sidenote{The $ND$ term comes from
+  computing distances between the test point and all training points.
+  The $K\log K$ term comes from finding the $K$ smallest values in the
+  list of distances, using a median-finding algorithm.  Of course,
+  $ND$ almost always dominates $K\log K$ in practice.}.  For very
+large data sets, this is impractical.
+
+\TODOFigure{knn:collapse}{two figures of points collapsed to mean, one
+  with good results and one with dire results}
+
+A first attempt to speed up the computation is to represent each class
+by a \emph{representative.}  A natural choice for a representative
+would be the mean.  We would collapse all positive examples down to
+their mean, and all negative examples down to their mean.  We could
+then just run $1$-nearest neighbor and check whether a test point is
+closer to the mean of the positive points or the mean of the negative
+points.  Figure~\ref{fig:knn:collapse} shows an example in which this
+would probably work well, and an example in which this would probably
+work poorly.  The problem is that collapsing each class to its mean is
+too aggressive.
+
+\TODOFigure{knn:collapse2}{data from previous bad case collapsed into
+  L=2 cluster and test point classified based on means and $1$-nn}
+
+A less aggressive approach is to make use of the $K$-means algorithm
+for clustering.  You can cluster the positive examples into $L$
+clusters (we are using $L$ to avoid variable overloading!) and then
+cluster the negative examples into $L$ separate clusters.  This is
+shown in Figure~\ref{fig:knn:collapse2} with $L=2$.  Instead of storing the
+entire data set, you would only store the \emph{means} of the $L$
+positive clusters and the means of the $L$ negative clusters.  At test
+time, you would run the $K$-nearest neighbors algorithm against these
+\emph{means} rather than against the full training set.  This leads a
+a much faster runtime of just $\cO(L D + K \log K)$, which is probably
+dominated by $LD$.
+
+\thinkaboutit{Clustering of classes was introduced as a way of making
+  things faster.  Will it make things worse, or could it help?}
+
+
+\begin{comment}
+Similarities versus distances
+Relationship to databases
+Underfitting/overfitting by k
+Weighted voting
+From two classes to M classes
+Decision boundaries for knn versus dts
+Computational complexity
+Reducing each class to one point: means
+K-means clustering
+\end{comment}
+
+\begin{exercises}
+\begin{Ex}
+\TODO
+
+\begin{solution}
+\TODO
+\end{solution}
+\end{Ex}
+
+\end{exercises}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "courseml"
+%%% End: 

@@ -1,0 +1,128 @@
+\documentclass[fleqn,explicit,twoside,openany]{tufte-book}
+\hypersetup{colorlinks}
+
+\usepackage[T1]{fontenc}
+%\font\ttfsegoeuil segoeuil at16pt
+%\font\ttfsegoeuilhuge segoeuil at36pt
+%\font\ttfgillsans GillSans at12pt
+\font\ttfsegoeuilsmall Colaborate-Thin at12pt
+\font\ttfsegoeuil Colaborate-Thin at16pt
+\font\ttfsegoeuilhuge Colaborate-Thin at30pt
+
+\renewcommand{\contentsname}{Table of Contents}
+
+\usepackage{pdfpages}
+
+\title[A Course in  Machine Learning]{\ttfsegoeuilhuge A Course in Machine Learning}
+\author{\ttfsegoeuil Hal Daum\'e III}
+
+\usepackage{amsthm}
+\usepackage{xcolor}
+\usepackage{wrapfig}
+\usepackage{soul}
+\usepackage{lipsum}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{answers}
+\usepackage[absolute,overlay]{textpos}
+\usepackage{verbatim}
+\usepackage{fancyvrb}
+\usepackage{xspace}
+%\usepackage[labelsep=none]{caption}
+\usepackage{tikz}
+\usepackage{units}
+\usepackage{makeidx}
+\usepackage{tabularx}
+\usepackage{colortbl}
+\usepackage{multirow}
+\usepackage{calc}
+\usepackage{haldefs}
+
+%\usepackage{draftwatermark}
+
+
+
+\setkeys{Gin}{width=\linewidth,totalheight=\textheight,keepaspectratio}
+\graphicspath{{graphics/}}
+
+\fvset{fontsize=\normalsize}
+
+\usetikzlibrary{shapes,snakes}
+
+\include{halbook}
+
+\renewenvironment{mycomment}{}{}   % comment this if you want comments :)
+
+\let\cleardoublepage\clearpage
+
+\makeindex
+
+\begin{document}
+
+\Opensolutionfile{solutions}[ans2]{Solutions}
+\Writetofile{solutions}{\protect\chapter{Solutions To Exercises}}
+
+\setcounter{secnumdepth}{3}
+
+\frontmatter
+
+%\SetWatermarkAngle{60}
+%\SetWatermarkLightness{0.95}
+%\SetWatermarkText{}
+%\SetWatermarkScale{0.7}
+
+
+\includepdf[pages={1},frame=true,fitpaper=true,noautoscale,width=614.295pt,height=794.97pt]{cover/cover.pdf}
+%\maketitle
+
+%\SetWatermarkText{\shortstack[c]{Draft:\\Do Not\\Distribute}}
+
+\include{pub}
+\include{ded}
+\tableofcontents
+%\listoffigures
+%\listoftables
+%\cleardoublepage
+\include{intro}
+\mainmatter
+\include{dt}
+\include{knn}
+\include{perc}
+\include{prac}
+\include{complex}
+\include{loss}
+\include{prob}
+\include{nnet}
+\include{kernel}
+\include{thy}
+\include{ens}
+\include{opt}
+\include{unsup}
+\include{em}
+\include{semi}
+\include{gm}
+\include{online}
+\include{srl}
+\include{bayes}
+
+\appendix
+\backmatter
+\include{data}
+\include{not}
+
+\bibliographystyle{plainnat}
+\bibliography{bibfile}
+
+\Closesolutionfile{solutions}
+%\Readsolutionfile{solutions}
+
+{
+\linespread{1}
+\printindex
+}
+%\include{important-terms}  trick CheckIndex to read this file
+
+
+\end{document}

@@ -1,0 +1,336 @@
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "courseml"
+%%% End: 
+
+\chapter{Expectation Maximization} \label{sec:em}
+
+\chapterquote{}{}
+
+\begin{learningobjectives}
+\item Explain the relationship between parameters and hidden
+  variables.
+\item Construct generative stories for clustering and dimensionality
+  reduction.
+\item Draw a graph explaining how EM works by constructing convex
+  lower bounds.
+\item Implement EM for clustering with mixtures of Gaussians, and
+  contrasting it with $k$-means.
+\item Evaluate the differences betweem EM and gradient descent for
+  hidden variable models.
+\end{learningobjectives}
+
+\dependencies{}
+
+\newthought{Suppose you were building} a naive Bayes model for a text
+categorization problem.  After you were done, your boss told you that
+it became prohibitively expensive to obtain labeled data.  You now
+have a probabilistic model that assumes access to labels, but you
+don't have any labels!  Can you still do something?
+
+Amazingly, you can.  You can treat the labels as \concept{hidden
+  variables}, and attempt to learn them at the same time as you learn
+the parameters of your model.  A very broad family of algorithms for
+solving problems just like this is the \concept{expectation
+  maximization} family.  In this chapter, you will derive expectation
+maximization (EM) algorithms for clustering and dimensionality reduction,
+and then see why EM works.
+
+\section{Clustering with a Mixture of Gaussians}
+
+In Chapter~\ref{sec:prob}, you learned about probabilitic models for
+classification based on density estimation.  Let's start with a fairly
+simple classification model that \emph{assumes} we have labeled data.
+We will shortly remove this assumption.  Our model will state that we
+have $K$ classes, and data from class $k$ is drawn from a Gaussian
+with mean $\vec\mu_k$ and variance $\si^2_k$.  The choice of classes
+is parameterized by $\vec\th$.  The generative story for this model
+is:
+%
+\begin{enumerate}
+  \item \textcolor{darkpurple}{For each example} $n = 1 \dots N$:
+    \begin{enumerate}
+      \item \textcolor{darkblue}{Choose a label} $y_n \sim \Disc(\vec\th)$
+      \item \textcolor{darkred}{Choose example} $\vx_n \sim \Nor(\vec\mu_{y_n}, \si^2_{y_n})$
+     \end{enumerate}
+\end{enumerate}
+%
+This generative story can be directly translated into a likelihood
+as before:
+%
+\begin{align}
+  p(D)
+  &= \prod_n \textcolor{darkblue}{\Mult(y_n \| \vec\th)} \textcolor{darkred}{\Nor(\vx_n \| \vec\mu_{y_n}, \si^2_{y_n})}\\
+  &=  \overbrace{
+      \prod_n
+       \underbrace{\th_{y_n}}_{\textsf{\textcolor{darkblue}{choose label}}}
+         \underbrace{
+         \left[2 \pi \si_{y_n}^2\right]^{-\frac D 2}
+         \exp\left[
+           -\frac 1 {2 \si_{y_n}^2} \norm{\vx_n - \vec\mu_{y_n}}^2
+           \right]}_{\textsf{\textcolor{darkred}{choose feature values}}}}
+       ^{\textsf{\textcolor{darkpurple}{for each example}}}
+\end{align}
+%
+If you had access to labels, this would be all well and good, and you
+could obtain closed form solutions for the maximum likelihood
+estimates of all parameters by taking a log and then taking gradients
+of the log likelihood:
+%
+\begin{align}
+\th_k &= \text{fraction of training examples in class $k$} \\
+&= \frac 1 N \sum_n [y_n = k] \nonumber\\
+\vec\mu_k &= \text{mean of training examples in class $k$} \\
+&= \frac {\sum_n [y_n = k] \vx_n} {\sum_n [y_n = k]} \nonumber\\
+\si^2_k &= \text{variance of training examples in class $k$} \\
+&= \frac {\sum_n [y_n = k] \norm{\vx_n-\mu_k}} {\sum_n [y_n = k]} \nonumber
+\end{align}
+%
+\thinkaboutit{You should be able to derive the maximum likelihood solution results formally by now.}
+%
+Suppose that you \emph{don't} have labels.  Analogously to the
+$K$-means algorithm, one potential solution is to iterate.  You can
+start off with guesses for the values of the unknown variables, and
+then iteratively improve them over time.  In $K$-means, the approach
+was the \emph{assign} examples to labels (or clusters).  This time,
+instead of making hard assignments (``example $10$ belongs to cluster
+$4$''), we'll make \concept{soft assignments} (``example $10$ belongs
+half to cluster $4$, a quarter to cluster $2$ and a quarter to cluster
+$5$'').  So as not to confuse ourselves too much, we'll introduce a
+new variable, $\vec z_n = \langle z_{n,1}, \dots, z_{n,K}$ (that sums
+to one), to denote a fractional assignment of examples to clusters.
+
+\TODOFigure{em:piecharts}{A figure showing pie charts}
+
+This notion of soft-assignments is visualized in
+Figure~\ref{fig:em:piecharts}.  Here, we've depicted each example as a
+pie chart, and it's coloring denotes the degree to which it's been
+assigned to each (of three) clusters.  The size of the pie pieces
+correspond to the $\vec z_n$ values.
+
+Formally, $z_{n,k}$ denotes the probability that example $n$ is
+assigned to cluster $k$:
+%
+\begin{align}
+z_{n,k} &= p(y_n = k \| \vx_n) \\
+&= \frac {p(y_n = k, \vx_n)} {p(\vx_n)} \\
+&= \frac 1 {Z_n} \Mult(k \| \vec\th) \Nor(\vx_n \| \vec\mu_k, \si^2_k)
+\end{align}
+%
+Here, the normalizer $Z_n$ is to ensure that $\vec z_n$ sums to one.
+
+Given a set of parameters (the $\vec\th$s, $\vec\mu$s and $\si^2$s),
+the \concept{fractional assignments} $z_{n,k}$ are easy to compute.
+Now, akin to $K$-means, given fractional assignments, you need to
+recompute estimates of the model parameters.  In analogy to the
+maximum likelihood solution (Eqs~\eqref{}-\eqref{}), you can do this
+by counting fractional points rather than full points.  This gives the
+following re-estimation updates:
+%
+\begin{align}
+\th_k &= \text{fraction of training examples in class $k$} \\
+&= \frac 1 N \sum_n z_{n,k} \nonumber\\
+\vec\mu_k &= \text{mean of fractional examples in class $k$} \\
+&= \frac {\sum_n z_{n,k} \vx_n} {\sum_n z_{n,k}} \nonumber\\
+\si^2_k &= \text{variance of fractional examples in class $k$} \\
+&= \frac {\sum_n z_{n,k} \norm{\vx_n-\mu_k}} {\sum_n z_{n,k}} \nonumber
+\end{align}
+%
+All that has happened here is that the hard assignments ``$[y_n=k]$''
+have been replaced with soft assignments ``$z_{n,k}$''.  As a bit of
+foreshadowing of what is to come, what we've done is essentially
+replace known labels with \emph{expected labels,} hence the name
+``expectation maximization.''
+
+\newalgorithm%
+  {em:gmm}%
+  {\FUN{GMM}(\VAR{$\mat X$}, \VAR{K})}
+  {
+\FOR{$\VAR{k} = \CON{1}$ \TO $\VAR{K}$}
+\SETST{$\vec\mu_k$}{some random location} \COMMENT{randomly initialize
+  mean for $k$th cluster}
+\SETST{$\si^2_k$}{1} \COMMENT{initialize variances}
+\SETST{$\th_k$}{$1/K$} \COMMENT{each cluster equally likely a priori}
+\ENDFOR
+\REPEAT
+\FOR{$\VAR{n} = \CON{1}$ \TO $\VAR{N}$}
+\FOR{$\VAR{k} = \CON{1}$ \TO $\VAR{K}$}
+\SETST{$z_{n,k}$}{$\VARm{\th_k} \left[2 \pi \VARm{\si_{k}^2}\right]^{-\frac D 2} \exp\left[-\frac 1 {2 \VARm{\si_{k}^2}} \norm{\VARm{\vx_n} - \VARm{\vec\mu_k}}^2\right]$}
+  \COMMENT{compute (unnormalized) fractional assignments}
+\ENDFOR
+\SETST{$\vec z_n$}{$\frac 1 {\sum_k \VARm{z_{n,k}}} \VARm{\vec z_n}$}
+  \COMMENT{normalize fractional assignments}
+\ENDFOR
+\FOR{$\VAR{k} = \CON{1}$ \TO $\VAR{K}$}
+\SETST{$\th_k$}{$\frac 1 {\VARm{N}} \sum_n \VARm{z_{n,k}}$}
+  \COMMENT{re-estimate prior probability of cluster $k$}
+\SETST{$\vec\mu_k$}{$\frac {\sum_n \VARm{z_{n,k}} \VARm{\vx_n}} {\sum_n \VARm{z_{n,k}}}$}
+  \COMMENT{re-estimate mean of cluster $k$}
+\SETST{$\si^2_k$}{$\frac {\sum_n \VARm{z_{n,k}} \norm{\VARm{\vx_n}-\VARm{\mu_k}}} {\sum_n \VARm{z_{n,k}}}$}
+  \COMMENT{re-estimate variance of cluster $k$}
+\ENDFOR
+\UNTIL{converged}
+\RETURN \VAR{$\vec z$} \COMMENT{return cluster assignments}
+}
+
+Putting this together yields Algorithm~\ref{alg:em:gmm}.  This is the
+\concept{GMM} (``\concept{Gaussian Mixture Models}'') algorithm,
+because the probabilitic model being learned describes a dataset as
+being drawn from a mixture distribution, where each component of this
+distribution is a Gaussian.
+
+\thinkaboutit{Aside from the fact that GMMs use soft assignments and $K$-means uses hard assignments, there are other differences between the two approaches.  What are they?}
+
+Just as in the $K$-means algorithm, this approach is succeptible to
+local optima and quality of initialization.  The heuristics for
+computing better initializers for $K$-means are also useful here.
+
+\section{The Expectation Maximization Framework}
+
+At this point, you've seen a method for learning in a particular
+probabilistic model with hidden variables.  Two questions remain: (1)
+can you apply this idea more generally and (2) why is it even a
+reasonable thing to do?  Expectation maximization is a \emph{family}
+of algorithms for performing maximum likelihood estimation in
+probabilistic models with hidden variables.
+
+\TODOFigure{em:lowerbound}{A figure showing successive lower bounds}
+
+The general flavor of how we will proceed is as follows.  We want to
+maximize the log likelihood $\cL$, but this will turn out to be
+difficult to do directly.  Instead, we'll pick a surrogate function
+$\tilde\cL$ that's a lower bound on $\cL$ (i.e., $\tilde\cL \leq \cL$
+everywhere) that's (hopefully) easier to maximize.  We'll construct
+the surrogate in such a way that increasing it will force the true
+likelihood to also go up.  After maximizing $\tilde\cL$, we'll
+construct a \emph{new} lower bound and optimize that.  This process is
+shown pictorially in Figure~\ref{fig:em:lowerbound}.
+
+To proceed, consider an arbitrary probabilistic model $p(\vx,\vy \|
+\vth$), where $\vx$ denotes the observed data, $\vy$ denotes the
+hidden data and $\vth$ denotes the parameters.  In the case of
+Gaussian Mixture Models, $\vx$ was the data points, $\vy$ was the
+(unknown) labels and $\vth$ included the cluster prior probabilities,
+the cluster means and the cluster variances.  Now, given access
+\emph{only} to a number of examples $\vx_1, \dots, \vx_N$, you would
+like to estimate the parameters ($\vth$) of the model.
+
+Probabilistically, this means that some of the variables are unknown
+and therefore you need to marginalize (or sum) over their possible
+values.  Now, your data consists only of $\mat X = \langle \vx_1,
+\vx_2, \dots, \vx_N \rangle$, not the $(\vx,y)$ pairs in $D$.  You can
+then write the likelihood as:
+%
+\begin{align}
+  p(\mat X \| \vth)
+  &= \sum_{y_1} \sum_{y_2} \cdots \sum_{y_N}  p(\mat X, y_1, y_2, \dots y_N \| \vth)  \becauseof{marginalization}\\
+  &= \sum_{y_1} \sum_{y_2} \cdots \sum_{y_N} \prod_n p(\vx_n, y_n \| \vth) \becauseof{examples are independent}\\
+  &= \prod_n \sum_{y_n} p(\vx_n, y_n \| \vth) \becauseof{algebra}
+\end{align}
+%
+At this point, the natural thing to do is to take logs and then start
+taking gradients.  However, once you start taking logs, you run into a
+problem: the log cannot eat the sum!
+%
+\begin{align}
+  \cL(\mat X \| \vth)
+  &= \sum_n \log \sum_{y_n} p(\vx_n, y_n \| \vth)
+\end{align}
+%
+Namely, the log gets ``stuck'' outside the sum and cannot move in to
+decompose the rest of the likelihood term!
+
+The next step is to apply the somewhat strange, but strangely useful,
+trick of multiplying by $1$.  In particular, let $q(\cdot)$ be an
+arbitrary probability distribution.  We will multiply the $p(\dots)$
+term above by $q(y_n) / q(y_n)$, a valid step so long as $q$ is never
+zero.  This leads to:
+%
+\begin{align}
+  \cL(\mat X \| \vth)
+  &= \sum_n \log \sum_{y_n} q(y_n) \frac {p(\vx_n, y_n \| \vth)} {q(y_n)}
+\end{align}
+%
+We will now construct a lower bound using \concept{Jensen's
+  inequality}.  This is a very useful (and easy to prove!) result that
+states that $f(\sum_i \la_i x_i) \geq \sum_i \la_i f(x_i)$, so long as
+(a) $\la_i \geq 0$ for all $i$, (b) $\sum_i \la_i = 1$, and (c) $f$ is
+concave.  If this looks familiar, that's just because it's a direct
+result of the definition of \concept{concavity}.  Recall that $f$ is
+concave if $f(a x + b y) \geq a f(x) + b f(x)$ whenever $a+b=1$.
+
+\thinkaboutit{Prove Jensen's inequality using the definition of concavity and induction.}
+
+You can now apply Jensen's inequality to the log likelihood by
+identifying the list of $q(y_n)$s as the $\la$s, $\log$ as $f$ (which
+is, indeed, concave) and each ``$x$'' as the $p/q$ term.  This yields:
+%
+\begin{align}
+  \cL(\mat X \| \vth)
+  &\geq \sum_n \sum_{y_n} q(y_n) \log \frac {p(\vx_n, y_n \| \vth)} {q(y_n)}\\
+  &= \sum_n \sum_{y_n} \Big[ q(y_n) \log p(\vx_n, y_n \| \vth) - q(y_n) \log q(y_n)\Big]\\
+  &\defeq \tilde\cL(\mat X \| \vth)
+\end{align}
+%
+Note that this inequality holds for \emph{any} choice of function $q$,
+so long as its non-negative and sums to one.  In particular, it
+needn't even by the same function $q$ for each $n$.  We will need to
+take advantage of both of these properties.
+
+We have succeeded in our first goal: constructing a lower bound on
+$\cL$.  When you go to optimize this lower bound for $\vth$, the only
+part that matters is the first term.  The second term, $q \log q$,
+drops out as a function of $\vth$.  This means that the the
+maximization you need to be able to compute, for fixed $q_n$s, is:
+%
+\begin{align}
+  \vth\newth \leftarrow \arg\max_{\vth} \sum_n \sum_{y_n} q_n(y_n) \log p(\vx_n, y_n \| \vth)
+\end{align}
+%
+This is \emph{exactly} the sort of maximization done for Gaussian
+mixture models when we recomputed new means, variances and cluster
+prior probabilities.
+
+The second question is: what should $q_n(\cdot)$ actually be?  Any
+reasonable $q$ will lead to a lower bound, so in order to choose one
+$q$ over another, we need another criterion.  Recall that we are
+hoping to maximize $\cL$ by instead maximizing a lower bound.  In
+order to ensure that an increase in the lower bound implies an
+increase in $\cL$, we need to ensure that $\cL(\mat X \| \vth) =
+\tilde\cL(\mat X \| \vth)$.  In words: $\tilde\cL$ should be a lower
+bound on $\cL$ that makes contact at the current point, $\vth$.  This
+is shown in Figure~\ref{fig:em:lb}, including a case where the lower
+bound does \emph{not} make contact, and thereby does not guarantee an
+increase in $\cL$ with an increase in $\tilde\cL$.
+
+\section{EM versus Gradient Descent}
+
+computing gradients through marginals
+
+step size
+
+\section{Dimensionality Reduction with Probabilistic PCA}
+
+derivation
+
+advantages over pca
+
+\begin{comment}
+   - Latent variable models (versus parameters)
+   - Marginalization, expectations
+   - Gaussian mixture models as naive Bayes without labels
+   - Expectation maximization in general
+   - EM vs gradient descent
+   - ``hard'' em
+\end{comment}
+
+\begin{exercises}
+\begin{Ex}
+\TODO
+
+\begin{solution}
+\TODO
+\end{solution}
+\end{Ex}
+
+\end{exercises}

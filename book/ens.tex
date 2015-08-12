@@ -1,0 +1,404 @@
+\chapter{Ensemble Methods} \label{sec:ens}
+
+\chapterquote{}{}
+
+\begin{learningobjectives}
+\item Implement bagging and explain how it reduces variance in a
+  predictor.
+%\item Show how to turn a binary classifier into a cost-sensitive
+%  classifier through weighted bagging.
+\item Explain the difference between a weak learner and a strong
+  learner.
+\item Derive the AdaBoost algorithm.
+\item Understand the relationship between boosting decision stumps and
+  linear classification.
+\end{learningobjectives}
+
+\dependencies{}
+
+\newthought{Groups of people can often make better decisions} than
+individuals, especially when group members each come in with their own
+biases.  The same is true in machine learning.  Ensemble methods are
+learning models that achieve performance by combining the opinions of
+multiple learners.  In doing so, you can often get away with using
+much \emph{simpler} learners and still achieve great performance.
+Moreover, ensembles are inherantly parallel, which can make them much
+more efficient at training and test time, if you have access to
+multiple processors.
+
+In this chapter, you will learn about various ways of combining
+\koncept{base learners}{base learner} into
+\koncept{ensembles}{ensemble}.  One of the shocking results we will
+see is that you can take a learning model that only ever does slightly
+better than chance, and turn it into an arbitrarily good learning
+model, though a technique known as \concept{boosting}.  You will also
+learn how ensembles can decrease the variance of predictors as well as
+perform regularization.
+
+\section{Voting Multiple Classifiers}
+
+All of the learning algorithms you have seen so far are
+deterministic.  If you train a decision tree multiple times on the
+same data set, you will always get the same tree back.  In order to
+get an effect out of voting multiple classifiers, they need to
+differ.  There are two primary ways to get variability.  You can
+either change the learning algorithm or change the data set.
+
+%TODO: need to talk about bias/variance before this point
+
+Building an emsemble by training different classifiers is the most
+straightforward approach.  As in single-model learning, you are given
+a data set (say, for classification).  Instead of learning a single
+classifier (eg., a decision tree) on this data set, you learn multiple
+different classifiers.  For instance, you might train a decision tree,
+a perceptron, a $K$NN, and multiple neural networks with different
+architectures.  Call these classifiers $f_1, \dots, f_M$.  At test
+time, you can make a prediction by \emph{voting}.  On a test example
+$\hat x$, you compute $\hat y_1 = f_1(\hat x)$, $\dots$, $\hat y_M =
+f_M(\hat x)$.  If there are more $+1$s in the list $\langle y_1,
+\dots, y_M$ then you predict $+1$; otherwise you predict $-1$.
+
+The main advantage of ensembles of different classifiers is that it is
+unlikely that all classifiers will make the same mistake.  In fact, as
+long as every error is made by a minority of the classifiers, you will
+achieve optimal classification!  Unfortunately, the inductive biases
+of different learning algorithms are highly correlated.  This means
+that different algorithms are prone to similar types of errors.  In
+particular, ensembles tend to reduce the \concept{variance} of
+classifiers.  So if you have a classification algorithm that tends to
+be very sensitive to small changes in the training data, ensembles are
+likely to be useful.
+
+\thinkaboutit{Which of the classifiers you've learned about so far
+  have high variance?}
+
+Note that the voting scheme naturally extends to multiclass
+classification.  However, it does not make sense in the contexts of
+regression, ranking or collective classification.  This is because you
+will rarely see the same exact output predicted twice by two different
+regression models (or ranking models or collective classification
+models).  For regression, a simple solution is to take the \emph{mean}
+or \emph{median} prediction from the different models.  For ranking
+and collective classification, different approaches are required.
+
+Instead of training different types of classifiers on the same
+data set, you can train a single type of classifier (eg., decision
+tree) on multiple data sets.  The question is: where do these multiple
+data sets come from, since you're only given one at training time?
+
+One option is to fragment your original data set.  For instance, you
+could break it into 10 pieces and build decision trees on each of
+these pieces individually.  Unfortunately, this means that each
+decision tree is trained on only a very small part of the entire
+data set and is likely to perform poorly.
+
+%TODO: be sure iid is defined
+
+\Figure{ens:resample}{picture of sampling with replacement}
+
+A better solution is to use \concept{bootstrap resampling}.  This is a
+technique from the statistics literature based on the following
+observation.  The data set we are given, $D$, is a sample drawn
+i.i.d. from an unknown distribution $\cD$.  If we draw a \emph{new}
+data set $\tilde D$ by random sampling from $D$ with
+replacement\footnote{To sample with replacement, imagine putting all
+  items from $D$ in a hat.  To draw a single sample, pick an element
+  at random from that hat, write it down, and then \emph{put it
+    back}.}, then $\tilde D$ is \emph{also} a sample from $\cD$.
+Figure~\ref{fig:ens:resample} shows the process of bootstrap
+resampling of ten objects.
+
+Applying this idea to ensemble methods yields a technique known as
+\concept{bagging}.  You start with a single data set $D$ that contains
+$N$ training examples.  From this single data set, you create $M$-many
+``bootstrapped training sets'' $\tilde D_1, \dots \tilde D_M$.  Each
+of these bootstrapped sets also contains $N$ training examples, drawn
+randomly from $D$ with replacement.  You can then train a decision
+tree (or other model) seperately on each of these data sets to obtain
+classifiers $f_1, \dots, f_M$.  As before, you can use these
+classifiers to vote on new test points.
+
+Note that the bootstrapped data sets will be similar.  However, they
+will not be \emph{too} similar.  For example, if $N$ is large then the
+number of examples that are not present in any particular bootstrapped
+sample is relatively large.  The probability that the first training
+example is not selected once is $(1- 1/N)$.  The probability that it
+is not selected at all is $(1 - 1/N)^N$.  As $N \rightarrow \infty$,
+this tends to $1/e \approx 0.3679$.  (Already for $N=1000$ this is correct
+to four decimal points.)  So only about $63\%$ of the original
+training examples will be represented in any given bootstrapped set.
+
+\Figure{ens:overfitting}{graph depicting overfitting using regularization versus bagging}
+
+Since bagging tends to reduce \emph{variance}, it provides an
+alternative approach to regularization.  That is, even if each of the
+learned classifiers $f_1, \dots, f_M$ are individually overfit, they
+are likely to be overfit to different things.  Through voting, you are
+able to overcome a significant portion of this overfitting.
+Figure~\ref{ens:overfitting} shows this effect by comparing
+regularization via hyperparameters to regularization via bagging.
+
+\section{Boosting Weak Learners}
+
+Boosting is the process of taking a crummy learning algorithm
+(technically called a \concept{weak learner}) and turning it into a
+great learning algorithm (technically, a \concept{strong learner}).
+Of all the ideas that originated in the theoretical machine learning
+community, boosting has had---perhaps---the greatest practical impact.
+The idea of boosting is reminiscent of what you (like me!)  might have
+thought when you first learned about file compression.  If I compress
+a file, and then re-compress it, and then re-compress it, eventually
+I'll end up with a final that's only one byte in size!
+
+To be more formal, let's define a \concept{strong learning algorithm}
+$\cL$ as follows.  When given a desired error rate $\ep$, a failure
+probability $\de$ and access to ``enough'' labeled examples from some
+distribution $\cD$, then, with high probability (at least $1-\de$),
+$\cL$ learns a classifier $f$ that has error at most $\ep$.  This is
+precisely the definition of \concept{PAC} learning that you learned
+about in Chapter~\ref{sec:thy}.  Building a strong learning algorithm
+might be difficult.  We can as if, instead, it is possible to build a
+\concept{weak learning algorithm} $\cW$ that only has to achieve an
+error rate of $49\%$, rather than some arbitrary user-defined
+parameter $\ep$.  ($49\%$ is arbitrary: anything strictly less than
+$50\%$ would be fine.)
+
+Boosting is more of a ``framework'' than an algorithm.  It's a
+framework for taking a weak learning algorithm $\cW$ and turning it
+into a strong learning algorithm.  The particular boosting algorithm
+discussed here is \concept{AdaBoost}, short for ``adaptive boosting
+algorithm.''  AdaBoost is famous because it was one of the first
+%TODO: fix this: it's not entirely true
+\emph{practical} boosting algorithms: it runs in polynomial time and
+does not require you to define a large number of hyperparameters.  It
+gets its name from the latter benefit: it automatically \emph{adapts}
+to the data that you give it.
+
+The intuition behind AdaBoost is like studying for an exam by using
+a past exam.  You take the past exam and grade yourself.  The
+questions that you got right, you pay less attention to.  Those that
+you got \emph{wrong}, you study more.  Then you take the exam again
+and repeat this process.  You continually \emph{down-weight} the
+importance of questions you routinely answer correctly and
+\emph{up-weight} the importance of questions you routinely answer
+incorrectly.  After going over the exam multiple times, you hope to
+have mastered everything.
+
+\newalgorithm{ens:adaboost}%
+  {\FUN{AdaBoost}(\FUN{$\cW$}, \VAR{$\cD$}, \VAR{$K$})}%
+  {
+\SETST{$\vec d\zth$}{$\langle \frac {\CON1} {\VAR N}, \frac {\CON1} {\VAR N}, \dots, \frac {\CON1} {\VAR N} \rangle$}
+  \COMMENT{Initialize uniform importance to each example}
+\FOR{\VAR{$k$} = \CON 1 \dots \VAR{$K$}}
+\SETST{$f\kth$}{$\FUNm{\cW}(\VARm{\cD}, \VARm{\vec d\kpth})$}
+  \COMMENT{Train $k$th classifier on weighted data}
+\SETST{$\hat y_n$}{$\FUNm{f\kth}(\VARm{\vx_n})$, $\forall \VARm n$}
+  \COMMENT{Make predictions on training data}
+\SETST{$\hat\ep\kth$}{$\sum_n \VARm{d\kpth_n} [\VARm{y_n} \neq \VARm{\hat y_n}]$}
+  \COMMENT{Compute weighted training error}
+\SETST{$\al\kth$}{$\frac {\CON 1} {\CON 2} \log \left( \frac {\CON 1 - \VARm{\hat\ep\kth}} {\VARm{\hat\ep\kth}} \right)$}
+  \COMMENT{Compute ``adaptive'' parameter}
+\SETST{$d\kth_n$}{$\frac {\CON 1} {\VARm{Z}} ~ \VARm{d\kpth_n} ~ \exp[ -\VARm{\al\kth} \VARm{y_n} \VARm{\hat y_n} ]$, $\forall n$}
+  \COMMENT{Re-weight examples and normalize}
+\ENDFOR
+\RETURN $\FUNm{f}(\VARm{\hat \vx}) = \sgn\left[ \sum_k \VARm{\al\kth} \FUNm{f\kth}(\VARm{\hat\vx}) \right]$
+  \COMMENT{Return (weighted) voted classifier}
+}
+
+The precise AdaBoost training algorithm is shown in
+Algorithm~\ref{alg:ens:adaboost}.  The basic functioning of the
+algorithm is to maintain a \emph{weight distribution} $\vec d$, over
+data points.  A weak learner, $\FUNm{f\kth}$ is trained on this
+weighted data.  (Note that we implicitly assume that our weak learner
+can accept weighted training data, a relatively mild assumption that
+is nearly always true.)  The (weighted) error rate of $\FUNm{f\kth}$
+is used to determine the \emph{adaptive parameter} $\al$, which
+controls how ``important'' $\FUNm{f\kth}$ is.  As long as the weak
+learner does, indeed, achieve $<50\%$ error, then $\al$ will be
+greater than zero.  As the error drops to zero, $\al$ grows without
+bound.
+
+\thinkaboutit{What happens if the weak learning assumption is violated
+  and $\hat\ep$ is equal to $50\%$?  What if it is worse than $50\%$?
+  What does this mean, in practice?}
+
+After the adaptive parameter is computed, the weight distibution is
+updated for the next iteration.  As desired, examples that are
+correctly classified (for which $\VARm{y_n} \VARm{\hat y_n} = +1$)
+have their weight \emph{decreased} multiplicatively.  Examples that
+are incorrectly classified ($\VARm{y_n} \VARm{\hat y_n} = -1$) have
+their weight \emph{increased} multiplicatively.  The $\VARm{Z}$ term
+is a nomralization constant to ensure that the sum of $\VARm{\vec d}$
+is one (i.e., $\VARm{\vec d}$ can be interpreted as a distribution).
+The final classifier returned by AdaBoost is a weighted vote of the
+individual classifiers, with weights given by the adaptive parameters.
+
+To better understand why $\al$ is defined as it is, suppose that our
+weak learner simply returns a \emph{constant} function that returns
+the (weighted) majority class.  So if the total weight of positive
+examples exceeds that of negative examples, $f(\vx) = +1$ for all
+$\vx$; otherwise $f(\vx) = -1$ for all $\vx$.  To make the problem
+moderately interesting, suppose that in the original training set,
+there are $80$ positive examples and $20$ negative examples.  In this
+case, $f\oth(\vx)=+1$.  It's weighted error rate will be $\hat\ep\oth
+= 0.2$ because it gets every negative example wrong.  Computing, we
+get $\al\oth = \frac12\log 4$.  Before normalization, we get the new
+weight for each positive (correct) example to be $1 \exp[-\frac12\log
+4] = \frac12$.  The weight for each negative (incorrect) example
+becomes $1 \exp[\frac12\log 4] = 2$.  We can compute $Z = 80 \times
+\frac 1 2 + 20 \times 2 = 80$.  Therefore, after normalization, the
+weight distribution on any single positive example is $\frac 1 {160}$
+and the weight on any negative example is $\frac 1 {40}$.  However,
+since there are $80$ positive examples and $20$ negative examples, the
+\emph{cumulative} weight on all positive examples is $80 \times \frac
+1 {160} = \frac 1 2$; the cumulative weight on all negative examples
+is $20 \times \frac 1{40} = \frac12$.  Thus, after a single boosting
+iteration, the data has become precisely evenly weighted.  This
+guarantees that in the next iteration, our weak learner \emph{must} do
+something more interesting than majority voting if it is to achieve an
+error rate \emph{less than} $50\%$, as required.
+
+\thinkaboutit{This example uses concrete numbers, but the same result
+  holds no matter what the data distribution looks like nor how many
+  examples there are.  Write out the general case to see that you will
+  still arrive at an even weighting after one iteration.}
+
+\Figure{ens:boost}{perf comparison of depth vs \# boost}
+
+One of the major attractions of boosting is that it is perhaps easy to
+design computationally efficient weak learners.  A very popular type
+of weak learner is a \concept{shallow decision tree}: a decision tree
+with a small depth limit.  Figure~\ref{fig:ens:boost} shows test error
+rates for decision trees of different maximum depths (the different
+curves) run for differing numbers of boosting iterations (the
+x-axis).  As you can see, if you are willing to boost for many
+iterations, very shallow trees are quite effective.
+
+In fact, a very popular weak learner is a decision \concept{decision
+  stump}: a decision tree that can only ask \emph{one} question.  This
+may seem like a silly model (and, in fact, it is on it's own), but
+when combined with boosting, it becomes very effective.  To understand
+why, suppose for a moment that our data consists only of binary
+features, so that any question that a decision tree might ask is of
+the form ``is feature 5 on?''  By concentrating on decision stumps,
+all weak functions must have the form $f(\vx) = s (2 x_d - 1)$, where
+$s \in \{\pm 1\}$ and $d$ indexes \emph{some} feature.
+
+\thinkaboutit{Why do the functions have this form?}
+
+Now, consider the \emph{final} form of a function learned by
+AdaBoost.  We can expand it as follow, where we let $f_k$ denote the
+single feature selected by the $k$th decision stump and let $s_k$
+denote its sign:
+%
+\begin{align}
+f(\vx) 
+&= \sgn\left[ \sum_k \al_k f\kth(\vx) \right] \\
+&= \sgn\left[ \sum_k \al_k s_k (2 x_{f_k} - 1) \right] \\
+&= \sgn\left[ \sum_k 2 \al_k s_k x_{f_k} - \sum_k \al_k s_k \right] \\
+&= \sgn\left[ \dotp{\vw}{\vx} + b \right] \\
+& \text{where }
+w_d = \sum_{k : f_k=d} 2 \al_k s_k \quad \text{and} \quad
+b   = - \sum_k \al_k s_k
+\end{align}
+%
+Thus, when working with decision stumps, AdaBoost actually provides an
+algorithm for learning \concept{linear classifiers}!  In fact, this
+connection has recently been strengthened: you can show that AdaBoost
+provides an algorithm for optimizing \concept{exponential loss}.
+(However, this connection is beyond the scope of this book.)
+
+As a further example, consider the case of boosting a \concept{linear
+  classifier}.  In this case, if we let the $k$th weak classifier be
+parameterized by $\vw\kth$ and $b\kth$, the overall predictor will
+have the form:
+%
+\begin{align}
+f(\vx)
+&= \sgn\left[ \sum_k \al_k \sgn\left( \dotp{\vw\kth}{\vx}+b\kth \right) \right]
+\end{align}
+%
+You can notice that this is nothing but a two-layer \concept{neural
+  network}, with $K$-many hidden units!  Of course it's not a
+classifically trained neural network (once you learn $\vw\kth$ you
+never go back and update it), but the structure is identical.
+
+\section{Random Ensembles}
+
+One of the most computationally expensive aspects of ensembles of
+decision trees is training the decision trees.  This is very fast for
+decision stumps, but for deeper trees it can be prohibitively
+expensive.  The expensive part is choosing the tree structure.  Once
+the tree structure is chosen, it is very cheap to fill in the leaves
+(i.e., the predictions of the trees) using the training data.
+
+An efficient and surprisingly effective alternative is to use trees
+with fixed structures and random features.  Collections of trees are
+called forests, and so classifiers built like this are called
+\concept{random forests}.  The random forest training algorithm, shown
+in Algorithm~\ref{alg:ens:randomforest} is quite short.  It takes
+three arguments: the data, a desired depth of the decision trees, and
+a number $K$ of total decision trees to build.
+
+\newalgorithm{ens:randomforest}%
+  {\FUN{RandomForestTrain}(\VAR{$\cD$}, \VAR{depth}, \VAR{$K$})}%
+  {
+\FOR{\VAR{$k$} = \CON 1 \dots \VAR{$K$}}
+\SETST{$t\kth$}{complete binary tree of depth \VAR{depth} with random
+  feature splits}
+\SETST{$f\kth$}{the function computed by \VAR{$t\kth$}, with leaves
+  filled in by \VAR{$\cD$}}
+\ENDFOR
+\RETURN $\FUNm{f}(\VARm{\hat \vx}) = \sgn\left[ \sum_k \FUNm{f\kth}(\VARm{\hat\vx}) \right]$
+  \COMMENT{Return voted classifier}
+}
+
+The algorithm generates each of the $K$ trees independently, which
+makes it very easy to parallelize.  For each trees, it constructs a
+full binary tree of depth \VAR{depth}.  The features used at the
+branches of this tree are selected randomly, typically \emph{with
+  replacement}, meaning that the same feature can appear multiple
+times, even in one branch.  The leaves of this tree, where predictions
+are made, are filled in based on the training data.  This last step is
+the \emph{only} point at which the training data is used.  The
+resulting classifier is then just a voting of the $K$-many random
+trees.
+
+The most amazing thing about this approach is that it actually works
+remarkably well.  It tends to work best when all of the features are
+at least marginally relevant, since the number of features selected
+for any given tree is small.  An intuitive reason that it works well
+is the following.  Some of the trees will query on useless features.
+These trees will essentially make random predictions.  But some of the
+trees will happen to query on good features and will make good
+predictions (because the leaves are estimated based on the training
+data).  If you have enough trees, the random ones will wash out as
+noise, and only the good trees will have an effect on the final
+classification.
+
+
+
+
+\begin{comment}
+   - costing
+   - Boosting
+   - Bagging
+   - feature bagging
+   - randomized stuff (forests)
+\end{comment}
+
+\begin{exercises}
+\begin{Ex}
+\TODO
+
+\begin{solution}
+\TODO
+\end{solution}
+\end{Ex}
+
+\end{exercises}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "courseml"
+%%% End: 

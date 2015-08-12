@@ -1,0 +1,1062 @@
+\chapter{Practical Issues} \label{sec:prac}
+
+%start at 3 end at 14; left is -0.8 right is 15.4
+%\begin{textblock}{1}(15.4,\chapterlabel)\tikz\node [fill=darkergreen,text=white,draw,circle] (chnode) {\normalfont\sffamily\Huge\bfseries\scshape \chapterlabel~~~};\end{textblock}
+%\begin{textblock}{1}(-0.8,14)\tikz\node [fill=darkergreen,text=white,draw,circle] (chnode) {\normalfont\sffamily\Huge\bfseries\scshape ~~~\chapterlabel};\end{textblock}
+
+\chapterquote{In theory, there is no difference between theory and practice.\\But, in practice, there is.}{Jan~L.A.~van~de~Snepscheut}
+
+\begin{learningobjectives}
+\item Translate between a problem description and a concrete learning
+  problem.
+\item Perform basic feature engineering on image and text data.
+\item Explain how to use cross-validation to tune hyperparameters and
+  estimate future performance.
+\item Compare and contrast the differences between several evaluation
+  metrics.
+\item Explain why feature combinations are important for learning with
+  some models but not others.
+\item Explain the relationship between the three learning techniques
+  you have seen so far.
+\item Apply several debugging techniques to learning algorithms.
+\end{learningobjectives}
+
+TODO: one two two examples per feature
+
+\dependencies{\chref{ch:dt},\chref{ch:knn},\chref{ch:perc}}
+
+\newthought{At this point,} you have seen three qualitatively
+different models for learning: decision trees, nearest neighbors, and
+perceptrons.  You have also learned about clustering with the
+$K$-means algorithm.  You will shortly learn about more complex
+models, most of which are variants on things you already know.
+However, before attempting to understand more complex models of
+learning, it is important to have a firm grasp on how to use machine
+learning in practice.  This chapter is all about how to go from an
+abstract learning problem to a concrete implementation.  You will see
+some examples of ``best practices'' along with justifications of these
+practices.
+
+In many ways, going from an abstract problem to a concrete learning
+task is more of an art than a science.  However, this art can have a
+huge impact on the practical performance of learning systems.  In many
+cases, moving to a more complicated learning algorithm will gain you a
+few percent improvement.  Going to a better representation will gain
+you an order of magnitude improvement.  To this end, we will discuss
+several high level ideas to help you develop a better artistic
+sensibility.
+
+\section{The Importance of Good Features}
+
+Machine learning is magical.  You give it data and it manages to
+classify that data.  For many, it can actually outperform a human!
+But, like so many problems in the world, there is a significant
+``garbage in, garbage out'' aspect to machine learning.  If the data
+you give it is trash, the learning algorithm is unlikely to be able to
+overcome it.
+
+Consider a problem of object recognition from images.  If you start
+with a $100 \times 100$ pixel image, a very easy feature
+representation of this image is as a $30,000$ dimensional vector,
+where each dimension corresponds to the red, green or blue component
+of some pixel in the image.  So perhaps feature 1 is the amount of red
+in pixel $(1,1)$; feature 2 is the amount of green in that pixel; and
+so on.  This is the \concept{pixel representation} of images.
+
+\TODOFigure{prac:imagepix}{object recognition in pixels}
+
+One thing to keep in mind is that the pixel representation
+\emph{throws away} all locality information in the image.  Learning
+algorithms don't care about features: they only care about feature
+values.  So I can \emph{permute} all of the features, with no effect
+on the learning algorithm (so long as I apply the same permutation to
+all training and test examples).  Figure~\ref{fig:prac:imagepix} shows
+some images whos pixels have been randomly permuted (in this case only
+the pixels are permuted, not the colors).  All of these objects are
+things that you've seen plenty of examples of; can you identify them?
+Should you expect a machine to be able to?
+
+\TODOFigure{prac:imagepatch}{object recognition in patches}
+\TODOFigure{prac:imageshape}{object recognition in shapes}
+
+An alternative representation of images is the \concept{patch
+  representation}, where the unit of interest is a small rectangular
+block of an image, rather than a single pixel.  Again, permuting the
+patches has no effect on the classifier.
+Figure~\ref{fig:prac:imagepatch} shows the same images in patch
+representation.  Can you identify them?  A final representation is a
+\concept{shape representation}.  Here, we throw out all color and
+pixel information and simply provide a bounding polygon.
+Figure~\ref{fig:prac:imageshape} shows the same images in this
+representation.  Is this now enough to identify them?  (If not, you
+can find the answers at the end of this chapter.)
+
+\TODOFigure{prac:bow}{BOW repr of one positive and one negative review}
+
+In the context of \concept{text categorization} (for instance, the
+sentiment recognition task), one standard representation is the
+\concept{bag of words} representation.  Here, we have one feature for
+each unique word that appears in a document.  For the feature
+\feat{happy}, the feature value is the number of times that the word
+``happy'' appears in the document.  The bag of words (BOW)
+representation throws away all position information.
+Figure~\ref{fig:prac:bow} shows a BOW representation for two
+documents: one positive and one negative.  Can you tell which is
+which?
+
+\section{Irrelevant and Redundant Features}
+
+One big difference between learning models is how robust they are to
+the addition of noisy or irrelevant features.  Intuitively, an
+irrelevant feature is one that is completely uncorrelated with the
+prediction task.  A feature $f$ whose expectation does not depend on
+the label $\Ep[f \| Y] = \Ep[f]$ might be irrelevant.  For instance,
+the presence of the word ``the'' might be largely irrelevant for
+predicting whether a course review is positive or negative.  
+
+\thinkaboutit{Is it possible to have a feature $f$ whose expectation
+  does not depend on the label, but is nevertheless still useful for
+  prediction?}
+
+A secondary issue is how well these algorithms deal with
+\concept{redundant features}.  Two features are redundant if they are
+highly correlated, regardless of whether they are correlated with the
+task or not.  For example, having a bright red pixel in an image at
+position $(20,93)$ is probably highly redundant with having a bright
+red pixel at position $(21,93)$.  Both might be useful (eg., for
+identifying fire hydrants), but because of how images are structured,
+these two features are likely to co-occur frequently.
+
+When thinking about robustness to irrelevant or redundant features, it
+is usually not worthwhile thinking of the case where one has $999$
+great features and $1$ bad feature.  The interesting case is when the
+bad features outnumber the good features, and often outnumber by a
+large degree.  For instance, perhaps the number of good features is
+something like $\log D$ out of a set of $D$ total features.  The
+question is how robust are algorithms in this case.\sidenote{You might
+  think it's crazy to have so many irrelevant features, but the cases
+  you've seen so far (bag of words, bag of pixels) are both reasonable
+  examples of this!  How many words, out of the entire English
+  vocabulary (roughly $10,000-100,000$ words), are actually useful for
+  predicting positive and negative course reviews?}
+
+For shallow \concept{decision trees}, the model explicitly selects
+features that are highly correlated with the label.  In particular, by
+limiting the depth of the decision tree, one can at least \emph{hope}
+that the model will be able to throw away irrelevant features.
+Redundant features are almost certainly thrown out: once you select
+one feature, the second feature now looks mostly useless.  The only
+possible issue with irrelevant features is that even though they're
+irrelevant, they \emph{happen to} correlate with the class label on
+the training data, but chance.
+
+As a thought experiment, suppose that we have $N$ training examples,
+and exactly half are positive examples and half are negative
+examples.  Suppose there's some binary feature, $f$, that is completely
+uncorrelated with the label.  This feature has a 50/50 chance of
+appearing in any example, regardless of the label.  In principle, the
+decision tree should \emph{not} select this feature.  But, by chance,
+especially if $N$ is small, the feature might \emph{look} correlated
+with the label.  This is analogous to flipping two coins
+simultaneously $N$ times.  Even though the coins are independent, it's
+entirely possible that you will observe a sequence like $(H,H), (T,T),
+(H,H), (H,H)$, which makes them look entirely correlated!  The hope is
+that as $N$ grows, this becomes less and less likely.  In fact, we can
+explicitly compute how likely this is to happen.
+
+To do this, let's fix the sequence of $N$ labels.  We now flip a coin
+$N$ times and consider how likely it is that it exactly matches the
+label.  This is easy: the probability is $0.5^N$.  Now, we would also
+be confused if it exactly matched \emph{not} the label, which has the
+same probability.  So the chance that it looks perfectly correlated is
+$0.5^N + 0.5^N = 0.5^{N-1}$.  Thankfully, this shrinks down very small
+(eg., $10^{-6}$) after only $21$ data points.
+
+This makes us happy.  The problem is that we don't have one irrelevant
+feature: we have $D-\log D$ irrelevant features!  If we randomly pick
+two irrelevant feature values, each has the same probability of
+perfectly correlating: $0.5^{N-1}$.  But since there are two and
+they're independent coins, the chance that \emph{either} correlates
+perfectly is $2 \times 0.5^{N-1} = 0.5^{N-2}$.  In general, if we have
+$K$ irrelevant features, all of which are random independent coins,
+the chance that at least one of them perfectly correlates is
+$0.5^{N-K}$.  This suggests that if we have a sizeable number $K$ of
+irrelevant features, we'd better have at \emph{least} $K+21$ training
+examples.
+
+Unfortunately, the situation is actually worse than this.  In the
+above analysis we only considered the case of \emph{perfect}
+correlation.  We could also consider the case of \emph{partial}
+correlation, which would yield even higher probabilities.  (This is
+left as Exercise~\ref{ex:prac:dtbound} for those who want some
+practice with probabilistic analysis.)  Suffice it to say that even
+decision trees can become confused.
+
+\TODOFigure{prac:addirel}{data from high dimensional warning, interpolated}
+
+In the case of \concept{$K$-nearest neighbors}, the situation is
+perhaps more dire.  Since KNN weighs each feature just as much as
+another feature, the introduction of irrelevant features can
+completely mess up KNN prediction.  In fact, as you saw, in high
+dimensional space, randomly distributed points all look approximately
+the same distance apart.  If we add lots and lots of randomly
+distributed features to a data set, then all distances still
+converge.  This is shown experimentally in
+Figure~\ref{fig:prac:addirrel}, where we start with the digit
+categorization data and continually add irrelevant, uniformly
+distributed features, and generate a histogram of distances.
+Eventually, all distances converge.
+
+In the case of the \concept{perceptron}, one can \emph{hope} that it
+might learn to assign zero weight to irrelevant features.  For
+instance, consider a binary feature is randomly one or zero
+independent of the label.  If the perceptron makes just as many
+updates for positive examples as for negative examples, there is a
+reasonable chance this feature weight will be zero.  At the very
+least, it should be small.
+
+\thinkaboutit{What happens with the perceptron with truly redundant
+  features (i.e., one is literally a copy of the other)?}
+
+\TODOFigure{prac:noisy}{dt,knn,perc on increasing amounts of noise}
+
+To get a better practical sense of how sensitive these algorithms are
+to irrelevant features, Figure~\ref{fig:prac:noisy} shows the
+\emph{test} performance of the three algorithms with an increasing
+number of compltely noisy features.  In all cases, the hyperparameters
+were tuned on validation data.  TODO...
+
+\section{Feature Pruning and Normalization}
+
+In text categorization problems, some words simply do not appear very
+often.  Perhaps the word ``groovy''\sidenote{This is typically
+  positive indicator, or at least it was back in the US in the 1970s.}
+appears in exactly one training document, which is positive.  Is it
+really worth keeping this word around as a feature?  It's a dangerous
+endeavor because it's hard to tell with just one training example if
+it is really correlated with the positive class, or is it just noise.
+You could hope that your learning algorithm is smart enough to figure
+it out.  Or you could just remove it.  That means that (a) the
+learning algorithm won't have to figure it out, and (b) you've reduced
+the number of dimensions you have, so things should be more efficient,
+and less ``scary.''
+
+\TODOFigure{prac:pruning}{effect of pruning on text data}
+
+This idea of feature pruning is very useful and applied in many
+applications.  It is easiest in the case of binary features.  If a
+binary feature only appears some small number $K$ times (in the
+training data: no fair looking at the test data!), you simply remove
+it from consideration.  (You might also want to remove features that
+appear in all-but-$K$ many documents, for instance the word ``the''
+appears in pretty much every English document ever written.)  Typical
+choices for $K$ are $1, 2, 5, 10, 20, 50$, mostly depending on the
+size of the data.  On a text data set with $1000$ documents, a cutoff
+of $5$ is probably reasonable.  On a text data set the size of the
+web, a cut of of $50$ or even $100$ or $200$ is probably
+reasonable\sidenote{According to Google, the following words (among
+  many others) appear $200$ times on the web: moudlings, agaggagctg,
+  setgravity, rogov, prosomeric, spunlaid, piyushtwok, telelesson,
+  nesmysl, brighnasa.  For comparison, the word ``the'' appears
+  $19,401,194,714$ (19 billion) times.}.
+Figure~\ref{fig:prac:pruning} shows the effect of pruning on a
+sentiment analysis task.  In the beginning, pruning does not hurt (and
+sometimes helps!) but eventually we prune away all the interesting
+words and performance suffers.
+
+\begin{mathreview}{Data Statistics: Means and Variances}
+  data mean, variance, moments, expectations, etc...
+\end{mathreview}
+
+\TODOFigure{prac:variance}{effect of pruning on vision}
+
+In the case of real-valued features, the question is how to extend the
+idea of ``does not occur much'' to real values.  A reasonable
+definition is to look for features with \emph{low variance}.  In fact,
+for binary features, ones that almost never appear or almost always
+appear will also have low variance.  Figure~\ref{fig:prac:variance}
+shows the result of pruning low-variance features on the digit
+recognition task.  Again, at first pruning does not hurt (and
+sometimes helps!) but eventually we have thrown out all the useful
+features.
+
+\thinkaboutit{Earlier we discussed the problem of \emph{scale} of
+  features (eg., millimeters versus centimeters).  Does this have an
+  impact on variance-based feature pruning?}
+
+Once you have pruned away irrelevant features, it is often useful to
+\concept{normalize} the data so that it is consistent in some way.
+There are two basic types of normalization: \concept{feature
+  normalization} and \concept{example normalization}.  In feature
+normalization, you go through each feature and adjust it the same way
+across all examples.  In example normalization, each example is
+adjusted individually.
+
+\TODOFigure{prac:transform}{picture of centering, scaling by variance and scaling by absolute value}
+
+The goal of both types of normalization is to make it \emph{easier}
+for your learning algorithm to learn.  In feature normalization, there
+are two standard things to do:
+\begin{enumerate}
+\item Centering: moving the entire data set so that it is centered
+  around the origin.
+\item Scaling: rescaling each feature so that one of the following
+  holds:
+\begin{enumerate}
+\item Each feature has variance $1$ across the training data.
+\item Each feature has maximum absolute value $1$ across the training
+  data.
+\end{enumerate}
+\end{enumerate}
+These transformations are shown geometrically in
+Figure~\ref{fig:prac:transform}.  The goal of centering is to make
+sure that no features are arbitrarily large.  The goal of scaling is
+to make sure that all features have roughly the same scale (to avoid
+the issue of centimeters versus millimeters).
+
+\thinkaboutit{For the three models you know about (KNN, DT,
+  Perceptron), which are most sensitive to centering?  Which are most
+  sensitive to scaling?}
+
+These computations are fairly straightforward.  Here, $x_{n,d}$ refers
+to the $d$th feature of example $n$.  Since it is very rare to apply
+scaling without previously applying centering, the expressions below
+for scaling assume that the data is already centered.
+\begin{align}
+\text{Centering:} && x_{n,d} &\leftarrow x_{n,d} - \mu_d \\
+\text{Variance Scaling:} && x_{n,d} &\leftarrow x_{n,d} / \si_d \\
+\text{Absolute Scaling:} && x_{n,d} &\leftarrow x_{n,d} / r_d \\
+&\textit{where:}
+& \mu_d &= \frac 1 N \sum_n x_{n,d} \\
+&& \si_d &= \sqrt{ \frac 1 N \sum_n (x_{n,d} - \mu_d)^2 } \\
+&& r_d   &= \max_n \ab{x_{n,d}}
+\end{align}
+
+
+In practice, if the dynamic range of your features is already some
+subset of $[-2,2]$ or $[-3,3]$, then it is probably not worth the
+effort of centering and scaling.  (It's an effort because you have to
+keep around your centering and scaling calculations so that you can
+apply them to the test data as well!)  However, if some of your
+features are orders of magnitude larger than others, it might be
+helpful.  Remember that you might know best: if the difference in
+scale is actually significant for your problem, then rescaling might
+throw away useful information.
+
+One thing to be wary of is centering binary data.  In many cases,
+binary data is very \emph{sparse}: for a given example, only a few of
+the features are ``on.''  For instance, out of a vocabulary of
+$10,000$ or $100,000$ words, a given document probably only contains
+about $100$.  From a storage and computation perspective, this is very
+useful.  However, after centering, the data will no longer sparse and
+you will pay dearly with outrageously slow implementations.
+
+\TODOFigure{prac:exnorm}{example of example normalization}
+
+In \concept{example normalization}, you view examples one at a time.
+The most standard normalization is to ensure that the length of each
+example vector is one: namely, each example lies somewhere on the unit
+hypersphere.  This is a simple transformation:
+\begin{align}
+\text{Example Normalization:} && \vx_{n} &\leftarrow \vx_{n} / \norm{\vx_n}
+\end{align}
+This transformation is depicted in Figure~\ref{fig:prac:exnorm}.
+
+The main advantage to example normalization is that it makes
+comparisons more straightforward across data sets.  If I hand you two
+data sets that differ only in the norm of the feature vectors (i.e.,
+one is just a scaled version of the other), it is difficult to compare
+the learned models.  Example normalization makes this more
+straightforward.  Moreover, as you saw in the perceptron convergence
+proof, it is often just mathematically easier to assume normalized
+data.
+
+\section{Combinatorial Feature Explosion}
+\label{sec:prac:combinatorial}
+
+You learned in Chapter~\ref{sec:perc} that linear models (like the
+perceptron) cannot solve the XOR problem.  You also learned that by
+performing a combinatorial feature explosion, they could.  But that
+came at the computational expense of gigantic feature vectors.
+
+\begin{comment}
+To make things more formal, suppose that you are given a feature
+vector $\vx$ in $D$-dimensional space.  Call these original features
+the ``base features.''  There are several types of feature
+combinations you could add:
+\begin{enumerate}
+\item Products: for all $d,d'$, create a feature whose value is $x_d
+  \times x_{d'}$.  In the case of binary features, this corresponds to
+  an ``and'' operation.
+\item Sums: for all $d,d'$, create a feature whose value is $x_d
+  + x_{d'}$.  In the case of binary features, this roughly corresponds to
+  an ``or'' operation.
+\item Log-transform: for all $d$, create a feature whose value is
+  $\log x_d$.  (Only makes sense for non-negative features.)
+\item Power-transform: for all $d$, create a feature whose value is
+  $x_d^k$ for some $k$.
+\end{enumerate}
+Call features that are generated in these ways ``meta features.''
+Now, there is nothing preventing you from combining meta features into
+more complex ``meta meta features'' and so on.  Eventually you could
+have a feature like:
+\begin{equation}
+  x_5 \times \log x_2 + (\log x_{10} + x_{16})^5 \times \log (x_{1}^2
+  + x_{5})
+\end{equation}
+Such a feature might not be pariticularly \emph{useful}, but you could
+certainly construct it.
+
+In principle any one of these ``meta meta features'' might be
+helpful.  Unfortunately, there is a combinatorial explosion of
+possibilities, even with just these four constructions (technically
+``power'' is unnecessary since it can be obtained through repeated
+products).  Moreover, as you know, learning algorithms can be fooled
+by features that look good by chance, but aren't actually good.  By
+generating this combinatorial explosion of features, you run the risk
+of creating \emph{many} features that look good by chance.
+\end{comment}
+
+Of the algorithms that you've seen so far, the perceptron is the one
+that has the most to gain by feature combination.  And the decision
+tree is the one that has the least to gain.  In fact, the decision
+tree construction is essentially building meta features for you.  (Or,
+at least, it is building meta features constructed purely through
+``logical ands.'')
+
+\TODOFigure{prac:dttoperc}{turning a DT into a set of meta features}
+
+This observation leads to a heuristic for constructing meta features
+\emph{for} perceptrons \emph{from} decision trees.  The idea is to
+train a decision tree on the training data.  From that decision tree,
+you can extract meta features by looking at feature combinations along
+branches.  You can then add \emph{only} those feature combinations as
+meta features to the feature set for the perceptron.
+Figure~\ref{fig:prac:dttoperc} shows a small decision tree and a set
+of meta features that you might extract from it.  There is a
+hyperparameter here of what length paths to extract from the tree: in
+this case, only paths of length two are extracted.  For bigger trees,
+or if you have more data, you might benefit from longer paths.
+
+\TODOFigure{prac:log}{performance on text categ with word counts
+  versus log word counts}
+
+In addition to combinatorial transformations, the \concept{logarithmic
+  transformation} can be quite useful in practice.  It seems like a
+strange thing to be useful, since it doesn't seem to fundamentally
+change the data.  However, since many learning algorithms operate by
+linear operations on the features (both perceptron and KNN do this),
+the log-transform is a way to get product-like operations.  The
+question is which of the following feels more applicable to your data:
+(1) every time this feature increases by one, I'm equally more likely
+to predict a positive label; (2) every time this feature doubles, I'm
+equally more like to predict a positive label.  In the first case, you
+should stick with linear features and in the second case you should
+switch to a log-transform.  This is an important transformation in
+text data, where the presence of the word ``excellent'' once is a good
+indicator of a positive review; seeing ``excellent'' twice is a better
+indicator; but the difference between seeing ``excellent'' 10 times
+and seeing it 11 times really isn't a big deal any more.  A
+log-transform achieves this.  Experimentally, you can see the
+difference in test performance between word count data and log-word
+count data in Figure~\ref{fig:prac:log}.  Here, the transformation is
+actually $x_d \mapsto \log_2(x_d + 1)$ to ensure that zeros remain
+zero and sparsity is retained.
+
+\section{Evaluating Model Performance}
+
+So far, our focus has been on classifiers that achieve \emph{high
+  accuracy}.  In some cases, this is not what you might want.  For
+instance, if you are trying to predict whether a patient has cancer or
+not, it might be better to err on one side (saying they have cancer
+when they don't) than the other (because then they die).  Similarly,
+letting a little spam slip through might be better than accidentally
+blocking one email from your boss.
+
+There are two major types of binary classification problems.  One is
+``X versus Y.''  For instance, positive versus negative sentiment.
+Another is ``X versus not-X.''  For instance, spam versus non-spam.
+(The argument being that there are lots of types of non-spam.)  Or in
+the context of web search, relevant document versus irrelevant
+document.  This is a subtle and subjective decision.  But ``X versus
+not-X'' problems often have more of the feel of ``X spotting'' rather
+than a true distinction between X and Y.  (Can you spot the spam?  can
+you spot the relevant documents?)
+
+For spotting problems (X versus not-X), there are often more
+appropriate success metrics than accuracy.  A very popular one from
+information retrieval is the \concept{precision}/\concept{recall}
+metric.  Precision asks the question: of all the X's that you found,
+how many of them were actually X's?  Recall asks: of all the X's that
+were out there, how many of them did you find?\sidenote{A colleague
+  make the analogy to the US court system's saying ``Do you promise to
+  tell the whole truth and nothing but the truth?''  In this case, the
+  ``whole truth'' means high recall and ``nothing but the truth''
+  means high precision.''}  Formally, precision and recall are defined
+as:
+\begin{align}
+P &= \frac I S \\
+R &= \frac I T \\
+S &= \text{number of Xs that your system found} \\
+T &= \text{number of Xs in the data} \\
+I &= \text{number of correct Xs that your system found}
+\end{align}
+Here, $S$ is mnemonic for ``System,'' $T$ is mnemonic for ``Truth''
+and $I$ is mnemonic for ``Intersection.''  It is generally accepted
+that $0/0 = 1$ in these definitions.  Thus, if you system found
+nothing, your precision is always perfect; and if there is nothing to
+find, your recall is always perfect.
+
+\TODOFigure{prac:spam}{show a bunch of emails spam/nospam sorted by model predicion, not perfect}
+
+Once you can compute precision and recall, you are often able to
+produce \concept{precision/recall curves}.  Suppose that you are
+attempting to identify spam.  You run a learning algorithm to make
+predictions on a test set.  But instead of just taking a ``yes/no''
+answer, you allow your algorithm to produce its confidence.  For
+instance, in perceptron, you might use the distance from the
+hyperplane as a confidence measure.  You can then sort all of your
+test emails according to this ranking.  You may put the most spam-like
+emails at the top and the least spam-like emails at the bottom, like
+in Figure~\ref{fig:prac:spam}.
+
+\thinkaboutit{How would you get a confidence out of a decision tree or KNN?}
+
+\TODOFigure{prac:prcurve}{precision recall curve}
+
+Once you have this sorted list, you can choose how aggressively you
+want your spam filter to be by setting a threshold \emph{anywhere} on
+this list.  One would hope that if you set the threshold very high,
+you are likely to have high precision (but low recall).  If you set
+the threshold very low, you'll have high recall (but low precision).
+By considering \emph{every possible} place you could put this
+threshold, you can trace out a curve of precision/recall values, like
+the one in Figure~\ref{fig:prac:prcurve}.  This allows us to ask the
+question: for some fixed precision, what sort of recall can I get.
+Obviously, the closer your curve is to the upper-right corner, the
+better.  And when comparing learning algorithms A and B you can say
+that A \concept{dominates} B if A's precision/recall curve is always
+higher than B's.
+
+\Table{prac:f}%
+  {Table of f-measures when varying precision and recall values.}%
+  {@{}r|c@{~~~~}c@{~~~~}c@{~~~~}c@{~~~~}c@{~~~~}c@{}}{
+    & 0.0 & 0.2 & 0.4 & 0.6 & 0.8 & 1.0 \\
+\hline
+0.0& \showfscore{0.00} & \showfscore{0.00} & \showfscore{0.00} & \showfscore{0.00} & \showfscore{0.00} & \showfscore{0.00} \\
+0.2& \showfscore{0.00} & \showfscore{0.20} & \showfscore{0.26} & \showfscore{0.30} & \showfscore{0.32} & \showfscore{0.33} \\
+0.4& \showfscore{0.00} & \showfscore{0.26} & \showfscore{0.40} & \showfscore{0.48} & \showfscore{0.53} & \showfscore{0.57} \\
+0.6& \showfscore{0.00} & \showfscore{0.30} & \showfscore{0.48} & \showfscore{0.60} & \showfscore{0.68} & \showfscore{0.74} \\
+0.8& \showfscore{0.00} & \showfscore{0.32} & \showfscore{0.53} & \showfscore{0.68} & \showfscore{0.80} & \showfscore{0.88} \\
+1.0& \showfscore{0.00} & \showfscore{0.33} & \showfscore{0.57} & \showfscore{0.74} & \showfscore{0.88} & \showfscore{1.00}
+}
+
+Precision/recall curves are nice because they allow us to visualize
+many ways in which we could use the system.  However, sometimes we
+like to have a \emph{single number} that informs us of the quality of
+the solution.  A popular way of combining precision and recall into a
+single number is by taking their harmonic mean.  This is known as the
+balanced f-measure (or f-score):
+\begin{equation} \label{eq:f}
+F = \frac {2\times P \times R} {P + R}
+\end{equation}
+The reason that you want to use a harmonic mean rather than an
+arithmetic mean (the one you're more used to) is that it favors
+systems that achieve roughly equal precision and recall.  In the
+extreme case where $P=R$, then $F=P=R$.  But in the imbalanced case,
+for instance $P=0.1$ and $R=0.9$, the overall f-measure is a modest
+$0.18$.  Table~\ref{tab:prac:f} shows f-measures as a function of
+precision and recall, so that you can see how important it is to get
+balanced values.
+
+In some cases, you might believe that precision is more important than
+recall.  This idea leads to the \emph{weighted} f-measure, which is
+parameterized by a weight $\be \in [0,\infty)$ (beta):
+\begin{equation} \label{eq:f-weighted}
+F_\be = \frac {(1 + \be^2) \times P \times R} {\be^2 \times P + R}
+\end{equation}
+For $\be=1$, this reduces to the standard f-measure.  For $\be = 0$, it
+focuses entirely on recall and for $\be \rightarrow \infty$ it focuses
+entirely on precision.  The interpretation of the weight is that
+$F_\be$ measures the performance for a user who cares $\be$ times as
+much about precision as about recall.
+
+One thing to keep in mind is that precision and recall (and hence
+f-measure) depend crucially on which class is considered the thing you
+wish to find.  In particular, if you take a binary data set if flip
+what it means to be a positive or negative example, you will end up
+with completely difference precision and recall values.  It is
+\emph{not} the case that precision on the flipped task is equal to
+recall on the original task (nor vice versa).  Consequently, f-measure
+is also not the same.  For some tasks where people are less sure about
+what they want, they will occasionally report two sets of
+precision/recall/f-measure numbers, which vary based on which class is
+considered the thing to spot.
+
+There are other standard metrics that are used in different
+communities.  For instance, the medical community is fond of the
+\concept{sensitivity}/\concept{specificity} metric.  A sensitive
+classifier is one which almost always finds everything it is looking
+for: it has high recall.  In fact, sensitivity is exactly the same as
+recall.  A specific classifier is one which does a good job \emph{not}
+finding the things that it doesn't want to find.  Specificity is
+precision on the negation of the task at hand.
+
+You can compute curves for sensitivity and specificity much like those
+for precision and recall.  The typical plot, referred to as the
+\concept{receiver operating characteristic} (or \concept{ROC curve})
+plots the sensitivity against $1 - \text{specificity}$.  Given an ROC
+curve, you can compute the \concept{area under the curve} (or
+\concept{AUC}) metric, which also provides a meaningful single number
+for a system's performance.  Unlike f-measures, which tend to be low
+because the require agreement, AUC scores tend to be very high, even
+for not great systems.  This is because random chance will give you an
+AUC of $0.5$ and the best possible AUC is $1.0$.
+
+The main message for evaluation metrics is that you should choose
+whichever one makes the most sense.  In many cases, several might make
+sense.  In that case, you should do whatever is more commonly done in
+your field.  There is no reason to be an outlier without cause.
+
+\section{Cross Validation}
+
+In Chapter~\ref{sec:dt}, you learned about using development data (or
+held-out data) to set hyperparameters.  The main disadvantage to the
+development data approach is that you throw out some of your training
+data, just for estimating one or two hyperparameters.
+
+\newalgorithm{prac:cv}%
+  {\FUN{CrossValidate}(\VAR{LearningAlgorithm}, \VAR{Data}, \VAR{K})}
+  {
+\SETST{$\hat\ep$}{$\infty$}
+  \COMMENT{store lowest error encountered so far}
+\SETST{$\hat\al$}{unknown}
+  \COMMENT{store the hyperparameter setting that yielded it}
+\FORALL{hyperparameter settings $\al$}
+\SETST{err}{\emptylist}
+  \COMMENT{keep track of the $K$-many error estimates}
+\FOR{\VAR{k} = \CON{1} \TO \VAR{K}}
+\SETST{train}{$\{ (\VARm{\vx_n}, \VARm{y_n}) \in \VAR{Data} : \VARm{n}\mod \VARm{K} \neq k-1 \}$}
+\SETST{test}{$\{ (\VARm{\vx_n}, \VARm{y_n}) \in \VAR{Data} : \VARm{n}\mod \VARm{K} = k-1 \}$}
+\COMMENT{test every $K$th example}
+\SETST{model}{Run \VAR{LearningAlgorithm} on \VAR{train}}
+\SETST{err}{\VAR{err} \pushlist{error of \VAR{model} on \VAR{test}}}
+\COMMENT{add current error to list of errors}
+\ENDFOR
+\SETST{avgErr}{mean of set \VAR{err}}
+\IF{$\VARm{avgErr} < \VARm{\hat\ep}$}
+\SETST{$\hat\ep$}{$\VARm{avgErr}$}
+\COMMENT{remember these settings}
+\SETST{$\hat\al$}{$\VARm{\al}$}
+\COMMENT{because they're the best so far~}
+\ENDIF
+\ENDFOR
+}
+
+An alternative is the idea of \concept{cross validation}.  In cross
+validation, you break your training data up into $10$ equally-sized
+partitions.  You train a learning algorithm on $9$ of them and test it
+on the remaining $1$.  You do this $10$ times, each time holding out a
+different partition as the ``development'' part.  You can then average
+your performance over all ten parts to get an estimate of how well
+your model will perform in the future.  You can repeat this process
+for every possible choice of hyperparameters to get an estimate of
+which one performs best.  The general $K$-fold cross validation
+technique is shown in Algorithm~\ref{alg:prac:cv}, where $K=10$ in the
+preceeding discussion.
+
+In fact, the development data approach can be seen as an approximation
+to cross validation, wherein only one of the $K$ loops (line 5 in
+Algorithm~\ref{alg:prac:cv}) is executed.
+
+Typical choices for $K$ are $2$, $5$, $10$ and $N-1$.  By far the most
+common is $K=10$: 10-fold cross validation.  Sometimes $5$ is used for
+efficiency reasons.  And sometimes $2$ is used for subtle statistical
+reasons, but that is quite rare.  In the case that $K=N-1$, this is
+known as \concept{leave-one-out cross validation} (or abbreviated as
+\concept{LOO cross validation}).  After running cross validation, you
+have two choices.  You can either select one of the $K$ trained models
+as your final model to make predictions with, or you can train a
+\emph{new} model on all of the data, using the hyperparameters
+selected by cross-validation.  If you have the time, the latter is
+probably a better options.
+
+\newalgorithm{alg:prac:loo}%
+  {\FUN{KNN-Train-LOO}(\VAR{$\mat D$})}
+  {
+\SETST{err$_k$}{\CON{0}, $\forall 1 \leq \VARm{k} \leq \VARm{N}-\CON{1}$}
+\COMMENT{err$_k$ stores how well you do with $k$NN}
+\FOR{\VAR{$n$} $=\CON{1}$ \TO \VAR{$N$}}
+\SETST{S$_m$}{$\langle\norm{\VARm{\vx_n} - \VARm{\vx_m}}, \VARm{m}\rangle$, $\forall \VARm{m} \neq \VARm{n}$}
+  \COMMENT{compute distances to other points}
+\SETST{S}{\FUN{sort}(\VAR{S})}
+\COMMENT{put lowest-distance objects first}
+\SETST{$\hat y$}{0}
+\COMMENT{current label prediction}
+\FOR{$\VARm{k} = \CON{1}$ \TO $\VAR{N}-\CON{1}$}
+\SETST{$\langle$dist,m$\rangle$}{\VAR{S$_k$}}
+\SETST{$\hat y$}{$\VARm{\hat y} + \VARm{y_m}$}
+\COMMENT{let $k$th closest point vote}
+\IF{$\VARm{\hat y} \neq \VARm{y_m}$}
+\SETST{err$_k$}{\VAR{err$_k$} + \CON{1}}
+\COMMENT{one more error for $k$NN}
+\ENDIF
+\ENDFOR
+\ENDFOR
+\RETURN $\argmin_k \VARm{err_k}$
+\COMMENT{return the $K$ that achieved lowest error}
+}
+
+It may seem that LOO cross validation is prohibitively expensive to
+run.  This is true for most learning algorithms \emph{except for}
+$K$-nearest neighbors.  For KNN, leave-one-out is actually very
+natural.  We loop through each training point and ask ourselves
+whether this example would be correctly classified for all different
+possible values of $K$.  This requires only as much computation as
+computing the $K$ nearest neighbors for the highest value of $K$.
+This is such a popular and effective approach for KNN classification
+that it is spelled out in Algorithm~\ref{alg:prac:loo}.
+
+Overall, the main advantage to cross validation over development data
+is robustness.  The main advantage of development data is speed.
+
+One warning to keep in mind is that the goal of both cross validation
+and development data is to estimate how well you will do in the
+future.  This is a question of statistics, and holds \emph{only if}
+your test data really looks like your training data.  That is, it is
+drawn from the same distribution.  In many practical cases, this is
+not entirely true.
+
+For example, in person identification, we might try to classify every
+pixel in an image based on whether it contains a person or not.  If we
+have $100$ training images, each with $10,000$ pixels, then we have a
+total of $1m$ training examples.  The classification for a pixel in
+image $5$ is highly dependent on the classification for a neighboring
+pixel in the same image.  So if one of those pixels happens to fall in
+training data, and the other in development (or cross validation)
+data, your model will do unreasonably well.  In this case, it is
+important that when you cross validate (or use development data), you
+do so over \emph{images}, not over \emph{pixels}.  The same goes for
+text problems where you sometimes want to classify things at a word
+level, but are handed a collection of documents.  The important thing
+to keep in mind is that it is the \emph{images} (or documents) that
+are drawn independently from your data distribution and \emph{not} the
+pixels (or words), which are drawn dependently.
+
+\section{Hypothesis Testing and Statistical Significance}
+
+\begin{vignette}{The Lady Drinking Tea}
+  story
+\end{vignette}
+
+Suppose that you've presented a machine learning solution to your boss
+that achieves $7\%$ error on cross validation.  Your nemesis, Gabe,
+gives a solution to your boss that achieves $6.9\%$ error on cross
+validation.  How impressed should your boss be?  It depends.  If this
+$0.1\%$ improvement was measured over $1000$ examples, perhaps not too
+impressed.  It would mean that Gabe got exactly one more example right
+than you did.  (In fact, he probably got $15$ more right and $14$ more
+wrong.)  If this $0.1\%$ impressed was measured over $1,000,000$
+examples, perhaps this is more impressive.
+
+This is one of the most fundamental questions in statistics.  You have
+a scientific hypothesis of the form ``Gabe's algorithm is better than
+mine.''  You wish to test whether this hypothesis is true.  You are
+testing it against the \concept{null hypothesis}, which is that Gabe's
+algorithm is no better than yours.  You've collected data (either
+$1000$ or $1m$ data points) to measure the strength of this
+hypothesis.  You want to ensure that the difference in performance of
+these two algorithms is \concept{statistically significant}: i.e., is
+probably not just due to random luck.  (A more common question
+statisticians ask is whether one drug treatment is better than
+another, where ``another'' is either a placebo or the competitor's
+drug.)
+
+There are about $\infty$-many ways of doing \concept{hypothesis
+  testing}.  Like evaluation metrics and the number of folds of cross
+validation, this is something that is very discipline specific.  Here,
+we will discuss two popular tests: the \concept{paired t-test} and
+\concept{bootstrapping}.  These tests, and other statistical tests,
+have underlying assumptions (for instance, assumptions about the
+distribution of observations) and strengths (for instance, small or
+large samples).  In most cases, the goal of hypothesis testing is to
+compute a \concept{p-value}: namely, the probability that the observed
+difference in performance was by chance.  The standard way of
+reporting results is to say something like ``there is a $95\%$ chance
+that this difference was not by chance.''  The value $95\%$ is
+arbitrary, and occasionally people use weaker ($90\%$) test or
+stronger ($99.5\%$) tests.
+
+The \concept{t-test} is an example of a \concept{parametric test}.  It
+is applicable when the null hypothesis states that the difference
+between two responses has mean zero and unknown variance.  The t-test
+actually assumes that data is distributed according to a Gaussian
+distribution, which is probably \emph{not} true of binary responses.
+Fortunately, for large samples (at least a few hundred), binary
+seamples are well approximated by a Gaussian distribution.  So long as
+your sample is sufficiently large, the t-test is reasonable either for
+regression or classification problems.
+
+\Table{prac:t}%
+  {Table of significance values for the t-test.}%
+  {c|c}{
+$t$ & significance \\
+\hline
+$\geq 1.28$ & $90.0\%$ \\
+$\geq 1.64$ & $95.0\%$ \\
+$\geq 1.96$ & $97.5\%$ \\
+$\geq 2.58$ & $99.5\%$
+}
+
+Suppose that you evaluate two algorithm on $N$-many examples.  On each
+example, you can compute whether the algorithm made the correct
+prediction.  Let $a_1, \dots, a_N$ denote the error of the first
+algorithm on each example.  Let $b_1, \dots, b_N$ denote the error of
+the second algorithm.  You can compute $\mu_a$ and $\mu_b$ as the
+means of $\vec a$ and $\vec b$, respecitively.  Finally, center the
+data as $\hat a = \vec a - \mu_a$ and $\hat b = \vec b - \mu_b$.
+The t-statistic is defined as:
+\begin{equation} \label{eq:prac:t}
+t =
+\left( \mu_a - \mu_b \right)
+\sqrt{
+ \frac {N (N-1)}
+       {\sum_n ( \hat a_n - \hat b_n )^2}
+}
+\end{equation}
+After computing the $t$-value, you can compare it to a list of values
+for computing \concept{confidence intervals}.  Assuming you have a lot
+of data ($N$ is a few hundred or more), then you can compare your
+$t$-value to Table~\ref{tab:prac:t} to determine the significance
+level of the difference.
+
+\thinkaboutit{What does it mean for the means $\mu_a$ and $\mu_b$ to
+  become further apart?  How does this affect the $t$-value?  What
+  happens if the variance of $\vec a$ increases?}
+
+One disadvantage to the t-test is that it cannot easily be applied to
+evaluation metrics like f-score.  This is because f-score is a
+computed over an entire test set and does not decompose into a set of
+individual errors.  This means that the t-test cannot be applied.
+
+Fortunately, \concept{cross validation} gives you a way around this
+problem.  When you do $K$-fold cross validation, you are able to
+compute $K$ error metrics over the same data.  For example, you might
+run $5$-fold cross validation and compute f-score for every fold.
+Perhaps the f-scores are $92.4$, $93.9$, $96.1$, $92.2$ and $94.4$.
+This gives you an average f-score of $93.8$ over the $5$ folds.  The
+standard deviation of this set of f-scores is:
+\begin{align} \label{eq:prac:stddev}
+\si
+&= \sqrt{ \frac 1 {N-1} \sum_n (a_i - \mu)^2 } \\
+&= \sqrt{ \frac 1 4 (1.96 + 0.01 + 5.29 + 2.56 + 0.36) } \\
+&= 1.595
+\end{align}
+You can now assume that the distribution of scores is approximately
+Gaussian.  If this is true, then approximately $70\%$ of the
+probability mass lies in the range $[\mu-\si, \mu+\si]$; $95\%$ lies
+in the range $[\mu-2\si,\mu+2\si]$; and $99.5\%$ lies in the range
+$[\mu-3\si,\mu+3\si]$.  So, if we were comparing our algorithm against
+one whose average f-score was $90.6\%$, we could be $95\%$ certain
+that our superior performance was not due to chance.\sidenote{Had we
+  run $10$-fold cross validation we might be been able to get tighter
+  confidence intervals.}
+
+\textcolor{darkred}{\bf WARNING:} A confidence of $95\%$ does not mean
+``There is a $95\%$ chance that I am better.''  All it means is that
+if I reran the same experiment $100$ times, then in $95$ of those
+experiments I would still win.  These are \emph{very} different
+statements.  If you say the first one, people who know about
+statistics will get very mad at you!
+
+One disadvantage to cross validation is that it is computationally
+expensive.  More folds typically leads to better estimates, but every
+new fold requires training a new classifier.  This can get very time
+consuming.  The technique of \concept{bootstrapping} (and closely
+related idea of \concept{jack-knifing} can address this problem.
+
+Suppose that you didn't want to run cross validation.  All you have is
+a single held-out test set with $1000$ data points in it.  You can run
+your classifier and get predictions on these $1000$ data points.  You
+would like to be able to compute a metric like f-score on this test
+set, but also get confidence intervals.  The idea behind bootstrapping
+is that this set of $1000$ is a random draw from some distribution.
+We would like to get multiple random draws from this distribution on
+which to evaluate.  We can \emph{simulate} multiple draws by
+repeatedly subsampling from these $1000$ examples, with replacement.
+
+To perform a \emph{single} bootstrap, you will sample $1000$ random
+points from your test set of $1000$ random points.  This sampling must
+be done with replacement (so that the same example can be sampled more
+than once), otherwise you'll just end up with your original test set.
+This gives you a bootstrapped sample.  On this sample, you can compute
+f-score (or whatever metric you want).  You then do this $99$ more
+times, to get a $100$-fold bootstrap.  For each bootstrapped sample,
+you will be a different f-score.  The mean and standard deviation of
+this set of f-scores can be used to estimate a confidence interval for
+your algorithm.
+
+\newalgorithm{prac:bootstrap}%
+  {\FUN{BootstrapEvaluate}(\VAR{$\vec y$}, \VAR{$\hat{\vec y}$}, \VAR{NumFolds})}
+  {
+\SETST{scores}{\emptylist}
+\FOR{\VAR{k} = \CON{1} \TO \VAR{NumFolds}}
+\SETST{truth}{\emptylist}
+\COMMENT{list of values we want to predict}
+\SETST{pred}{\emptylist}
+\COMMENT{list of values we actually predicted}
+\FOR{\VAR{n} = \CON{1} \TO \VAR{N}}
+\SETST{m}{uniform random value from \CON{1} to \VAR{N}}
+\COMMENT{sample a test point}
+\SETST{truth}{\VAR{truth} \pushlist \VAR{$y_m$}}
+\COMMENT{add on the truth}
+\SETST{pred}{\VAR{pred} \pushlist \VAR{$\hat y_m$}}
+\COMMENT{add on our prediction}
+\ENDFOR
+\SETST{scores}{\VAR{scores} \pushlist \FUN{f-score}(\VAR{truth}, \VAR{pred})}
+\COMMENT{evaluate}
+\ENDFOR
+\RETURN (\FUN{mean}(\VAR{scores}), \FUN{stddev}(\VAR{scores}))
+}
+
+The bootstrap resampling procedure is sketched in
+Algorithm~\ref{alg:prac:bootstrap}.  This takes three arguments: the
+true labels $\vec y$, the predicted labels $\hat{\vec y}$ and the
+number of folds to run.  It returns the mean and standard deviation
+from which you can compute a confidence interval.
+
+\section{Debugging Learning Algorithms}
+
+Learning algorithms are notoriously hard to debug, as you may have
+already experienced if you have implemented any of the models
+presented so far.  The main issue is that when a learning algorithm
+doesn't learn, it's unclear if this is because there's a bug or
+because the learning problem is too hard (or there's too much noise,
+or \dots).  Moreover, sometimes bugs lead to learning algorithms
+performing \emph{better} than they should: these are especially hard
+to catch (and always a bit disappointing when you do catch them).
+
+Obviously if you have a reference implementation, you can attempt to
+match its output.  Otherwise, there are two things you can do to try
+to help debug.  The first is to do everything in your power to get the
+learning algorithm to overfit.  If it cannot \emph{at least} overfit
+the training data, there's definitely something wrong.  The second is
+to feed it some tiny hand-specified two dimensional data set on which
+you \emph{know} what it should do and you can plot the output.
+
+The easiest way to try to get a learning algorithm to overfit is to
+add a new feature to it.  You can call this feature the
+\feat{CheatingIsFun} feature\footnote{Note: cheating is actually
+  \emph{not} fun and you shouldn't do it!}.  The feature value
+associated with this feature is $+1$ if this is a positive example and
+$-1$ (or zero) if this is a negative example.  In other words, this
+feature is a \emph{perfect} indicator of the class of this example.
+
+If you add the \feat{CheatingIsFun} feature and your algorithm does
+not get near $0\%$ training error, this could be because there are too
+many noisy features confusing it.  You could either remove a lot of
+the other features, or make the feature value for \feat{CheatingIsFun}
+either $+100$ or $-100$ so that the algorithm \emph{really} looks at
+it.  If you do this and your algorithm still cannot overfit then you
+likely have a bug.  (Remember to remove the \feat{CheatingIsFun}
+feature from your final implementation!)
+
+A second thing to try is to hand-craft a data set on which you know
+your algorithm should work.  This is also useful if you've managed to
+get your model to overfit and have simply noticed that it does not
+generalize.  For instance, you could run KNN on the XOR data.  Or you
+could run perceptron on some easily linearly separable data (for
+instance positive points along the line $x_2 = x_1 + 1$ and negative
+points along the line $x_2 = x_1 - 1$).  Or a decision tree on nice
+axis-aligned data.
+
+When debugging on hand-crafted data, remember whatever you know about
+the models you are considering.  For instance, you know that the
+perceptron should converge on linearly separable data, so try it on a
+linearly separable data set.  You know that decision trees should do
+well on data with only a few relevant features, so make your label
+some easy combination of features, such as $y = x_1 \lor (x_2 \land
+\lnot x_3)$.  You know that KNN should work well on data sets where
+the classes are well separated, so try such data sets.
+
+The most important thing to keep in mind is that a \emph{lot} goes in
+to getting good test set performance.  First, the model has to be
+right for the data.  So crafting your own data is helpful.  Second,
+the model has to fit the training data well, so try to get it to
+overfit.  Third, the model has to generalize, so make sure you tune
+hyperparameters well.
+
+\TODOFigure{prac:imageanswers}{object recognition answers}
+
+\begin{comment}
+\section{Human Knowledge is Everywhere}
+
+\TODOFigure{prac:boc}{BOC repr of one positive and one negative review}
+
+Alternatively, one can use bags of characters, a representation much
+like bag of pixels.  As you might expect, this is a terrible
+representation for most text categorization problems.  However,
+instead of using a ``bag of X'' representation, one can you a ``bag of
+(sequences of X)'' representation.  For example, we could have one
+feature for any pair of adjacent words\sidenote{This might help
+  recognize that ``real estate'' is different than ``real'' +
+  ``estate''.} or adjacent characters.  As these sequences grow
+longer, the size of the feature space grows, but we begin to see more
+meaningful units.  Figure~\ref{fig:prac:boseq} shows \emph{test
+  performance} for both bag of words and bag of characters, for
+different sequence lengths.  As you can see, once the character
+sequence length hits $5$, it performs roughly equally to bag of
+words (this is because most words are about $4$ characters long, plus
+a space).  As the sequence lengths grow, the models begin to overfit
+and performance drops.
+
+One can take this idea further.  Instead of sequences of characters,
+we can consider sequences of \emph{bits}.  
+
+\thinkaboutit{Can you think of a text categorization problem where bag
+  of characters might actually be a reasonable representation?}
+
+One issue in language is that words are often not the right level of
+granularity for classification.  For instance, ``real estate'' is very
+different than ``real'' + ``estate'', so in one sense a word is too
+small of a unit.  On the other hand, ``fortunate'' and ``fortunately''
+are really not very different, so a word can also be too large of a
+unit.  A possible way to address this is to either move ``up'' and
+consider \emph{sequences of words}, in addition to single words.
+Another possibility is to move ``down'' and consider \emph{sequences
+  of characters}.
+
+\TODOFigure{prac:boc}{BOC repr of one positive and one negative review
+  (negative first)}
+
+As an extreme example in text, one can use a bag of characters
+representation.  This is more analogous to the pixel representation in
+images.  Figure~\ref{fig:prac:boc} shows such a representation for a
+difference positive and negative document pair.  In this case it is
+near impossible to tell the difference!  (It turns out that the first
+one is negative.)
+
+
+
+gzip example
+
+\end{comment}
+
+TODO: answers to image questions
+
+
+\begin{exercises}
+\begin{Ex}
+\TODO
+
+\begin{solution}
+\TODO
+\end{solution}
+\end{Ex}
+
+\end{exercises}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "courseml"
+%%% End: 

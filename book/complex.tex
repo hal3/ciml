@@ -1,0 +1,964 @@
+
+\chapter{Beyond Binary Classification} \label{sec:complex}
+
+\chapterquote{}{}
+
+\begin{learningobjectives}
+\item Represent complex prediction problems in a formal learning
+  setting.
+\item Be able to artifically ``balance'' imbalanced data.
+\item Understand the positive and negative aspects of several
+  reductions from multiclass classification to binary classification.
+\item Recognize the difference between regression and ordinal
+  regression.
+\item Implement stacking as a method of collective classification.
+\end{learningobjectives}
+
+\dependencies{}
+
+\newthought{In the preceeding chapters,} you have learned all about a
+very simple form of prediction: predicting bits.  In the real world,
+however, we often need to predict much more complex objects.  You may
+need to categorize a document into one of several categories: sports,
+entertainment, news, politics, etc.  You may need to rank web pages or
+ads based on relevance to a query.  You may need to simultaneously
+classify a collection of objects, such as web pages, that have
+important information in the links between them.  These problems are
+all commonly encountered, yet fundamentally more complex than binary
+classification.
+
+In this chapter, you will learn how to use everything you already know
+about binary classification to solve these more complicated problems.
+You will see that it's relatively easy to think of a binary classifier
+as a black box, which you can reuse for solving these more complex
+problems.  This is a very useful abstraction, since it allows us to
+reuse knowledge, rather than having to build new learning models and
+algorithms from scratch.
+
+
+\section{Learning with Imbalanced Data}
+
+Your boss tells you to build a classifier that can identify fraudulent
+transactions in credit card histories.  Fortunately, most transactions
+are legitimate, so perhaps only $0.1\%$ of the data is a positive
+instance.  The \concept{imbalanced data} problem refers to the fact
+that for a large number of real world problems, the number of positive
+examples is dwarfed by the number of negative examples (or vice
+versa).  This is actually something of a misnomer: it is not the
+\emph{data} that is imbalanced, but the \emph{distribution} from which
+the data is drawn.  (And since the distribution is imbalanced, so must
+the data be.)
+
+Imbalanced data is a problem because machine learning algorithms are
+too smart for your own good.  For most learning algorithms, if you
+give them data that is $99.9\%$ negative and $0.1\%$ positive, they
+will simply learn to always predict negative.  Why?  Because they are
+trying to minimize error, and they can achieve $0.1\%$ error by doing
+nothing!  If a teacher told you to study for an exam with $1000$
+true/false questions and only one of them is true, it is unlikely you
+will study very long.
+
+Really, the problem is not with the data, but rather with the way that
+you have defined the learning problem.  That is to say, what you care
+about is \emph{not} accuracy: you care about something else.  If you
+want a learning algorithm to do a reasonable job, you have to tell it
+what you want!
+
+Most likely, what you want is \emph{not} to optimize accuracy, but
+rather to optimize some other measure, like f-score or AUC.  You want
+your algorithm to make \emph{some} positive predictions, and simply
+prefer those to be ``good.''  We will shortly discuss two heuristics
+for dealing with this problem: subsampling and weighting.  In
+subsampling, you \emph{throw out} some of you negative examples so
+that you are left with a balanced data set ($50\%$ positive, $50\%$
+negative).  This might scare you a bit since throwing out data seems
+like a bad idea, but at least it makes learning much more efficient.
+In weighting, instead of throwing out positive examples, we just given
+them lower weight.  If you assign an \concept{importance weight} of
+$0.00101$ to each of the positive examples, then there will be as much
+\emph{weight} associated with positive examples as negative examples.
+
+Before formally defining these heuristics, we need to have a mechanism
+for formally defining supervised learning problems.  We will proceed
+by example, using binary classification as the canonical learning
+problem.
+
+\learningproblem{Binary Classification}{
+\item An input space $\cX$
+\item An unknown distribution $\cD$ over $\cX \times \{ -1, +1 \}$
+}{A function $f$ minimizing: $\Ep_{(\vx,y) \sim \cD} \big[ f(\vx) \neq y \big]$}
+
+As in all the binary classification examples you've seen, you have
+some input space (which has always been $\R^D$).  There is some
+distribution that produces labeled examples over the input space.  You
+do not have access to that distribution, but can obtain samples from
+it.  Your goal is to find a classifier that minimizes error on that
+distribution.
+
+A small modification on this definition gives a $\al$-weighted
+classification problem, where you believe that the positive class is
+$\al$-times as important as the negative class.
+
+\learningproblem{$\al$-Weighted Binary Classification}{
+\item An input space $\cX$
+\item An unknown distribution $\cD$ over $\cX \times \{ -1, +1 \}$
+}{A function $f$ minimizing: $\Ep_{(\vx,y) \sim \cD} \Big[ \al^{y=1} \big[f(\vx) \neq y\big] \Big]$}
+
+The objects given to you in weighted binary classification are
+identical to standard binary classification.  The only difference is
+that the \emph{cost} of misprediction for $y=+1$ is $\al$, while the
+cost of misprediction for $y=-1$ is $1$.  In what follows, we assume
+that $\al > 1$.  If it is not, you can simply swap the labels and use
+$1/\al$.
+
+The question we will ask is: suppose that I have a good algorithm for
+solving the \lprob{Binary Classification} problem.  Can I turn that
+into a good algorithm for solving the \lprob{$\al$-Weighted Binary
+  Classification} problem?
+
+\newalgorithm{complex:subsamplemap}
+  {\FUN{SubsampleMap}(\VAR{$\cD^{\text{weighted}}$}, \VAR{$\al$})}
+  {
+\WHILE{\CON{true}}
+\SAMPLE{$(\vx,y)$}{\VAR{$\cD^{\text{weighted}}$}}
+\COMMENT{draw an example from the weighted distribution}
+\SAMPLE{u}{uniform random variable in $[0,1]$}
+\IF{\VAR{y} = \CON{+1} \OR \VAR{u} < $\frac 1 {\VARm{\al}}$}
+\RETURN{$(\VARm{\vx},\VARm{y})$}
+\ENDIF
+\ENDWHILE
+}
+
+%\newalgorithm{complex:subsampletest}
+%  {\FUN{SubsampleTest}(\FUN{$f^{\text{binary}}$}, \VAR{$\hat\vx$})}
+%  {
+%\RETURN \FUN{$f^{\text{binary}}$}(\VAR{$\hat\vx$})
+%}
+
+In order to do this, you need to define a \emph{transformation} that
+maps a concrete weighted problem into a concrete unweighted problem.
+This transformation needs to happen both at training time and at test
+time (though it need not be the same transformation!).
+Algorithm~\ref{alg:complex:subsampletrain} sketches a training-time
+\concept{sub-sampling} transformation and
+Algorithm~\ref{alg:complex:subsampletest} sketches a test-time
+transformation (which, in this case, is trivial).  All the training
+algorithm is doing is retaining all positive examples and a $1/\al$
+fraction of all negative examples.  The algorithm is explicitly
+turning the distribution over weighted examples into a (different)
+distribution over binary examples.  A vanilla binary classifier is
+trained on this \concept{induced distribution}.
+
+Aside from the fact that this algorithm throws out a lot of data
+(especially for large $\al$), it does seem to be doing a reasonable
+thing.  In fact, from a \concept{reductions} perspective, it is an
+optimal algorithm.  You can prove the following result:
+
+\begin{theorem}[Subsampling Optimality] \label{thm:complex:subsample}
+  Suppose the binary classifier trained in
+  Algorithm~\ref{alg:complex:subsampletrain} achieves a binary error
+  rate of $\ep$.  Then the error rate of the weighted predictor is
+  equal to $\al\ep$.
+\end{theorem}
+
+This theorem states that if your binary classifier does well (on the
+induced distribution), then the learned predictor will also do well
+(on the original distribution).  Thus, we have successfully converted
+a weighted learning problem into a plain classification problem!  The
+fact that the error rate of the weighted predictor is exactly $\al$
+times more than that of the unweighted predictor is unavoidable: the
+error metric on which it is evaluated is $\al$ times bigger!
+
+\thinkaboutit{Why is it unreasonable to expect to be able to achieve,
+  for instance, an error of $\sqrt{\al} \ep$, or anything that is
+  sublinear in $\al$?}
+
+The proof of this theorem is so straightforward that we will prove it
+here.  It simply involves some algebra on expected values.
+
+\begin{myproof}{\ref{thm:complex:subsampletrain}}
+  Let $\cD^w$ be the original distribution and let $\cD^b$ be the
+  induced distribution.  Let $f$ be the binary classifier trained on
+  data from $\cD^b$ that achieves a binary error rate of $\ep^b$ on
+  that distribution.  We will compute the expected error $\ep^w$ of
+  $f$ on the weighted problem:
+  \begin{align}
+    \ep^w 
+    &= \Ep_{(\vx,y) \sim \cD^w} 
+         \Big[ \al^{y=1} \big[f(\vx) \neq y\big] \Big] \\
+    &= \sum_{\vx \in \cX} \sum_{y \in \pm 1}
+         \cD^w(\vx,y) \al^{y=1} \big[f(\vx) \neq y\big] \\
+%    &= \sum_{\vx \in \cX} \Big(
+%         \cD^w(\vx,+1) \al \big[f(\vx) \neq +1\big] +
+%         \cD^w(\vx,-1) \big[f(\vx) \neq -1\big] \Big) \\
+    &= \al \sum_{\vx \in \cX} \Big(
+         \cD^w(\vx,+1) \big[f(\vx) \neq +1\big] +
+         \cD^w(\vx,-1) \frac 1 \al \big[f(\vx) \neq -1\big] \Big) \\
+    &= \al \sum_{\vx \in \cX} \Big(
+         \cD^b(\vx,+1) \big[f(\vx) \neq +1\big] +
+         \cD^b(\vx,-1) \big[f(\vx) \neq -1\big] \Big) \\
+    &= \al \Ep_{(\vx,y) \sim \cD^b} \big[f(\vx) \neq y\big] \\
+    &= \al \ep^b
+  \end{align}
+And we're done!  (We implicitly assumed $\cX$ is discrete.  In the
+case of continuous data, you need to replace all the sums over $\vx$
+with integrals over $\vx$, but the result still holds.)
+\end{myproof}
+
+Instead of subsampling the low-cost class, you could alternatively
+\concept{oversample} the high-cost class.  The easiest case is when
+$\al$ is an integer, say $5$.  Now, whenever you get a positive point,
+you include $5$ copies of it in the induced distribution.  Whenever
+you get a negative point, you include a single copy.
+
+\thinkaboutit{How can you handle non-integral $\al$, for instance $5.5$?}
+
+This oversampling algorithm achieves exactly the same theoretical
+result as the subsampling algorithm.  The main advantage to the
+oversampling algorithm is that it does not throw out any data.  The
+main advantage to the subsampling algorithm is that it is more
+computationally efficient.
+
+\thinkaboutit{Modify the proof of optimality for the subsampling
+  algorithm so that it applies to the oversampling algorithm.}
+
+You might be asking yourself: intuitively, the oversampling algorithm
+seems like a much better idea than the subsampling algorithm, at least
+if you don't care about computational efficiency.  But the theory
+tells us that they are the same!  What is going on?  Of course the
+theory isn't wrong.  It's just that the assumptions are effectively
+different in the two cases.  Both theorems state that if you can get
+error of $\ep$ on the binary problem, you automatically get error of
+$\al\ep$ on the weighted problem.  But they do not say anything about
+how possible it is to get error $\ep$ on the binary problem.  Since
+the oversampling algorithm produces more data points than the
+subsampling algorithm it is very concievable that you could get lower
+binary error with oversampling than subsampling.
+
+The primary drawback to oversampling is computational inefficiency.
+However, for many learning algorithms, it is straightforward to
+include \emph{weighted} copies of data points at no cost.  The idea is
+to store only the unique data points and maintain a counter saying how
+many times they are replicated.  This is not easy to do for the
+perceptron (it can be done, but takes work), but it \emph{is} easy for
+both decision trees and KNN.  For example, for decision trees (recall
+Algorithm~\ref{alg:dt:train}), the only changes are to: (1) ensure
+that line 1 computes the most frequent \emph{weighted} answer, and (2)
+change lines 10 and 11 to compute weighted errors.
+
+\thinkaboutit{Why is it hard to change the perceptron? (Hint: it has to
+  do with the fact that perceptron is online.)}
+
+\thinkaboutit{How would you modify KNN to take into account weights?}
+
+\section{Multiclass Classification}
+
+Multiclass classification is a natural extension of binary
+classification.  The goal is still to assign a discrete label to
+examples (for instance, is a document about entertainment, sports,
+finance or world news?).  The difference is that you have $K>2$
+classes to choose from.
+
+\learningproblem{Multiclass Classification}{
+\item An input space $\cX$ and number of classes $K$
+\item An unknown distribution $\cD$ over $\cX \times [K]$
+}{A function $f$ minimizing: $\Ep_{(\vx,y) \sim \cD} \big[f(\vx) \neq y\big]$}
+
+Note that this is \emph{identical} to binary classification, except
+for the presence of $K$ classes.  (In the above, $[K] =
+\{1,2,3,\dots,K\}$.)  In fact, if you set $K=2$ you exactly recover
+binary classification.
+
+The game we play is the same: someone gives you a binary classifier
+and you have to use it to solve the multiclass classification problem.
+A very common approach is the \concept{one versus all} technique (also
+called \concept{OVA} or \concept{one versus rest}).  To perform OVA,
+you train $K$-many binary classifiers, $f_1, \dots, f_K$.  Each
+classifier sees \emph{all} of the training data.  Classifier $f_i$
+receives all examples labeled class $i$ as positives and all other
+examples as negatives.  At test time, whichever classifier predicts
+``positive'' wins, with ties broken randomly.
+
+\thinkaboutit{Suppose that you have $N$ data points in $K$ classes,
+  evenly divided.  How long does it take to train an OVA classifier,
+  if the base binary classifier takes $\cO(N)$ time to train?  What if
+  the base classifier takes $\cO(N^2)$ time?}
+
+\newalgorithm{complex:ovatrain}
+  {\FUN{OneVersusAllTrain}(\VAR{$\mat D^{\text{multiclass}}$}, \FUN{BinaryTrain})}
+  {
+\FOR{\VAR{i} = \CON{1} \TO \VAR{K}}
+\SETST{$\mat D^{\text{bin}}$}{relabel \VAR{$\mat
+    D^{\text{multiclass}}$} so class \VAR{i} is positive and
+  $\lnot$\VAR{i} is negative}
+\SETST{$f_{i}$}{\FUN{BinaryTrain}(\VAR{$\mat D^{\text{bin}}$})}
+\ENDFOR
+\RETURN{\VAR{$f_1$}, \dots, \VAR{$f_K$}}
+}
+
+\newalgorithm{complex:ovatest}
+  {\FUN{OneVersusAllTest}(\FUN{$f_1$}, \dots, \FUN{$f_K$}, \VAR{$\hat\vx$})}
+  {
+\SETST{score}{$\langle \CON{0}, \CON{0}, \dots, \CON{0}\rangle$}
+  \COMMENT{initialize $K$-many scores to zero}
+\FOR{\VAR{i} = \CON{1} \TO \VAR{K}}
+\SETST{y}{\FUN{$f_i$}(\VAR{$\hat\vx$})}
+\SETST{score$_i$}{\VAR{$score_i$} + \VAR{y}}
+\ENDFOR
+\RETURN $\argmax_k$ \VAR{score$_k$}
+}
+
+The training and test algorithms for OVA are sketched in
+Algorithms~\ref{alg:complex:ovatrain} and \ref{alg:complex:ovatest}.
+In the testing procedure, the prediction of the $i$th classifier is
+added to the overall score for class $i$.  Thus, if the prediction is
+positive, class $i$ gets a vote; if the prdiction is negative,
+everyone else (implicitly) gets a vote.  (In fact, if your learning
+algorithm can output a confidence, as discussed in Section~\ref{}, you
+can often do better by using the confidence as $y$, rather than a
+simple $\pm1$.)
+
+\thinkaboutit{Why would using a confidence help.}
+
+OVA is very natural, easy to implement, and quite natural.  It also
+works very well in practice, so long as you do a good job choosing a
+good binary classification algorithm \emph{tuning} its hyperparameters
+well.  Its weakness is that it can be somewhat brittle.  Intuitively,
+it is not particularly robust to errors in the underlying classifiers.
+If \emph{one} classifier makes a mistake, it eis possible that the
+entire prediction is erroneous.  In fact, it is entirely possible that
+\emph{none} of the $K$ classifiers predicts positive (which is
+actually the worst-case scenario from a theoretical perspective)!
+This is made explicit in the OVA error bound below.
+
+\begin{theorem}[OVA Error Bound] \label{thm:complex:ova} Suppose the
+  average binary error of the $K$ binary classifiers is $\ep$.  Then
+  the error rate of the OVA multiclass predictor is \emph{at most}
+  $(K-1) \ep$.
+\end{theorem}
+
+\begin{myproof}{\ref{thm:complex:ova}}
+  The key question is erroneous predictions from the binary
+  classifiers lead to multiclass errors.  We break it down into false
+  negatives (predicting -1 when the truth is +1) and false positives
+  (predicting +1 when the truth is -1).
+
+  When a false negative occurs, then the testing procedure chooses
+  randomly between available options, which is all labels.  This gives
+  a $(K-1)/K$ probability of multiclass error.  Since only \emph{one}
+  binary error is necessary to make this happen, the \emph{efficiency}
+  of this error mode is $[ (K-1) / K ] / 1 = (K-1) / K$.
+
+  Multiple false positives can occur simultaneously.  Suppose there
+  are $m$ false positives.  If there is simultaneously a false
+  negative, the error is $1$.  In order for this to happen, there have
+  to be $m+1$ errors, so the efficiency is $1/(M+1)$.  In the case
+  that there is not a simultaneous false negative, the error
+  probability is $m/(m+1)$.  This requires $m$ errors, leading to an
+  efficiency of $1/(m+1)$.
+
+  The worse case, therefore, is the false negative case, which gives
+  an efficiency of $(K-1)/K$.  Since we have $K$-many opportunities to
+  err, we multiply this by $K$ and get a bound of $(K-1) \ep$.
+\end{myproof}
+
+The constants in this are relatively unimportant: the aspect that
+matters is that this scales \emph{linearly} in $K$.  That is, as the
+number of classes grows, so does your expected error.
+
+To develop alternative approaches, a useful way to think about turning
+multiclass classification problems into binary classification problems
+is to think of them like tournaments (football, soccer--aka football,
+cricket, tennis, or whatever appeals to you).  You have $K$ teams
+entering a tournament, but unfortunately the sport they are playing
+only allows two to compete at a time.  You want to set up a way of
+pairing the teams and having them compete so that you can figure out
+which team is best.  In learning, the teams are now the classes and
+you're trying to figure out which class is best.\sidenote{The sporting
+  analogy breaks down a bit for OVA: $K$ games are played, wherein
+  each team will play simultaneously against all other teams.}
+
+One natural approach is to have every team compete against every other
+team.  The team that wins the majority of its matches is declared the
+winner.  This is the \concept{all versus all} (or \concept{AVA})
+approach (sometimes called \concept{all pairs}).  The most natural way
+to think about it is as training $K \choose 2$ classifiers.  Say
+$f_{ij}$ for $1 \leq i < j \leq k$ is the classifier that pits class
+$i$ against class $j$.  This classifier receives all of the class $i$
+examples as ``positive'' and all of the class $j$ examples as
+``negative.''  When a test point arrives, it is run through all
+$f_{ij}$ classifiers.  Every time $f_{ij}$ predicts positive, class
+$i$ gets a point; otherwise, class $j$ gets a point.  After running
+all $K \choose 2$ classifiers, the class with the most votes wins.
+
+\thinkaboutit{Suppose that you have $N$ data points in $K$ classes,
+  evenly divided.  How long does it take to train an AVA classifier,
+  if the base binary classifier takes $\cO(N)$ time to train?  What if
+  the base classifier takes $\cO(N^2)$ time?  How does this compare to
+  OVA?}
+
+
+\newalgorithm{complex:avatrain}
+  {\FUN{AllVersusAllTrain}(\VAR{$\mat D^{\text{multiclass}}$}, \FUN{BinaryTrain})}
+  {
+\SETST{$f_{ij}$}{$\emptyset, \forall 1 \leq i < j \leq K$}
+\FOR{\VAR{i} = \CON{1} \TO \VAR{K}-\CON{1}}
+\SETST{$\mat D^{\text{pos}}$}{all \VAR{$\vx$} $\in$ \VAR{$\mat D^{\text{multiclass}}$} labeled $i$}
+\FOR{\VAR{j} = \VAR{i}+\CON{1} \TO \VAR{K}}
+\SETST{$\mat D^{\text{neg}}$}{all \VAR{$\vx$} $\in$ \VAR{$\mat D^{\text{multiclass}}$} labeled $j$}
+\SETST{$\mat D^{\text{bin}}$}{$ \left\{ (\VARm{\vx},+1) : \VARm{\vx} \in \VARm{\mat D^{\text{pos}}}\right\}
+                         \cup \left\{ (\VARm{\vx},-1) : \VARm{\vx} \in \VARm{\mat D^{\text{neg}}}\right\}$}
+\SETST{$f_{ij}$}{\FUN{BinaryTrain}(\VAR{$\mat D^{\text{bin}}$})}
+\ENDFOR
+\ENDFOR
+\RETURN{all \VAR{$f_{ij}$}s}
+}
+
+\newalgorithm{complex:avatest}
+  {\FUN{AllVersusAllTest}(all \FUN{$f_{ij}$}, \VAR{$\hat\vx$})}
+  {
+\SETST{score}{$\langle \CON{0}, \CON{0}, \dots, \CON{0}\rangle$}
+  \COMMENT{initialize $K$-many scores to zero}
+\FOR{\VAR{i} = \CON{1} \TO \VAR{K}-\CON{1}}
+\FOR{\VAR{j} = \VAR{i}+\CON{1} \TO \VAR{K}}
+\SETST{y}{\FUN{$f_{ij}$}(\VAR{$\hat\vx$})}
+\SETST{score$_i$}{\VAR{$score_i$} + \VAR{y}}
+\SETST{score$_j$}{\VAR{$score_j$} - \VAR{y}}
+\ENDFOR
+\ENDFOR
+\RETURN $\argmax_k$ \VAR{score$_k$}
+}
+
+The training and test algorithms for AVA are sketched in
+Algorithms~\ref{alg:complex:avatrain} and \ref{alg:complex:avatest}.
+In theory, the AVA mapping is more complicated than the weighted
+binary case.  The result is stated below, but the proof is omitted.
+
+\begin{theorem}[AVA Error Bound] \label{thm:complex:ava} Suppose the
+  average binary error of the $K \choose 2$ binary classifiers is
+  $\ep$.  Then the error rate of the AVA multiclass predictor is
+  \emph{at most} $2(K-1) \ep$.
+\end{theorem}
+
+\thinkaboutit{The bound for AVA is $2(K-1)\ep$; the bound for OVA is
+  $(K-1)\ep$.  Does this mean that OVA is necessarily better than AVA?
+  Why or why not?}
+
+
+\Figure{complex:badova}{data set on which OVA will do terribly with
+  linear classifiers}
+
+\thinkaboutit{Consider the data in Figure~\ref{fig:complex:badova} and
+  assume that you are using a perceptron as the base classifier.  How
+  well will OVA do on this data?  What about AVA?}
+
+At this point, you might be wondering if it's possible to do better
+than something linear in $K$.  Fortunately, the answer is yes!  The
+solution, like so much in computer science, is divide and conquer.
+The idea is to construct a \emph{binary tree} of classifiers.  The
+leaves of this tree correspond to the $K$ labels.  Since there are
+only $\log_2 K$ decisions made to get from the root to a leaf, then
+there are only $\log_2 K$ chances to make an error.
+
+\Figure{complex:tree}{example classification tree for $K=8$}
+
+An example of a classification tree for $K=8$ classes is shown in
+Figure~\ref{fig:complex:tree}.  At the root, you distinguish between
+classes $\{1,2,3,4\}$ and classes $\{5,6,7,8\}$.  This means that you
+will train a binary classifier whose positive examples are all data
+points with multiclass label $\{1,2,3,4\}$ and whose negative examples
+are all data points with multiclass label $\{5,6,7,8\}$.  Based on
+what decision is made by this classifier, you can walk down the
+appropriate path in the tree.  When $K$ is not a powwr of $2$, the
+tree will not be full.  This classification tree algorithm achieves
+the following bound.
+
+\begin{theorem}[Tree Error Bound] \label{thm:complex:tree} Suppose the
+  average binary classifiers error is $\ep$.  Then the error rate of
+  the tree classifier is \emph{at most} $\ceil{\log_2 K} \ep$.
+\end{theorem}
+\begin{myproof}{\ref{thm:complex:tree}}
+  A multiclass error is made if any classifier on the path from the
+  root to the correct leaf makes an error.  Each has probability $\ep$
+  of making an error and the path consists of at most $\ceil{\log_2
+    K}$ binary decisions.
+\end{myproof}
+
+One think to keep in mind with tree classifiers is that you have
+control over how the tree is defined.  In OVA and AVA you have no say
+in what classification problems are created.  In tree classifiers, the
+only thing that matters is that, at the root, half of the classes are
+considered positive and half are considered negative.  You want to
+split the classes in such a way that this classification decision is
+as easy as possible.  You can use whatever you happen to know about
+your classification problem to try to separate the classes out in a
+reasonable way.
+
+Can you do better than $\ceil{\log_2 K}\ep$?  It turns out the answer
+is yes, but the algorithms to do so are relatively complicated.  You
+can actually do as well as $2\ep$ using the idea of error-correcting
+tournaments.  Moreover, you can prove a \emph{lower bound} that states
+that the best you could possible do is $\ep/2$.  This means that
+error-correcting tournaments are at most a factor of four worse than
+optimal.
+
+\section{Ranking}
+
+You start a new web search company called Goohooing.  Like other
+search engines, a user inputs a query and a set of documents is
+retrieved.  Your goal is to rank the resulting documents based on
+relevance to the query.  The ranking problem is to take a collection
+of items and sort them according to some notion of preference.  One of
+the trickiest parts of doing ranking through learning is to properly
+define the loss function.  Toward the end of this section you will see
+a very general loss function, but before that let's consider a few
+special cases.
+
+Continuing the web search example, you are given a collection of
+queries.  For each query, you are also given a collection of
+documents, together with a desired ranking over those documents.  In
+the following, we'll assume that you have $N$-many queries and for
+each query you have $M$-many documents.  (In practice, $M$ will
+probably vary by query, but for ease we'll consider the simplified
+case.)  The goal is to train a binary classifier to predict a
+\concept{preference function}.  Given a query $q$ and two documents
+$d_i$ and $d_j$, the classifier should predict whether $d_i$ should be
+preferred to $d_j$ with respect to the query $q$.
+
+As in all the previous examples, there are two things we have to take
+care of: (1) how to train the classifier that predicts preferences;
+(2) how to turn the predicted preferences into a ranking.  Unlike the
+previous examples, the second step is somewhat complicated in the
+ranking case.  This is because we need to predict an entire ranking of
+a large number of documents, somehow assimilating the preference
+function into an overall permutation.
+
+For notationally simplicity, let $\vx_{nij}$ denote the features
+associated with comparing document $i$ to document $j$ on query $n$.
+Training is fairly straightforward.  For every $n$ and every pair $i
+\neq j$, we will create a binary classification example based on
+features $\vx_{nij}$.  This example is positive if $i$ is preferred to
+$j$ in the true ranking.  It is negative if $j$ is preferred to $i$.
+(In some cases the true ranking will not express a preference between
+two objects, in which case we exclude the $i,j$ and $j,i$ pair from
+training.)
+
+\newalgorithm{complex:naiveranktrain}
+  {\FUN{NaiveRankTrain}(\VAR{RankingData}, \FUN{BinaryTrain})}
+  {
+\SETST{$\mat D$}{\emptylist}
+\FOR{\VAR{n} = \CON{1} \TO \VAR{N}}
+\FORALL{\VAR{i}, \VAR{j} = \CON{1} \TO \VAR{M} \AND \VAR{i} $\neq$ \VAR{j}}
+\IF{\VAR{i} is prefered to \VAR{j} on query \VAR{n}}
+\SETST{$\mat D$}{\VAR{$\mat D$} \pushlist $(\VARm{\vx_{nij}}, +1)$}
+\ELSIF{\VAR{j} is prefered to \VAR{i} on query \VAR{n}}
+\SETST{$\mat D$}{\VAR{$\mat D$} \pushlist $(\VARm{\vx_{nij}}, -1)$}
+\ENDIF
+\ENDFOR
+\ENDFOR
+\RETURN \FUN{BinaryTrain}(\VAR{$\mat D$})
+}
+
+\newalgorithm{complex:naiveranktest}
+  {\FUN{NaiveRankTest}(\FUN{$f$}, \VAR{$\hat\vx$})}
+  {
+\SETST{score}{$\langle \CON{0}, \CON{0}, \dots, \CON{0}\rangle$}
+  \COMMENT{initialize $M$-many scores to zero}
+\FORALL{\VAR{i}, \VAR{j} = \CON{1} \TO \VAR{M} \AND \VAR{i} $\neq$ \VAR{j}}
+\SETST{y}{\FUN{$f$}(\VAR{$\hat\vx_{ij}$})}
+\COMMENT{get predicted ranking of $i$ and $j$}
+\SETST{score$_i$}{\VAR{$score_i$} + \VAR{y}}
+\SETST{score$_j$}{\VAR{$score_j$} - \VAR{y}}
+\ENDFOR
+\RETURN \FUN{argsort}(\VAR{score})
+\COMMENT{return queries sorted by score}
+}
+
+Now, you might be tempted to evaluate the classification performance
+of this binary classifier on its own.  The problem with this approach
+is that it's impossible to tell---just by looking at its output on one
+$i,j$ pair---how good the overall ranking is.  This is because there
+is the intermediate step of turning these pairwise predictions into a
+coherent ranking.  What you need to do is measure how well the ranking
+based on your predicted preferences compares to the true ordering.
+Algorithms~\ref{alg:complex:naiveranktrain} and
+\ref{alg:complex:naiveranktest} show naive algorithms for training and
+testing a ranking function.
+
+These algorithms actually work quite well in the case of
+\concept{bipartite ranking problems}.  A bipartite ranking problem is
+one in which you are only ever trying to predict a binary response,
+for instance ``is this document relevant or not?'' but are being
+evaluated according to a metric like \concept{AUC}.  This is
+essentially because the only goal in bipartite problems to to ensure
+that all the relevant documents are ahead of all the irrelevant
+documents.  There is no notion that one relevant document is
+\emph{more relevant} than another.
+
+For non-bipartite ranking problems, you can do better.  First, when
+the preferences that you get at training time are more nuanced than
+``relevant or not,'' you can incorporate these preferences at training
+time.  Effectively, you want to give a higher weight to binary
+problems that are very different in terms of perference than others.
+Second, rather than producing a list of scores and then calling an
+arbitrary sorting algorithm, you can actually use the preference
+function as the sorting function inside your own implementation of
+quicksort.  
+
+We can now formalize the problem.  Define a ranking as a function
+$\si$ that maps the objects we are ranking (documents) to the desired
+position in the list, $1, 2, \dots M$.  If $\si_u < \si_v$ then $u$
+is preferred to $v$ (i.e., appears earlier on the ranked document
+list).  Given data with observed rankings $\si$, our goal is to learn
+to predict rankings for new objects, $\hat\si$.  We define $\Si_M$ as
+the set of all ranking functions over $M$ objects.  We also wish to
+express the fact that making a mistake on some pairs is worse than
+making a mistake on others.  This will be encoded in a cost function
+$\om$ (omega), where $\om(i,j)$ is the cost for accidentally putting
+something in position $j$ when it should have gone in position $i$.
+To be a valid cost function valid, $\om$ must be (1) symmetric, (2)
+monotonic and (3) satisfy the triangle inequality.  Namely: (1)
+$\om(i,j) = \om(j,i)$; (2) if $i<j<k$ or $i>j>k$ then $\om(i,j) \leq
+\om(i,k)$; (3) $\om(i,j) + \om(j,k) \geq \om(i,k)$.  With these
+definitions, we can properly define the ranking problem.
+
+\learningproblem{$\om$-Ranking}{
+\item An input space $\cX$
+\item An unknown distribution $\cD$ over $\cX \times \Si_M$
+}{A function $f : \cX \fto \Si_M$ minimizing:
+\begin{equation} \label{eq:complex:rank}
+  \Ep_{(\vx,\si) \sim \cD} \left[
+%    {M \choose 2}^{-1}
+    \sum_{u \neq v}
+      [    \si_u <     \si_v]~
+      [\hat\si_v < \hat\si_u]~
+      \om( \si_u, \si_v )~
+  \right]
+\end{equation}
+where $\hat\si = f(\vx)$
+}
+
+In this definition, the only complex aspect is the loss
+function~\ref{eq:complex:rank}.  This loss sums over all pairs of
+objects $u$ and $v$.  If the true ranking ($\si$) prefers $u$ to $v$,
+but the predicted ranking ($\hat\si$) prefers $v$ to $u$, then you
+incur a cost of $\om(\si_u,\si_v)$.
+
+Depending on the problem you care about, you can set $\om$ to many
+``standard'' options.  If $\om(i,j) = 1$ whenever $i \neq j$, then you
+achieve the Kemeny distance measure, which simply counts the number of
+pairwise misordered items.  In many applications, you may only care
+about getting the top $K$ predictions correct.  For instance, your web
+search algorithm may only display $K=10$ results to a user.  In this
+case, you can define:
+\begin{equation}
+\om(i,j) = \brack{
+  1 & \text{if } \min\{i,j\} \leq K \text{ and } i \neq j \\
+  0 & \text{otherwise}
+}
+\end{equation}
+In this case, only errors in the top $K$ elements are penalized.
+Swapping items $55$ and $56$ is irrelevant (for $K<55$).
+
+Finally, in the bipartite ranking case, you can express the
+\concept{area under the curve} (\concept{AUC}) metric as:
+\begin{equation}
+\om(i,j) =
+  \frac {{M \choose 2}} {M^+(M-M^+)}
+    \times
+    \brack{1 & \text{if } i \leq M^+ \text{ and } j > M^+ \\
+           1 & \text{if } j \leq M^+ \text{ and } i > M^+ \\
+           0 & \text{otherwise} }
+\end{equation}
+Here, $M$ is the total number of objects to be ranked and $M^+$ is the
+number that are actually ``good.''  (Hence, $M-M^+$ is the number that
+are actually ``bad,'' since this is a bipartite problem.)  You are
+only penalized if you rank a good item in position greater than $M^+$
+or if you rank a bad item in a position less than or equal to $M^+$.
+
+\newalgorithm{complex:ranktrain}
+  {\FUN{RankTrain}(\VAR{$\mat D^{\text{rank}}$}, \VAR{$\om$}, \FUN{BinaryTrain})}
+  {
+\SETST{$\mat D^{\text{bin}}$}{\emptylist}
+\FORALL{(\VAR{$\vx$}, \VAR{$\si$}) $\in$ \VAR{$\mat D^{\text{rank}}$}}
+\FORALL{\VAR{u} $\neq$ \VAR{v}}
+\SETST{y}{\FUN{sign}(\VAR{$\si_v$} - \VAR{$\si_u$})}
+  \COMMENT{y is +1 if $u$ is prefered to $v$}
+\SETST{w}{\VAR{$\om$}(\VAR{$\si_u$}, \VAR{$\si_v$})}
+  \COMMENT{w is the cost of misclassification}
+\SETST{$\mat D^{\text{bin}}$}{\VAR{$\mat D^{\text{bin}}$}
+           \pushlist (\VAR{y}, \VAR{w}, \VAR{$\vx_{uv}$})}
+\ENDFOR
+\ENDFOR
+\RETURN \FUN{BinaryTrain}(\VAR{$\mat D^{\text{bin}}$})
+}
+
+\newalgorithm{complex:ranktest}
+  {\FUN{RankTest}(\FUN{$f$}, \VAR{$\hat\vx$}, \VAR{obj})}
+  {
+\IF{\VAR{obj} contains $0$ or $1$ elements}
+\RETURN \VAR{obj}
+\ELSE
+\SETST{p}{randomly chosen object in \VAR{obj}}
+\COMMENT{pick pivot}
+\SETST{left}{\emptylist}
+\COMMENT{elements that seem smaller than $p$}
+\SETST{right}{\emptylist}
+\COMMENT{elements that seem larger than $p$}
+\FORALL{\VAR{u} $\in$ \VAR{obj} $\without \{$\VAR{p}$\}$}
+\SETST{$\hat y$}{\FUN{$f$}(\VAR{$\vx_{up}$})}
+\COMMENT{what is the probability that $u$ precedes $p$}
+\IF{uniform random variable $<$ \VAR{$\hat y$}}
+\SETST{left}{\VAR{left} \pushlist \VAR{u}}
+\ELSE
+\SETST{right}{\VAR{right} \pushlist \VAR{u}}
+\ENDIF
+\ENDFOR
+\SETST{left}{\FUN{RankTest}(\FUN{$f$}, \VAR{$\hat\vx$}, \VAR{left})}
+  \COMMENT{sort earlier elements}
+\SETST{right}{\FUN{RankTest}(\FUN{$f$}, \VAR{$\hat\vx$}, \VAR{right})}
+  \COMMENT{sort later elements}
+\RETURN \VAR{left} \pushlist $\langle$\VAR{p}$\rangle$ \pushlist \VAR{right}
+\ENDIF
+}
+
+In order to \emph{solve} this problem, you can follow a recipe similar
+to the naive approach sketched earlier.  At training time, the biggest
+change is that you can \emph{weight} each training example by how bad
+it would be to mess it up.  This change is depicted in
+Algorithm~\ref{alg:complex:ranktrain}, where the binary classiciation
+data has \emph{weights} \VAR{$w$} provided for saying how important a
+given example is.  These weights are derived from the cost function
+$\om$.
+
+At test time, instead of predicting scores and then sorting the list,
+you essentially run the quicksort algorith, using $f$ as a comparison
+function.  At each step in Algorithm~\ref{alg:complex:ranktest}, a
+pivot $p$ is chosen.  Every other object $u$ is compared to $p$ using
+$f$.  If $f$ thinks $u$ is better, then it is sorted on the left;
+otherwise it is sorted on the right.  There is one major difference
+between this algorithmand quicksort: the comparison function is
+allowed to be \emph{probabilistic}.  If $f$ outputs probabilities, for
+instance it predicts that $u$ has an $80\%$ probability of being
+better than $p$, then it puts it on the left with $80\%$ probability
+and on the right with $20\%$ probability.  (The pseudocode is written
+in such a way that even if $f$ just predicts $-1,+1$, the algorithm
+still works.)
+
+This algorithm is better than the naive algorithm in at least two
+ways.  First, it only makes $\cO(M\log_2 M)$ calls to $f$ (in
+expectation), rather than $\cO(M^2)$ calls in the naive case.  Second,
+it achieves a better error bound, shown below:
+
+\begin{theorem}[Rank Error Bound] \label{thm:complex:rank} Suppose the
+  average binary error of $f$ is $\ep$.  Then the ranking algorithm
+  achieves a test error of at most $2\ep$ in the general case, and
+  $\ep$ in the bipartite case.
+\end{theorem}
+
+
+
+
+\section{Collective Classification}
+
+\Figure{complex:face}{example face finding image and pixel mask}
+
+You are writing new software for a digital camera that does face
+identification.  However, instead of simply finding a bounding box
+around faces in an image, you must predict where a face is \emph{at
+  the pixel level.}  So your input is an image (say, $100\times 100$
+pixels: this is a really low resolution camera!) and your output is a
+set of $100\times 100$ binary predictions about each pixel.  You are
+given a large collection of training examples.  An example
+input/output pair is shown in Figure~\ref{fig:complex:face}.
+
+Your first attempt might be to train a binary classifier to predict
+whether pixel $(i,j)$ is part of a face or not.  You might feed in
+features to this classifier about the RGB values of pixel $(i,j)$ as
+well as pixels in a window arround that.  For instance, pixels in the
+region $\{(i+k,j+l) : k \in [-5,5], l \in [-5,5]\}$.
+
+\Figure{complex:facebad}{bad pixel mask for previous image}
+
+You run your classifier and notice that it predicts weird things, like
+what you see in Figure~\ref{fig:complex:facebad}.  You then realize
+that predicting each pixel independently is a bad idea!  If pixel
+$(i,j)$ is part of a face, then this significantly increases the
+chances that pixel $(i+1,j)$ is also part of a face.  (And similarly
+for other pixels.)  This is a \concept{collective classification}
+problem because you are trying to predict multiple, correlated objects
+at the same time.
+
+\thinkaboutit{Similar problems come up all the time.  Cast the
+  following as collective classification problems: web page
+  categorization; labeling words in a sentence as noun, verb,
+  adjective, etc.; finding genes in DNA sequences; predicting the
+  stock market.}
+
+The most general way to formulate these problems is as (undirected)
+\concept{graph} prediction problems.  Our input now takes the form of
+a graph, where the vertices are input/output pairs and the edges
+represent the correlations among the putputs.  (Note that edges do not
+need to express correlations among the inputs: these can simply be
+encoded on the nodes themselves.)  For example, in the face
+identification case, each pixel would correspond to an vertex in the
+graph.  For the vertex that corresponds to pixel $(5,10)$, the input
+would be whatever set of features we want about that pixel (including
+features about neighboring pixels).  There would be edges between that
+vertex and (for instance) vertices $(4,10)$, $(6,10)$, $(5,9)$ and
+$(5,11)$.  If we are predicting one of $K$ classes at each vertex,
+then we are given a graph whose vertices are labeled by pairs $(\vx,k)
+\in \cX \times [K]$.  We will write $\cG(\cX\times[K])$ to denote the
+set of all such graphs.  A graph in this set is denoted as $G=(V,E)$
+with vertices $V$ and edges $E$.  Our goal is a function $f$ that
+takes as input a graph from $\cG(\cX)$ and predicts a label from $[K]$
+for each of its vertices.
+
+\thinkaboutit{Formulate the example problems above as graph prediction
+  problems.}
+
+\learningproblem{Collective Classification}{
+\item An input space $\cX$ and number of classes $K$
+\item An unknown distribution $\cD$ over $\cG(\cX\times[K])$
+}{A function $f : \cG(\cX) \fto \cG([K])$ minimizing: 
+$\Ep_{(V,E) \sim \cD} \left[
+  \sum_{v \in V} \big[ \hat y_v \neq y_v \big]
+  \right]$, where $y_v$ is the label associated with vertex $v$ in $G$
+  and $\hat y_v$ is the label predicted by $f(G)$.}
+
+In collective classification, you would like to be able to use the
+labels of neighboring vertices to help predict the label of a given
+vertex.  For instance, you might want to add features to the predict
+of a given vertex based on the labels of each neighbor.  At training
+time, this is easy: you get to see the true labels of each neighbor.
+However, at test time, it is much more difficult: you are, yourself,
+predicting the labels of each neighbor.
+
+This presents a chicken and egg problem.  You are trying to predict a
+collection of labels.  But the prediction of each label depends on the
+prediction of other labels.  If you remember from before, a general
+solution to this problem is iteration: you can begin with some
+guesses, and then try to improve these guesses over time.
+\sidenote{Alternatively, the fact that we're using a graph might
+  scream to you ``dynamic programming.''  Rest assured that you can do
+  this too: skip forward to Chapter~\ref{sec:srl} for lots more detail
+  here!}
+
+\Figure{complex:stacking}{a charicature of how stacking works}
+
+This is the idea of \concept{stacking} for solving collective
+classification (see Figure~\ref{fig:complex:stacking}.  You can train
+$5$ classifiers.  The first classifier \emph{just} predicts the value
+of each pixel independently, like in Figure~\ref{fig:complex:facebad}.
+This doesn't use any of the graph structure at all.  In the second
+level, you can repeat the classification.  However, you can use the
+outputs from the first level as initial guesses of labels.  In
+general, for the $K$th level in the stack, you can use the inputs
+(pixel values) as well as the predictions for all of the $K-1$
+previous levels of the stack.  This means training $K$-many binary
+classifiers based on different feature sets.
+
+\newalgorithm{complex:stacktrain}
+  {\FUN{StackTrain}(\VAR{$\cD^{\text{cc}}$}, \VAR{K}, \FUN{MulticlassTrain})}
+  {
+\SETST{$\mat D^{\text{mc}}$}{\emptylist}
+  \COMMENT{our generated multiclass data}
+\SETST{$\hat Y_{k,n,v}$}{\CON{0}, $\forall k \in [K], n \in [N], v \in G_n$}
+  \COMMENT{initialize predictions for all levels}
+\FOR{\VAR{k} = \CON{1} \TO \VAR{K}}
+\FOR{\VAR{n} = \CON{1} \TO \VAR{N}}
+\FORALL{\VAR{v} $\in G_n$}
+\SETST{$(\vx,y)$}{features and label for node \VAR{v}}
+\SETST{$\vx$}{\VAR{$\vx$} \pushlist $\VARm{\hat Y_{l,n,u}}$, $\forall
+  \VARm{u} \in \cN(\VARm{u}), \forall \VAR{l} \in [\VAR{k}-\CON{1}]$}
+\COMMENT{add on features for}
+\STATE{}
+\COMMENT{neighboring nodes from lower levels in the stack}
+\SETST{$\mat D^{\text{mc}}$}{\VAR{$\mat D^{\text{mc}}$} \pushlist (\VAR{y}, \VAR{$\vx$})}
+\COMMENT{add to multiclass data}
+\ENDFOR    % for v
+\ENDFOR    % for n
+\SETST{$f_k$}{\FUN{MulticlassTrain}(\VAR{$\mat D^{\text{bin}}$})}
+\COMMENT{train $k$th level classifier}
+\FOR{\VAR{n} = \CON{1} \TO \VAR{N}}
+\SETST{$\hat Y_{k,n,v}$}{\FUN{StackTest}(\VAR{$f_1$}, \dots, \VAR{$f_k$}, \VAR{$G_n$})}
+\COMMENT{predict using $k$th level classifier}
+\ENDFOR    % for n
+\ENDFOR    % for k
+\RETURN \FUN{$f_1$}, \dots, \FUN{$f_K$}
+\COMMENT{return all classifiers}
+}
+
+\newalgorithm{complex:stacktest}
+  {\FUN{StackTest}(\FUN{$f_1$}, \dots, \FUN{$f_K$}, \VAR{$G$})}
+  {
+\SETST{$\hat Y_{k,v}$}{\CON{0}, $\forall k \in [K], v \in G$}
+  \COMMENT{initialize predictions for all levels}
+\FOR{\VAR{k} = \CON{1} \TO \VAR{K}}
+\FORALL{\VAR{v} $\in G$}
+\SETST{$\vx$}{features for node \VAR{v}}
+\SETST{$\vx$}{\VAR{$\vx$} \pushlist $\VARm{\hat Y_{l,u}}$, $\forall
+  \VARm{u} \in \cN(\VARm{u}), \forall \VAR{l} \in [\VAR{k}-\CON{1}]$}
+\COMMENT{add on features for}
+\STATE{}
+\COMMENT{neighboring nodes from lower levels in the stack}
+\SETST{$\hat Y_{k,v}$}{\FUN{$f_k$}(\VAR{$\vx$})}
+\COMMENT{predict according to $k$th level}
+\ENDFOR    % for v
+\ENDFOR    % for n
+\RETURN $\{ \VARm{\hat Y_{K,v}} : \VARm{v} \in \VARm{G}\}$
+\COMMENT{return predictions for every node from the last layer}
+}
+
+The prediction technique for stacking is sketched in
+Algorithm~\ref{alg:complex:stacktest}.  This takes a list of $K$
+classifiers, corresponding to each level in the stack, and an input
+graph $G$.  The variable $\hat Y_{k,v}$ stores the prediction of
+classifier $k$ on vertex $v$ in the graph.  You first predict every
+node in the vertex using the first layer in the stack, and no
+neighboring information.  For the rest of the layers, you add on
+features to each node based on the predictions made by lower levels in
+the stack for neighboring nodes ($\cN(u)$ denotes the neighbors of
+$u$).
+
+The training procedure follows a similar scheme, sketched in
+Algorithm~\ref{alg:complex:stacktrain}.  It largely follows the same
+schematic as the prediction algorithm, but with training fed in.
+After the classifier for the $k$ level has been trained, it is used to
+predict labels on every node in the graph.  These labels are used by
+later levels in the stack, as features.
+
+One thing to be aware of is that \FUN{MulticlassTrain} could
+conceivably overfit its training data.  For example, it is possible
+that the first layer might actually achieve $0\%$ error, in which case
+there is no reason to iterate.  But at test time, it will probably
+\emph{not} get $0\%$ error, so this is misleading.  There are (at
+least) two ways to address this issue.  The first is to use
+cross-validation during training, and to use the predictions obtained
+during cross-validation as the predictions from \concept{StackTest}.
+This is typically very safe, but somewhat expensive.  The alternative
+is to simply \emph{over-regularize} your training algorithm.  In
+particular, instead of trying to find hyperparameters that
+get the \emph{best} development data performance, try to find
+hyperparameters that make your \emph{training} performance
+approximately equal to your \emph{development} performance.  This will
+ensure that your predictions at the $k$th layer are indicative of how
+well the algorithm will actually do at test time.
+
+TODO: finish this discussion
+
+\begin{exercises}
+\begin{Ex}
+\TODO
+
+\begin{solution}
+\TODO
+\end{solution}
+\end{Ex}
+
+\end{exercises}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "courseml"
+%%% End: 

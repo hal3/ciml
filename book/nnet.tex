@@ -1,0 +1,745 @@
+\chapter{Neural Networks} \label{sec:nnet}
+
+\chapterquote{}{}
+
+\begin{learningobjectives}
+\item Explain the biological inspiration for multi-layer neural
+  networks.
+\item Construct a two-layer network that can solve the XOR problem.
+\item Implement the back-propogation algorithm for training
+  multi-layer networks.
+\item Explain the trade-off between depth and breadth in network
+  structure.
+\item Contrast neural networks with radial basis functions with
+  $k$-nearest neighbor learning.
+\end{learningobjectives}
+
+\dependencies{}
+
+\newthought{The first learning models} you learned about (decision
+trees and nearest neighbor models) created complex,
+\concept{non-linear} decision boundaries.  We moved from there to the
+perceptron, perhaps the most classic linear model.  At this point, we
+will move \emph{back} to non-linear learning models, but using all
+that we have learned about linear learning thus far.
+
+This chapter presents an extension of perceptron learning to
+non-linear decision boundaries, taking the biological inspiration of
+neurons even further.  In the perceptron, we thought of the input data
+point (eg., an image) as being directly connected to an output (eg.,
+label).  This is often called a \concept{single-layer network} because
+there is one layer of weights.  Now, instead of directly connecting
+the inputs to the outputs, we will insert a layer of ``hidden'' nodes,
+moving from a single-layer network to a \concept{multi-layer network}.
+But introducing a non-linearity at inner layers, this will give us
+non-linear decision boundaires.  In fact, such networks are able to
+express almost any function we want, not just linear functions.  The
+trade-off for this flexibility is increased complexity in parameter
+tuning and model design.
+
+\section{Bio-inspired Multi-Layer Networks}
+
+One of the major weaknesses of linear models, like perceptron and the
+regularized linear models from the previous chapter, is that they are
+linear!  Namely, they are unable to learn arbitrary decision
+boundaries.  In contrast, decision trees and $K$NN \emph{could} learn
+arbitrarily complicated decision boundaries.
+
+\Figure{nnet:twolayer}{picture of a two-layer network with 5
+  inputs and two hidden units}
+
+One approach to doing this is to chain together a collection of
+perceptrons to build more complex \concept{neural networks}.  An
+example of a \concept{two-layer network} is shown in
+Figure~\ref{fig:nnet:twolayer}.  Here, you can see five inputs
+(features) that are fed into two \concept{hidden units}.  These hidden
+units are then fed in to a single \concept{output unit}.  Each edge in
+this figure corresponds to a different weight.  (Even though it looks
+like there are three layers, this is called a two-layer network
+because we don't count the inputs as a real layer.  That is, it's two
+layers of \emph{trained} weights.)
+
+Prediction with a neural network is a straightforward generalization
+of prediction with a perceptron.  First you compute activations of the
+nodes in the hidden unit based on the inputs and the input weights.
+Then you compute activations of the output unit given the hidden unit
+activations and the second layer of weights.
+
+The only major difference between this computation and the perceptron
+computation is that the hidden units compute a \emph{non-linear}
+function of their inputs.  This is usually called the
+\concept{activation function} or \concept{link function}.  More
+formally, if $w_{i,d}$ is the weights on the edge connecting input $d$
+to hidden unit $i$, then the activation of hidden unit $i$ is computed
+as:
+%
+\begin{equation}
+  h_i = f\left( \dotp{\vw_i}{\vx} \right)
+\end{equation}
+%
+Where $f$ is the link function and $\vw_i$ refers to the
+vector of weights feeding in to node $i$.
+
+One example link function is the \concept{sign} function.  That is, if
+the incoming signal is negative, the activation is $-1$.  Otherwise
+the activation is $+1$.  This is a potentially useful activiation
+function, but you might already have guessed the problem with it: it
+is non-differentiable.
+
+\Figure{nnet:tanh}{picture of sign versus tanh}
+
+EXPLAIN BIAS!!!
+
+A more popular link function is the \concept{hyperbolic tangent}
+function, $\tanh$.  A comparison between the sign function and the
+$\tanh$ function is in Figure~\ref{fig:nnet:tanh}.  As you can see, it
+is a reasonable approximation to the sign function, but is convenient
+in that it is differentiable.\sidenote{It's derivative is just
+  $1-\tanh^2(x)$.}  Because it looks like an ``S'' and because the
+Greek character for ``S'' is ``Sigma,'' such functions are usually
+called \concept{sigmoid} functions.
+
+\newalgorithm%
+  {nnet:twolayerpredict}%
+  {\FUN{TwoLayerNetworkPredict}(\VAR{$\mat W$}, \VAR{$\vec v$}, \VAR{$\hat\vx$})}
+  {
+\FOR{\VAR{i} = \CON{1} \TO \VAR{number of hidden units}}
+\SETST{$h_i$}{$\tanh(\dotp{\VARm{\vec w_i}}{\VARm{\hat\vx}})$}
+\COMMENT{compute activation of hidden unit $i$}
+\ENDFOR
+\RETURN $\dotp{\VARm{\vec v}}{\VARm{\vec h}}$
+\COMMENT{compute output unit}
+}
+
+
+Assuming for now that we are using $\tanh$ as the link function, the
+overall prediction made by a two-layer network can be computed using
+Algorithm~\ref{alg:nnet:twolayerpredict}.  This function takes a
+matrix of weights $\mat W$ corresponding to the first layer weights
+and a vector of weights $\vec v$ corresponding to the second layer.
+You can write this entire computation out in one line as:
+%
+\begin{align}
+\hat y
+&= \sum_i v_i \tanh( \dotp{\vec w_i}{\hat\vx} ) \\
+&= \dotp{\vec v}{\tanh( \mat W \hat\vx )} \label{eq:nnet:matrixeq}
+\end{align}
+%
+Where the second line is short hand assuming that $\tanh$ can take a
+vector as input and product a vector as output.
+
+\thinkaboutit{Is it necessary to use a link function at all?  What
+  would happen if you just used the identify function as a link?}
+
+\TableSize{large}{nnet:xor}{Small XOR data set.}{r|rrr}{
+  $y$ & $x_0$ & $x_1$ & $x_2$ \\
+  \hline
+  +1 & +1 & +1 & +1 \\
+  +1 & +1 & -1 & -1 \\
+  -1 & +1 & +1 & -1 \\
+  -1 & +1 & -1 & +1}
+
+The claim is that two-layer neural networks are more expressive than
+single layer networks (i.e., perceptrons).  To see this, you can
+construct a very small two-layer network for solving the XOR problem.
+For simplicity, suppose that the data set consists of four data
+points, given in Table~\ref{tab:nnet:xor}.  The classification rule is
+that $y=+1$ if an only if $x_1=x_2$, where the features are just $\pm
+1$.
+
+You can solve this problem using a two layer network with two hidden
+units.  The key idea is to make the first hidden unit compute an
+``or'' function: $x_1 \lor x_2$.  The second hidden unit can compute
+an ``and'' function: $x_1 \land x_2$.  The the output can combine
+these into a single prediction that mimics XOR.  Once you have the
+first hidden unit activate for ``or'' and the second for ``and,'' you
+need only set the output weights as $-2$ and $+1$, respectively.
+
+\thinkaboutit{Verify that these output weights will actually give you XOR.}
+
+To achieve the ``or'' behavior, you can start by setting the bias to
+$-0.5$ and the weights for the two ``real'' features as both being
+$1$.  You can check for yourself that this will do the ``right thing''
+if the link function were the sign function.  Of course it's not, it's
+$\tanh$.  To get $\tanh$ to mimic $\sign$, you need to make the dot
+product either really really large or really really small.  You can
+accomplish this by setting the bias to $-500,000$ and both of the two
+weights to $1,000,000$.  Now, the activation of this unit will be just
+slightly above $-1$ for $\vx = \langle -1,-1 \rangle$ and just
+slightly below $+1$ for the other three examples.
+
+\thinkaboutit{This shows how to create an ``or'' function.  How can
+  you create an ``and'' function?}
+
+At this point you've seen that one-layer networks (aka perceptrons)
+can represent any linear function and only linear functions.  You've
+also seen that two-layer networks can represent non-linear functions
+like XOR.  A natural question is: do you get additional
+representational power by moving beyond two layers?  The answer is
+partially provided in the following Theorem, due originally to George
+Cybenko for one particular type of link function, and extended later
+by Kurt Hornik to arbitrary link functions.
+
+\begin{theorem}[Two-Layer Networks are Universal Function Approximators] \label{thm:nnet:twolayer}
+%
+  Let $F$ be a continuous function on a bounded subset of
+  $D$-dimensional space.  Then there exists a two-layer neural network
+  $\hat F$ with a finite number of hidden units that approximate $F$
+  arbitrarily well.  Namely, for all $\vx$ in the domain of $F$,
+  $\ab{F(\vx) - \hat F(\vx)} < \ep$.
+\end{theorem}
+
+Or, in colloquial terms ``two-layer networks can approximate any
+function.''
+
+This is a remarkable theorem.  Practically, it says that if you give
+me a function $F$ and some error tolerance parameter $\ep$, I can
+construct a two layer network that computes $F$.  In a sense, it says
+that going from one layer to two layers completely changes the
+representational capacity of your model.
+
+When working with two-layer networks, the key question is: how many
+hidden units should I have?  If your data is $D$ dimensional and you
+have $K$ hidden units, then the total number of parameters is
+$(D+2)K$.  (The first $+1$ is from the bias, the second is from the
+second layer of weights.)  Following on from the heuristic that you
+should have one to two examples for each parameter you are trying to
+estimate, this suggests a method for choosing the number of hidden
+units as roughly $\lfloor \frac N D \rfloor$.  In other words, if you
+have tons and tons of examples, you can safely have lots of hidden
+units.  If you only have a few examples, you should probably restrict
+the number of hidden units in your network.
+
+The number of units is both a form of inductive bias and a form of
+regularization.  In both view, the number of hidden units controls how
+complex your function will be.  Lots of hidden units $\Rightarrow$
+very complicated function.  Figure~\ref{fig:nnet:units} shows training
+and test error for neural networks trained with different numbers of
+hidden units.  As the number increases, training performance continues
+to get better.  But at some point, test performance gets worse because
+the network has overfit the data.
+
+\section{The Back-propagation Algorithm}
+
+The back-propagation algorithm is a classic approach to training
+neural networks.  Although it was not originally seen this way, based
+on what you know from the last chapter, you can summarize
+back-propagation as:
+%
+\begin{equation}
+\text{back-propagation} = \text{gradient descent} + \text{chain rule}
+\end{equation}
+%
+More specifically, the set up is \emph{exactly} the same as before.
+You are going to optimize the weights in the network to minimize some
+objective function.  The only difference is that the predictor is no
+longer linear (i.e., $\hat y = \dotp{\vw}{\vx}+b$) but now non-linear
+(i.e., $\dotp{\vec v}{\tanh( \mat W \hat\vx )}$).  The only question
+is how to do gradient descent on this more complicated objective.
+
+For now, we will ignore the idea of regularization.  This is for two
+reasons.  The first is that you already know how to deal with
+regularization, so everything you've learned before applies.  The
+second is that \emph{historically}, neural networks have not been
+regularized.  Instead, people have used \concept{early stopping} as a
+method for controlling overfitting.  Presently, it's not obvious which
+is a better solution: both are valid options.
+
+To be completely explicit, we will focus on optimizing squared error.
+Again, this is mostly for historic reasons.  You could easily replace
+squared error with your loss function of choice.  Our overall
+objective is:
+%
+\optimizeuc{nnet:twolayer}{\mat W,\vec v}{%
+  \sum_n \frac 1 2 \left( \textcolor{darkblue}{y_n - 
+     \sum_i v_i f(\dotp{\vec w_i}{\vx_n})}
+     \right)^2}
+%
+Here, $f$ is some link function like $\tanh$.
+
+The easy case is to differentiate this with respect to $\vec v$: the
+weights for the output unit.  Without even doing any math, you should
+be able to guess what this looks like.  The way to think about it is
+that from $\vec v$s perspective, it is just a linear model, attempting
+to minimize squared error.  The only ``funny'' thing is that its
+inputs are the activations $\vec h$ rather than the examples $\vx$.
+So the gradient with respect to $\vec v$ is just as for the linear
+case.
+
+To make things notationally more convenient, let $e_n$ denote the
+\emph{error} on the $n$th example (i.e., the blue term above), and let
+$\vec h_n$ denote the vector of hidden unit activations on that
+example.  Then:
+%
+\begin{equation}
+\grad_{\vec v} = -\sum_n e_n \vec h_n 
+\end{equation}
+%
+This is exactly like the linear case.  One way of interpreting this
+is: how would the output weights have to change to make the prediction
+better?  This is an easy question to answer because they can easily
+measure how their changes affect the output.
+
+The more complicated aspect to deal with is the weights corresponding
+to the \emph{first} layer.  The reason this is difficult is because
+the weights in the first layer aren't necessarily trying to produce
+specific values, say $0$ or $5$ or $-2.1$.  They are simply trying to
+produce activations that get fed to the output layer.  So the change
+they want to make depends crucially on how the output layer interprets
+them.
+
+Thankfully, the chain rule of calculus saves us.  Ignoring the sum
+over data points, we can compute:
+%
+\begin{align}
+\cL(\mat W) &= 
+\frac 1 2 \left( \textcolor{darkblue}{y - 
+     \sum_i v_i f(\dotp{\vec w_i}{\vx})}
+     \right)^2
+\\
+\frac {\partial \cL} {\partial \vec w_i}
+&= \frac {\partial \cL} {\partial f_i}
+   \frac {\partial f_i}   {\partial \vec w_i}
+\\
+\frac {\partial \cL} {\partial f_i}
+&= -\left(y - \sum_i v_i f(\dotp{\vec w_i}{\vx})\right) v_i
+= -e v_i
+\\
+\frac {\partial f_i} {\partial \vec w_i}
+&= f'(\dotp{\vec w_i}{\vx}) \vx
+\end{align}
+%
+Putting this together, we get that the gradient with respect to
+$\vw_i$ is:
+%
+\begin{equation}
+\grad_{\vw_i}
+= -e v_i f'(\dotp{\vw_i}{\vx}) \vec x
+\end{equation}
+%
+Intuitively you can make sense of this.  If the overall error of the
+predictor ($e$) is small, you want to make small steps.  If $v_i$ is
+small for hidden unit $i$, then this means that the output is not
+particularly sensitive to the activation of the $i$th hidden unit.
+Thus, its gradient should be small.  If $v_i$ flips sign, the gradient
+at $\vw_i$ should also flip signs.  The name
+\concept{back-propagation} comes from the fact that you propagate
+gradients backward through the network, starting at the end.
+
+\newalgorithm%
+  {nnet:twolayertrain}%
+  {\FUN{TwoLayerNetworkTrain}(\VAR{$\mat D$}, \VAR{$\eta$}, \VAR{K}, \VAR{MaxIter})}
+  {
+\SETST{$\mat W$}{$D \times K$ matrix of small random values}
+\COMMENT{initialize input layer weights}
+\SETST{$\vec v$}{$K$-vector of small random values}
+\COMMENT{initialize output layer weights}
+\FOR{\VAR{iter} = \CON{1} \dots \VAR{MaxIter}}
+\SETST{$\mat G$}{$D \times K$ matrix of zeros}
+\COMMENT{initialize input layer gradient}
+\SETST{$\vec g$}{$K$-vector of zeros}
+\COMMENT{initialize output layer gradient}
+\FORALL{(\VAR{$\vx$},\VAR{$y$}) $\in$ \VAR{$\mat D$}}
+\FOR{\VAR{i} = \CON{1} \TO \VAR{K}}
+\SETST{$a_i$}{$\dotp{\VARm{\vec w_i}}{\VARm{\hat\vx}}$}
+\SETST{$h_i$}{$\tanh(\VARm{a_i})$}
+\COMMENT{compute activation of hidden unit $i$}
+\ENDFOR
+\SETST{$\hat y$}{$\dotp{\VARm{\vec v}}{\VARm{\vec h}}$}
+\COMMENT{compute output unit}
+\SETST{$e$}{$\VARm{y} - \VARm{\hat y}$}
+\COMMENT{compute error}
+\SETST{$\vec g$}{$\VARm{\vec g} - \VARm{e} \VARm{\vec h}$}
+\COMMENT{update gradient for output layer}
+\FOR{\VAR{i} = \CON{1} \TO \VAR{K}}
+\SETST{$\mat G_i$}{$\VARm{\mat G_i} - \VARm{e} \VARm{v_i} (\CON{1} - \tanh^2(\VARm{a_i})) \VARm{\vx}$}
+\COMMENT{update gradient for input layer}
+\ENDFOR
+\ENDFOR
+\SETST{$\mat W$}{$\VARm{\mat W} - \VARm{\eta} \VARm{\mat G}$}
+  \COMMENT{update input layer weights}
+\SETST{$\vec v$}{$\VARm{\vec v} - \VARm{\eta} \VARm{\vec g}$}
+  \COMMENT{update output layer weights}
+\ENDFOR
+\RETURN \VAR{$\mat W$}, \VAR{$\vec v$}
+}
+
+The complete instantiation of gradient descent for a two layer network
+with $K$ hidden units is sketched in
+Algorithm~\ref{alg:nnet:twolayertrain}.  Note that this really is
+\emph{exactly} a gradient descent algorithm; the only different is
+that the computation of the gradients of the input layer is moderately
+complicated.
+
+\thinkaboutit{What would happen to this algorithm if you wanted to
+  optimize exponential loss instead of squared error?  What if you
+  wanted to add in weight regularization?}
+
+As a bit of practical advice, implementing the back-propagation
+algorithm can be a bit tricky.  Sign errors often abound.  A useful
+trick is first to keep $\mat W$ fixed and work on just training $\vec
+v$.  Then keep $\vec v$ fixed and work on training $\mat W$.  Then put
+them together.
+
+\thinkaboutit{If you like matrix calculus, derive the same algorithm
+  starting from Eq~\eqref{eq:nnet:matrixeq}.}
+
+\section{Initialization and Convergence of Neural Networks}
+
+Based on what you know about linear models, you might be tempted to
+initialize all the weights in a neural network to zero.  You might
+also have noticed that in Algorithm~\ref{al:nnet:twolayertrain}, this
+is not what's done: they're initialized to small random values.  The
+question is why?
+
+The answer is because an initialization of $\mat W = \mat 0$ and $\vec
+v = \vec 0$ will lead to ``uninteresting'' solutions.  In other words,
+if you initialize the model in this way, it will eventually get stuck
+in a bad local optimum.  To see this, first realize that on any
+example $\vx$, the activation $h_i$ of the hidden units will all be
+zero since $\mat W = \mat 0$.  This means that on the first iteration,
+the gradient on the output weights ($\vec v$) will be zero, so they
+will stay put.  Furthermore, the gradient $w_{1,d}$ for the $d$th
+feature on the $i$th unit will be \emph{exactly} the same as the
+gradient $w_{2,d}$ for the same feature on the second unit.  This
+means that the weight matrix, after a gradient step, will change in
+\emph{exactly the same way} for every hidden unit.  Thinking through
+this example for iterations $2\dots$, the values of the hidden units
+will \emph{always} be exactly the same, which means that the weights
+feeding in to any of the hidden units will be exactly the same.
+Eventually the model will converge, but it will converge to a solution
+that does not take advantage of having access to the hidden units.
+
+This shows that neural networks are \emph{sensitive} to their
+initialization.  In particular, the function that they optimize is
+\concept{non-convex}, meaning that it might have plentiful local
+optima.  (One of which is the trivial local optimum described in the
+preceding paragraph.)  In a sense, neural networks \emph{must} have
+local optima.  Suppose you have a two layer network with two hidden
+units that's been optimized.  You have weights $\vw_1$ from inputs to
+the first hidden unit, weights $\vw_2$ from inputs to the second
+hidden unit and weights $(v_1,v_2)$ from the hidden units to the
+output.  If I give you back another network with $\vw_1$ and $\vw_2$
+swapped, and $v_1$ and $v_2$ swapped, the network computes
+\emph{exactly} the same thing, but with a markedly different weight
+structure.  This phenomena is known as \concept{symmetric modes}
+(``mode'' referring to an optima) meaning that there are symmetries in
+the weight space.  It would be one thing if there were lots of modes
+and they were all symmetric: then finding one of them would be as good
+as finding any other.  Unfortunately there are additional local
+optima that are \emph{not} global optima.
+
+\Figure{nnet:converge}{convergence of randomly initialized networks}
+
+Random initialization of the weights of a network is a way to address
+\emph{both} of these problems.  By initializing a network with small
+random weights (say, uniform between $-0.1$ and $0.1$), the network is
+unlikely to fall into the trivial, symmetric local optimum.  Moreover,
+by training a collection of networks, each with a different random
+initialization, you can often obtain better solutions that with just
+one initialization.  In other words, you can train ten networks with
+different random seeds, and then pick the one that does best on
+held-out data.  Figure~\ref{fig:nnet:converge} shows prototypical
+\emph{test-set} performance for ten networks with different random
+initialization, plus an eleventh plot for the trivial symmetric
+network initialized with zeros.
+
+One of the typical complaints about neural networks is that they are
+finicky.  In particular, they have a rather large number of knobs to
+tune:
+%
+\begin{enumerate}
+\item The number of layers
+\item The number of hidden units per layer
+\item The gradient descent learning rate $\eta$
+\item The initialization
+\item The stopping iteration or weight regularization
+\end{enumerate}
+%
+The last of these is minor (early stopping is an easy regularization
+method that does not require much effort to tune), but the others are
+somewhat significant.  Even for two layer networks, having to choose
+the number of hidden units, and then get the learning rate and
+initialization ``right'' can take a bit of work.  Clearly it can be
+automated, but nonetheless it takes time.
+
+Another difficulty of neural networks is that their weights can be
+difficult to interpret.  You've seen that, for linear networks, you
+can often interpret high weights as indicative of positive examples
+and low weights as indicative of negative examples.  In multilayer
+networks, it becomes very difficult to try to understand what the
+different hidden units are doing.  
+
+%TODO: maybe have something about doing images?
+
+
+\section{Beyond Two Layers}
+
+\Figure{nnet:layered}{multi-layer network}
+
+The definition of neural networks and the back-propagation algorithm
+can be generalized beyond two layers to any arbitrary directed acyclic
+graph.  In practice, it is most common to use a layered network like
+that shown in Figure~\ref{fig:nnet:layered} unless one has a very
+strong reason (aka inductive bias) to do something different.
+However, the view as a directed graph sheds a different sort of
+insight on the back-propagation algorithm.
+
+\Figure{nnet:dag}{DAG network}
+
+Suppose that your network structure is stored in some directed acyclic
+graph, like that in Figure~\ref{fig:nnet:dag}.  We index nodes in this
+graph as $u,v$.  The activation \emph{before} applying non-linearity
+at a node is $a_u$ and after non-linearity is $h_u$.  The graph has a
+single sink, which is the output node $y$ with activation $a_y$ (no
+non-linearity is performed on the output unit).  The graph has
+$D$-many inputs (i.e., nodes with no parent), whose activations $h_u$
+are given by an input example.  An edge $(u,v)$ is from a parent to a
+child (i.e., from an input to a hidden unit, or from a hidden unit to
+the sink).  Each edge has a weight $w_{u,v}$.  We say that
+$\textit{par}(u)$ is the set of parents of $u$.
+
+There are two relevant algorithms: forward-propagation and
+back-propagation.  Forward-propagation tells you how to compute the
+activation of the sink $y$ given the inputs.  Back-propagation
+computes derivatives of the edge weights for a given input.
+
+\newalgorithm%
+  {nnet:forwardprop}%
+  {\FUN{ForwardPropagation}{($\vx$)}}
+  {
+\FORALL{input nodes $u$}
+\SETST{$h_u$}{corresponding feature of $\vx$}
+\ENDFOR
+\FORALL{nodes $v$ in the network whose parent's are computed}
+\SETST{$a_v$}{$\sum_{u \in \textit{par}(v)} w_{(u,v)} h_u$}
+\SETST{$h_v$}{$\tanh(a_v)$}
+\ENDFOR
+\RETURN $a_y$
+}
+\newalgorithm%
+  {nnet:backprop}%
+  {\FUN{BackPropagation}{($\vx$, $y$)}}
+  {
+\STATE{run \FUN{ForwardPropagation}(\VAR{$\vx$}) to compute activations}
+\SETST{$e_y$}{$y - a_y$}
+  \COMMENT{compute overall network error}
+\FORALL{nodes $v$ in the network whose error $e_v$ is computed}
+\FORALL{$u \in \textit{par}(v)$}
+\SETST{$g_{u,v}$}{$- e_v h_u$}
+  \COMMENT{compute gradient of this edge}
+\SETST{$e_u$}{$e_u + e_v w_{u,v} (1 - \tanh^2(a_u))$}
+  \COMMENT{compute the ``error'' of the parent node}
+\ENDFOR
+\ENDFOR
+\RETURN all gradients $g_e$
+}
+
+\Figure{nnet:forwardprop}{picture of forward prop}
+
+The key aspect of the \concept{forward-propagation} algorithm is to
+iteratively compute activations, going deeper and deeper in the DAG.
+Once the activations of all the parents of a node $u$ have been
+computed, you can compute the activation of node $u$.  This is spelled
+out in Algorithm~\ref{alg:nnet:forwardprop}.  This is also explained
+pictorially in Figure~\ref{fig:nnet:forwardprop}.
+
+\Figure{nnet:backprop}{picture of back prop}
+
+Back-propagation (see Algorithm~\ref{alg:nnet:backprop}) does the
+opposite: it computes gradients top-down in the network.  The key idea
+is to compute an \emph{error} for each node in the network.  The error
+at the output unit is the ``true error.''  For any input unit, the
+error is the amount of gradient that we see coming from our children
+(i.e., higher in the network).  These errors are computed backwards in
+the network (hence the name \concept{back-propagation}) along with the
+gradients themselves.  This is also explained pictorially in
+Figure~\ref{fig:nnet:backprop}.
+
+Given the back-propagation algorithm, you can directly run gradient
+descent, using it as a subroutine for computing the gradients.
+
+\section{Breadth versus Depth}
+
+At this point, you've seen how to train two-layer networks and how to
+train arbitrary networks.  You've also seen a theorem that says that
+two-layer networks are universal function approximators.  This begs
+the question: if two-layer networks are so great, why do we care about
+deeper networks?
+
+To understand the answer, we can borrow some ideas from CS theory,
+namely the idea of \concept{circuit complexity}.  The goal is to show
+that there are functions for which it might be a ``good idea'' to use
+a deep network.  In other words, there are functions that will require
+a huge number of hidden units if you force the network to be shallow,
+but can be done in a small number of units if you allow it to be
+deep.  The example that we'll use is the \concept{parity function}
+which, ironically enough, is just a generalization of the XOR
+problem.  The function is defined over binary inputs as:
+%
+\begin{align}
+\textit{parity}(\vx)
+&= \sum_d \vx_d \mod 2 \\
+&= \brack{ 1 & \text{if the number of $1$s in $\vx$ is odd} \\
+           0 & \text{if the number of $1$s in $\vx$ is even} }
+\end{align}
+%
+\TODOFigure{nnet:paritydeep}{deep function for computing parity}
+%
+It is easy to define a circuit of depth $\cO(\log_2 D)$ with
+$\cO(D)$-many gates for computing the parity function.  Each gate is
+an XOR, arranged in a complete binary tree, as shown in
+Figure~\ref{fig:nnet:paritydeep}.  (If you want to disallow XOR as a
+gate, you can fix this by allowing the depth to be doubled and
+replacing each XOR with an AND, OR and NOT combination, like you did
+at the beginning of this chapter.)
+
+This shows that if you are allowed to be deep, you can construct a
+circuit with that computes parity using a number of hidden units that
+is linear in the dimensionality.  So can you do the same with shallow
+circuits?  The answer is no.  It's a famous result of circuit
+complexity that parity requires exponentially many gates to compute in
+constant depth.  The formal theorem is below:
+
+\begin{theorem}[Parity Function Complexity] \label{thm:nnet:parity}
+  Any circuit of depth $K < \log_2 D$ that computes the parity
+  function of $D$ input bits must contain $\cO{e^D}$ gates.
+\end{theorem}
+
+This is a very famous result because it shows that constant-depth
+circuits are less powerful that deep circuits.  Although a neural
+network isn't exactly the same as a circuit, the is generally believed
+that the same result holds for neural networks.  At the very least,
+this gives a strong indication that depth might be an important
+consideration in neural networks.
+
+\thinkaboutit{What is it about neural networks that makes it so that
+  the theorem about circuits does not apply directly?}
+
+One way of thinking about the issue of breadth versus depth has to do
+with the number of \emph{parameters} that need to be estimated.  By
+the heuristic that you need roughly one or two examples for every
+parameter, a deep model could potentially require exponentially fewer
+examples to train than a shallow model!
+
+This now flips the question: if deep is potentially so much better,
+why doesn't everyone use deep networks?  There are at least two
+answers.  First, it makes the \concept{architecture selection} problem
+more significant.  Namely, when you use a two-layer network, the only
+hyperparameter to choose is how many hidden units should go in the
+middle layer.  When you choose a deep network, you need to choose how
+many layers, and what is the width of all those layers.  This can be
+somewhat daunting.
+
+A second issue has to do with training deep models with
+back-propagation.  In general, as back-propagation works its way down
+through the model, the sizes of the gradients shrink.  You can work
+this out mathematically, but the intuition is simpler.  If you are the
+beginning of a very deep network, changing one single weight is
+unlikely to have a significant effect on the output, since it has to
+go through so many other units before getting there.  This directly
+implies that the derivatives are small.  This, in turn, means that
+back-propagation essentially never moves far from its initialization
+when run on very deep networks.
+
+\thinkaboutit{While these small derivatives might make training
+  difficult, they might be \emph{good} for other reasons: what
+  reasons?}
+
+Finding good ways to train deep networks is an active research area.
+There are two general strategies.  The first is to attempt to
+initialize the weights better, often by a \concept{layer-wise}
+initialization strategy.  This can be often done using unlabeled data.
+After this initialization, back-propagation can be run to tweak the
+weights for whatever classification problem you care about.  A second
+approach is to use a more complex optimization procedure, rather than
+gradient descent.  You will learn about some such procedures later in
+this book.
+
+\section{Basis Functions}
+
+At this point, we've seen that: (a) neural networks can mimic linear
+functions and (b) they can learn more complex functions.  A reasonable
+question is whether they can mimic a $K$NN classifier, and whether
+they can do it efficiently (i.e., with not-too-many hidden units).
+
+A natural way to train a neural network to mimic a $K$NN classifier is
+to replace the sigmoid link function with a \concept{radial basis
+  function} (RBF).  In a \concept{sigmoid network} (i.e., a network
+with sigmoid links), the hidden units were computed as $h_i =
+\tanh(\dotp{\vw_i,\vx})$.  In an \concept{RBF network}, the hidden
+units are computed as:
+%
+\begin{equation}
+h_i = \exp\left[ - \ga_i \norm{\vw_i - \vx}^2 \right]
+\end{equation}
+%
+\TODOFigure{nnet:rbfpicture}{a one-D picture of RBF bumps}
+\TODOFigure{nnet:unitsymbols}{picture of nnet with sigmoid/rbf units}
+%
+In other words, the hidden units behave like little Gaussian ``bumps''
+centered around locations specified by the vectors $\vw_i$.  A
+one-dimensional example is shown in Figure~\ref{fig:nnet:rbfpicture}.
+The parameter $\ga_i$ specifies the \emph{width} of the Gaussian bump.
+If $\ga_i$ is large, then only data points that are really close to
+$\vw_i$ have non-zero activations.  To distinguish sigmoid networks
+from RBF networks, the hidden units are typically drawn with sigmoids
+or with Gaussian bumps, as in Figure~\ref{fig:nnet:unitsymbols}.
+
+Training RBF networks involves finding good values for the Gassian
+widths, $\ga_i$, the centers of the Gaussian bumps, $\vw_i$ and the
+connections between the Gaussian bumps and the output unit, $\vec v$.
+This can all be done using back-propagation.  The gradient terms for
+$\vec v$ remain unchanged from before, the the derivates for the other
+variables differ (see Exercise~\ref{}).
+
+One of the big questions with RBF networks is: where should the
+Gaussian bumps be centered?  One can, of course, apply
+back-propagation to attempt to find the centers.  Another option is to
+specify them ahead of time.  For instance, one potential approach is
+to have one RBF unit per data point, centered on that data point.  If
+you carefully choose the $\ga$s and $\vec v$s, you can obtain
+something that looks nearly identical to distance-weighted $K$NN by
+doing so.  This has the added advantage that you can go futher, and
+use back-propagation to \emph{learn} good Gaussian widths ($\ga$) and
+``voting'' factors ($\vec v$) for the nearest neighbor algorithm.
+
+\thinkaboutit{Consider an RBF network with one hidden unit per
+  training point, centered at that point.  What bad thing might happen
+  if you use back-propagation to estimate the $\ga$s and $\vec v$ on
+  this data if you're not careful?  How could you be careful?}
+
+% If you use \emph{fewer} hidden units than data point, you can think
+% of this technique as a \concept{locally weighted linear model}.
+% This is easiest to picture in the \concept{regression} setting.
+% Figure~\ref{fig:nnet:lwlr} shows an example of using locally
+% weighted linear regression to fit a very non-linear curve using a
+% relatively small number of bumps.  As with all neural networks,
+% choosing the right number of hidden units (aka the
+% \concept{architecture selection} problem) is one of the challenges
+% in RBF network and locally weighted linear models.
+
+
+\begin{comment}
+   - Multilayer perceptron
+   - From linear to non-linear
+   - Architecture choice
+   - Basis functions
+   - Each training point as a basic function
+\end{comment}
+
+\begin{exercises}
+\begin{Ex}
+\TODO
+
+\begin{solution}
+\TODO
+\end{solution}
+\end{Ex}
+
+\end{exercises}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "courseml"
+%%% End: 

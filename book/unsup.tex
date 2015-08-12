@@ -1,0 +1,512 @@
+\chapter{Unsupervised Learning} \label{sec:unsup}
+
+\chapterquote{}{}
+
+\begin{learningobjectives}
+\item Explain the difference between linear and non-linear
+  dimensionality reduction.
+\item Relate the view of PCA as maximizing variance with the view of
+  it as minimizing reconstruction error.
+\item Implement latent semantic analysis for text data.
+\item Motivate manifold learning from the perspective of
+  reconstruction error.
+\item Understand $K$-means clustering as distance minimization.
+\item Explain the importance of initialization in $k$-means and
+  furthest-first heuristic.
+\item Implement agglomerative clustering.
+\item Argue whether spectral clustering is a clustering algorithm or a
+  dimensionality reduction algorithm.
+\end{learningobjectives}
+
+\dependencies{}
+
+\newthought{If you have access to labeled training data,} you know
+what to do.  This is the ``supervised'' setting, in which you have a
+teacher telling you the right answers.  Unfortunately, finding such a
+teacher is often difficult, expensive, or down right impossible.  In
+those cases, you might still want to be able to analyze your data,
+even though you do not have labels.
+
+Unsupervised learning is learning without a teacher.  One basic thing
+that you might want to do with data is to \concept{visualize} it.
+Sadly, it is difficult to visualize things in more than two (or three)
+dimensions, and most data is in hundreds of dimensions (or more).
+\koncept{Dimensionality reduction}{dimensionality reduction} is the
+problem of taking high dimensional data and \concept{embedding} it in
+a lower dimension space.  Another thing you might want to do is
+automatically derive a partitioning of the data into
+\koncept{clusters}{clustering}.  You've already learned a basic
+approach for doing this: the $k$-means algorithm (\chref{sec:knn}).
+Here you will analyze this algorithm to see why it works.  You will
+also learn more advanced clustering approaches.
+
+\section[K-Means Clustering, Revisited]{$K$-Means Clustering, Revisited}
+
+\newalgorithm%
+  {unsup:kmeans}%
+  {\FUN{K-Means}(\VAR{$\mat D$}, \VAR{K})}
+  {
+\FOR{$\VAR{k} = \CON{1}$ \TO $\VAR{K}$}
+\SETST{$\vec\mu_k$}{some random location} \COMMENT{randomly initialize
+  mean for $k$th cluster}
+\ENDFOR
+\REPEAT
+\FOR{$\VAR{n} = \CON{1}$ \TO $\VAR{N}$}
+\SETST{$z_n$}{$\argmin_k \norm{\VARm{\vec\mu_k} - \VARm{\vx_n}}$}
+  \COMMENT{assign example $n$ to closest center}
+\ENDFOR
+\FOR{$\VAR{k} = \CON{1}$ \TO $\VAR{K}$}
+\SETST{$\vec\mu_k$}{\FUN{mean}($\{$ \VAR{$\vx_n$} : \VAR{$z_n$} = \VAR{$k$} $\}$)}
+  \COMMENT{re-estimate mean of cluster $k$}
+\ENDFOR
+\UNTIL{converged}
+\RETURN \VAR{$\vec z$} \COMMENT{return cluster assignments}
+}
+
+
+The $K$-means clustering algorithm is re-presented in
+Algorithm~\ref{alg:unsup:kmeans}.  There are two very basic questions
+about this algorithm: (1) does it converge (and if so, how quickly);
+(2) how sensitive it is to initialization?  The answers to these
+questions, detailed below, are: (1) yes it converges, and it converges
+very quickly in practice (though slowly in theory); (2) yes it is
+sensitive to initialization, but there are good ways to initialize it.
+
+Consider the question of convergence.  The following theorem states
+that the $K$-Means algorithm converges, though it does not say how
+quickly it happens.  The method of proving the convergence is to
+specify a \concept{clustering quality} objective function, and then to
+show that the $K$-Means algorithm converges to a (local) optimum of
+that objective function.  The particular objective function that
+$K$-Means is optimizing is the \emph{sum of squared distances from any
+  data point to its assigned center.}  This is a natural
+generalization of the definition of a mean: the mean of a set of
+points is the single point that minimizes the sum of squared distances
+from the mean to every point in the data.  Formally, the $K$-Means
+objective is:
+%
+\begin{align}
+  \cL(\vec z, \vec \mu ; \mat D)
+  &=
+  \sum_n \norm{ \vx_n - \vec\mu_{z_n} }^2
+  \quad
+  =
+  \sum_k \sum_{n : z_n=k} \norm{ \vx_n - \vec\mu_k }^2
+\end{align}
+%
+\begin{theorem}[$K$-Means Convergence Theorem] \label{thm:unsup:kmeans}
+  For any dataset $\mat D$ and any number of clusters $K$, the
+  $K$-means algorithm converges in a finite number of iterations,
+  where convergence is measured by $\cL$ ceasing the change.
+\end{theorem}
+\begin{myproof}{\ref{thm:unsup:kmeans}}
+    The proof works as follows.  There are only two points in which
+    the $K$-means algorithm changes the values of $\vec\mu$ or $\vec
+    z$: lines 6 and 9.  We will show that both of these operations
+    can never increase the value of $\cL$.  Assuming this is true, the
+    rest of the argument is as follows.  After the first pass through
+    the data, there are are only finitely many possible assignments to
+    $\vz$ and $\vec \mu$, because $\vz$ is discrete and because
+    $\vec\mu$ can only take on a finite number of values: means of
+    some subset of the data.  Furthermore, $\cL$ is lower-bounded by
+    zero.  Together, this means that $\cL$ cannot decrease more than a
+    finite number of times.  Thus, it must stop decreasing at some
+    point, and at that point the algorithm has converged.
+
+    It remains to show that lines 6 and 9 decrease $\cL$.  For line 6,
+    when looking at example $n$, suppose that the previous value of
+    $z_n$ is $a$ and the new value is $b$.  It must be the case that
+    $\norm{\vx_n-\vec\mu_b} \leq \norm{\vx_n-\vec\mu_b}$.  Thus,
+    changing from $a$ to $b$ can only decrease $\cL$.  For line 9,
+    consider the second form of $\cL$.  Line 9 computes $\vec\mu_k$ as
+    the mean of the data points for which $z_n=k$, which is precisely
+    the point that minimizes squared sitances.  Thus, this update to
+    $\vec\mu_k$ can only decrease $\cL$.
+\end{myproof}
+
+There are several aspects of $K$-means that are unfortunate.  First,
+the convergence is only to a local optimum of $\cL$.  In practice,
+this means that you should usually run it $10$ times with different
+initializations and pick the one with minimal resulting $\cL$.
+Second, one can show that there are input datasets and initializations
+on which it might take an exponential amount of time to converge.
+Fortunately, these cases almost never happen in practice, and in fact
+it has recently been shown that (roughly) if you limit the floating
+point precision of your machine, $K$-means \emph{will} converge in
+polynomial time (though still only to a local optimum), using
+techniques of \concept{smoothed analysis}.
+
+The biggest practical issue in $K$-means is initialization.  If the
+cluster means are initialized poorly, you often get convergence to
+uninteresting solutions.  A useful heuristic is the
+\concept{furthest-first heuristic}.  This gives a way to perform a
+semi-random initialization that attempts to pick initial means as far
+from each other as possible.  The heuristic is sketched below:
+%
+\begin{enumerate}
+  \item Pick a random example $m$ and set $\vec\mu_1 = \vx_m$.
+  \item For $k = 2 \dots K$:
+    \begin{enumerate}
+      \item Find the example $m$ that is as far as possible from
+        \emph{all} previously selected means; namely: 
+          $m = \arg\max_m \min_{k' < k} \norm{ \vx_m - \vec\mu_{k'} }^2$
+          and set $\vec\mu_k = \vx_m$
+    \end{enumerate}
+\end{enumerate}
+%
+In this heuristic, the only bit of randomness is the selection of the
+first data point.  After that, it is completely deterministic (except
+in the rare case that there are multiple equidistant points in step
+2a).  It is extremely important that when selecting the $3$rd mean,
+you select that point that \emph{maximizes} the \emph{minimum}
+distance to the closest other mean.  You want the point that's as far
+away from \emph{all} previous means as possible.
+
+The furthest-first heuristic is just that: a heuristic.  It works very
+well in practice, though can be somewhat sensitive to outliers (which
+will often get selected as some of the initial means).  However, this
+outlier sensitivity is usually reduced after one iteration through the
+$K$-means algorithm.  Despite being just a heuristic, it is quite
+useful in practice.
+
+You can turn the heuristic into an algorithm by adding a bit more
+randomness.  This is the idea of the $K$-means{\tt ++} algorithm,
+which is a simple randomized tweak on the furthest-first heuristic.
+The idea is that when you select the $k$th mean, instead of choosing
+the \emph{absolute furthest} data point, you choose a data point at
+random, with probability proportional to its distance squared.  This
+is made formal in Algorithm~\ref{alg:unsup:kmeanspp}.
+
+\newalgorithm%
+  {unsup:kmeanspp}%
+  {\FUN{K-Means{\tt ++}}(\VAR{$\mat D$}, \VAR{K})}
+  {
+\SETST{$\vec\mu_1$}{\VAR{$\vx_m$} for $m$ chosen uniformly at random}
+  \COMMENT{randomly initialize first point}
+\FOR{$\VAR{k} = \CON{2}$ \TO $\VAR{K}$}
+\SETST{$d_n$}{$\min_{\VARm{k'}<\VARm{k}} \norm{ \VARm{\vx_n} - \VARm{\vec\mu_{k'}} }^2$, $\forall \VARm{n}$}
+  \COMMENT{compute distances}
+\SETST{$\vec p$}{$\frac 1 {\sum_{\VARm{n}} \VARm{n_d}} \VARm{\vec d}$}
+  \COMMENT{normalize to probability distribution}
+\SETST{$m$}{random sample from \VAR{$\vec p$}}
+  \COMMENT{pick an example at random}
+\SETST{$\vec\mu_k$}{\VAR{$\vx_m$}}
+\ENDFOR
+\STATE{run \FUN{K-Means} using \VAR{$\vec\mu$} as initial centers}
+}
+
+If you use $K$-means{\tt ++} as an initialization for $K$-means, then
+you are able to achieve an approximation guarantee on the final value
+of the objective.  This doesn't tell you that you will reach the
+global optimum, but it \emph{does} tell you that you will get
+reasonably close.  In particular, if $\hat\cL$ is the value obtained
+by running $K$-means{\tt ++}, then this will not be ``too far'' from
+$\cL\xth{opt}$, the true global minimum.
+%
+\begin{theorem}[$K$-means{\tt ++} Approximation
+  Guarantee] \label{thm:unsup:kmeanspp} The expected value of the
+  objective returned by $K$-means{\tt ++} is never more than $\cO(\log
+  K)$ from optimal and can be as close as $\cO(1)$ from optimal.  Even
+  in the former case, with $2^K$ random restarts, one restart will be
+  $\cO(1)$ from optimal (with high probability).  Formally: $\Ep\left[
+    \hat \cL \right] \leq 8 (\log K + 2) \cL\xth{opt}$.  Moreover, if
+  the data is ``well suited'' for clustering, then $\Ep\left[ \hat \cL
+  \right] \leq \cO(1) \cL\xth{opt}$.
+\end{theorem}
+%
+The notion of ``well suited'' for clustering informally states that
+the advantage of going from $K-1$ clusters to $K$ clusters is
+``large.''  Formally, it means that $\cL_K\xth{opt} \leq \ep^2
+\cL_{K-1}\xth{opt}$, where $\cL_K\xth{opt}$ is the optimal value for
+clustering with $K$ clusters, and $\ep$ is the desired degree of
+approximation.  The idea is that if this condition does \emph{not}
+hold, then you shouldn't bother clustering the data.
+
+One of the biggest practical issues with $K$-means clustering is
+``choosing $K$.''  Namely, if someone just hands you a dataset and
+asks you to cluster it, how many clusters should you produce?  This is
+difficult, because increasing $K$ will always decrease
+$\cL_K\xth{opt}$ (until $K > N$), and so simply using $\cL$ as a
+notion of goodness is insufficient (analogous to overfitting in a
+supervised setting).  A number of ``information criteria'' have been
+proposed to try to address this problem.  They all effectively boil
+down to ``regularizing'' $K$ so that the model cannot grow to be too
+complicated.  The two most popular are the Bayes Information Criteria
+(BIC) and the Akaike Information Criteria (AIC), defined below in the
+context of $K$-means:
+%
+\begin{align}
+\textsf{BIC:}\quad & \arg\min_K \hat\cL_K + K \log D \\
+\textsf{AIC:}\quad & \arg\min_K \hat\cL_K + 2 K D
+\end{align}
+%
+The informal intuition behind these criteria is that increasing $K$ is
+going to make $\cL_K$ go down.  However, if it doesn't go down ``by
+enough'' then it's not worth doing.  In the case of BIC, ``by enough''
+means by an amount proportional to $\log D$; in the case of AIC, it's
+proportional to $2D$.  Thus, AIC provides a much stronger penalty for
+many clusters than does BIC, especially in high dimensions.
+
+A more formal intuition for BIC is the following.  You ask yourself
+the question ``if I wanted to send this data across a network, how
+many bits would I need to send?''  Clearly you could simply send all
+of the $N$ examples, each of which would take roughly $\log D$ bits to
+send.  This gives $N \log D$ to send all the data.  Alternatively, you
+could first cluster the data and send the cluster centers.  This will
+take $K \log D$ bits.  Then, for each data point, you send its center
+as well as its deviation from that center.  It turns out this will
+cost exactly $\hat\cL_K$ bits.  Therefore, the BIC is precisely
+measuring how many bits it will take to send your data using $K$
+clusters.  The $K$ that minimizes this number of bits is the optimal
+value.
+
+% TODO: evaluating clustering using labeled data???
+
+\section{Linear Dimensionality Reduction}
+
+Dimensionality reduction is the task of taking a dataset in high
+dimensions (say $10000$) and reducing it to low dimensions (say $2$)
+while retaining the ``important'' characteristics of the data.  Since
+this is an unsupervised setting, the notion of important
+characteristics is difficult to define.
+
+Consider the dataset in Figure~\ref{fig:unsup:pcadata}, which lives in
+high dimensions (two) and you want to reduce to low dimensions (one).
+In the case of linear dimensionality reduction, the only thing you can
+do is to project the data onto a vector and use the projected
+distances as the embeddings.  Figure~\ref{fig:unsup:pcadata2} shows a
+projection of this data onto the vector that points in the direction
+of \emph{maximal variance} of the original dataset.  Intuitively, this
+is a reasonable notion of importance, since this is the direction in
+which most information is encoded in the data.
+
+For the rest of this section, assume that the data is centered:
+namely, the mean of all the data is at the origin.  (This will simply
+make the math easier.)  Suppose the two dimensional data is $\vx_1,
+\dots, \vx_N$ and you're looking for a vector $\vec u$ that points in
+the direction of maximal variance.  You can compute this by projecting
+each point onto $\vec u$ and looking at the variance of the result.
+In order for the projection to make sense, you need to constrain $\norm{\vec
+u}^2 = 1$.  In this case, the projections are $\dotp{\vx_1, \vec u},
+\dots, \dotp{\vx_N, \vec u}$.  Call these values $p_1, \dots, p_N$.
+
+The goal is to compute the variance of the $\{p_n\}$s and then choose
+$\vec u$ to maximize this variance.  To compute the variance, you
+first need to compute the mean.  Because the mean of the $\vx_n$s was
+zero, the mean of the $p$s is also zero.  This can be seen as follows:
+%
+\begin{align}
+  \sum_n p_n
+  = \sum_n \dotp{\vx_n}{\vec u} 
+  = \dotp{\left( \sum_n \vx_n \right)}{\vec u} 
+  = \dotp{\vec 0}{\vec u} = \vec 0
+\end{align}
+%
+The variance of the $\{p_n\}$ is then just $\sum_n p_n^2$.  Finding
+the optimal $\vec u$ (from the perspective of variance maximization)
+reduces to the following optimization problem:
+%
+\optimizemaxoneline{unsup:pcaone}{\vec u}{
+  \sum_n \left(\dotp{\vec x_n}{\vec u}\right)^2
+}{\norm{\vec u}^2 = 1}
+%
+In this problem it becomes apparent why keeping $\vec u$ unit length
+is important: if not, $\vec u$ would simply stretch to have infinite
+length to maximize the objective.
+
+\begin{mathreview}{Eigenvalues and eigenvectors}
+  the usual...
+\end{mathreview}
+
+It is now helpful to write the collection of datapoints $\vx_n$ as a
+$N \times D$ matrix $\mat X$.  If you take this matrix $\mat X$ and
+multiply it by $\vec u$, which has dimensions $D \times 1$, you end up
+with a $N \times 1$ vector whose values are exactly the values $\vec
+p$.  The objective in Eq~\eqref{opt:unsup:pcaone} is then just the
+squared norm of $\vec p$.  This simplifies
+Eq~\eqref{eq:opt:unsup:pcaone} to:
+%
+\optimizemaxoneline{unsup:pageant}{\vec u}{
+  \norm{ \mat X \vec u }^2
+}{\norm{\vec u}^2 - 1 = 0}
+%
+where the constraint has been rewritten to make it amenable to
+constructing the Lagrangian.  Doing so and taking gradients yields:
+%
+\begin{align}
+\cL(\vec u, \la) &=
+  \norm{ \mat X \vec u }^2
+  - \la \left( \norm{\vec u}^2 - 1 \right) \\
+\grad_{\vec u} \cL &=
+  2 \mat X\T\mat X \vec u  - 2 \la \vec u \\
+\Longrightarrow & \quad\la \vec u =  \left(\mat X\T\mat X\right)\vec u
+\end{align}
+%
+You can solve this expression ($\la \vec u =  \mat X\T\mat X \vec u$)
+by computing the first eigenvector and eigenvalue of the matrix $\mat
+X\T\mat X$.
+
+This gives you the solution to a projection into a one-dimensional
+space.  To get a second dimension, you want to find a new vector $\vec
+v$ on which the data has maximal variance.  However, to avoid
+redundancy, you want $\vec v$ to be orthogonal to $\vec u$; namely
+$\dotp{\vec u}{\vec v} = 0$.  This gives:
+%
+\optimizemaxoneline{unsup:pcatwo}{\vec v}{
+  \norm{ \mat X \vec v }^2
+}{\norm{\vec v}^2 = 1, \text{ and } \dotp{\vec u}{\vec v} = 0}
+%
+Following the same procedure as before, you can construct a Lagrangian
+and differentiate:
+%
+\begin{align}
+\cL(\vec v, \la_1, \la_2) &=
+\norm{ \mat X \vec v }^2
+  - \la_1 \left( \norm{\vec u}^2 - 1 \right)
+  - \la_2 \dotp{\vec u}{\vec v}\\
+\grad_{\vec u} \cL &=
+  2 \mat X\T\mat X \vec v  - 2 \la_1 \vec v - 2 \la_2 \vec u\\
+\Longrightarrow & \quad\la_1 \vec v =  \left(\mat X\T\mat X\right)\vec v
+- \la_2 \vec u
+\end{align}
+%
+However, you know that $\vec u$ is the first eigenvector of $\mat
+X\T\mat X$, so the solution to this problem for $\la_1$ and $\vec v$
+is given by the \emph{second} eigenvalue/eigenvector pair of $\mat
+X\T\mat X$.
+
+Repeating this analysis inductively tells you that if you want to
+project onto $K$ mutually orthogonal dimensions, you simply need to
+take the first $K$ eigenvectors of the matrix $\mat X\T\mat X$.  This
+matrix is often called the \concept{data covariance matrix} because
+$[\mat X\T\mat X]_{i,j} = \sum_n \sum_m x_{n,i} x_{m,j}$, which is the
+sample covariance between features $i$ and $j$.
+
+%  {\FUN{PCA}{\VAR{$\mat X$}, \VAR{K})}
+\newalgorithm%
+  {unsup:pca}%
+  {\FUN{PCA}(\VAR{$\mat D$}, \VAR{K})}
+  {
+\SETST{$\vec \mu$}{\FUN{mean}(\VAR{$\mat X$})}
+  \COMMENT{compute data mean for centering}
+\SETST{$\mat D$}{$\left( \VARm{\mat X} - \VARm{\vec \mu} \vec 1\T \right)\T\left( \VARm{\mat X} - \VARm{\vec \mu} \vec 1\T \right)$}
+  \COMMENT{compute covariance, $\vec 1$ is a vector of ones}
+\SETST{$\{\la_k,\vec u_k\}$}{top \VAR{$K$} eigenvalues/eigenvectors of
+  \VAR{$\mat D$}}
+\RETURN{$\left( \VARm{\mat X} - \VARm{\vec \mu} \vec 1 \right) \VARm{\mat U}$}
+  \COMMENT{project data using $\mat U$}
+}
+
+This leads to the technique of \concept{principle components
+  analysis}, or \concept{PCA}.  For completeness, the is depicted in
+Algorithm~\ref{alt:unsup:pca}.  The important thing to note is that
+the eigenanalysis only gives you the projection directions.  It does
+not give you the embedded data.  To embed a data point $\vx$ you need
+to compute its embedding as $\langle \dotp{\vx}{\vec u_1},
+\dotp{\vx}{\vec u_2}, \dots, \dotp{\vx}{\vec u_K} \rangle$.  If you
+write $\mat U$ for the $D \times K$ matrix of $\vec u$s, then this is
+just $\mat X \mat U$.
+
+There is an alternative derivation of PCA that can be informative,
+based on \emph{reconstruction error.}  Consider the one-dimensional
+case again, where you are looking for a single projection direction
+$\vec u$.  If you were to use this direction, your projected data
+would be $\mat Z = \mat X \vec u$.  Each $Z_n$ gives the position of
+the $n$th datapoint along $\vec u$.  You can project this
+one-dimensional data back into the original space by multiplying it by
+$\vec u\T$.  This gives you \emph{reconstructed} values $\mat Z \vec
+u\T$.  Instead of maximizing variance, you might instead want to
+minimize the \concept{reconstruction error}, defined by:
+%
+\begin{align}
+\norm{ \mat X - \mat Z\vec u\T}^2 
+&= \norm{ \mat X - \mat X \vec u \vec u\T }^2 
+\becauseof{definition of $\mat Z$}\\
+&= \norm{\mat X}^2 
+ + \norm{\mat X \vec u \vec u\T}^2
+ - 2 \mat X\T \mat X \vec u \vec u\T
+\becauseof{quadratic rule}\\
+&= \norm{\mat X}^2 
+ + \norm{\mat X \vec u \vec u\T}^2
+ - 2 \vec u\T\mat X\T \mat X \vec u
+\becauseof{quadratic rule}\\
+&= \norm{\mat X}^2
+ + \norm{\mat X}^2
+ - 2 \vec u\T\mat X\T \mat X \vec u
+\becauseof{$\vec u$ is a unit vector} \\
+&= C - 2 \norm{\mat X \vec u}^2
+\becauseof{join constants, rewrite last term}
+\end{align}
+%
+Minimizing this final term is equivalent to maximizing $\norm{\mat
+  X\vec u}^2$, which is exactly the form of the maximum variance
+derivation of PCA.  Thus, you can see that maximizing variance is
+identical to minimizing reconstruction error.
+
+The same question of ``what should $K$ be'' arises in dimensionality
+reduction as in clustering.  If the purpose of dimensionality
+reduction is to visualize, then $K$ should be $2$ or $3$.  However, an
+alternative purpose of dimensionality reduction is to avoid the curse
+of dimensionality.  For instance, even if you have labeled data, it
+might be worthwhile to reduce the dimensionality before applying
+supervised learning, essentially as a form of regularization.  In this
+case, the question of an optimal $K$ comes up again.  In this case,
+the same criteria (AIC and BIC) that can be used for clustering can be
+used for PCA.  The only difference is the quality measure changes from
+a sum of squared distances to means (for clustering) to a sum of
+squared distances to original data points (for PCA).  In particular,
+for BIC you get the reconstruction error plus $K \log D$; for AIC, you
+get the reconstruction error plus $2 K D$.
+
+
+
+
+\section{Manifolds and Graphs}
+
+what is a manifold?
+
+graph construction
+
+\section{Non-linear Dimensionality Reduction}
+
+isomap
+
+lle
+
+mvu
+
+mds?
+
+\section{Non-linear Clustering: Spectral Methods}
+
+what is a spectrum
+
+spectral clustering
+
+\begin{comment}
+- pca
+- lsa/svd
+- mds
+- manifold
+- JL
+- kmeans++
+- hierarchical clustering
+- spectral clustering
+\end{comment}
+
+\begin{exercises}
+\begin{Ex}
+\TODO
+
+\begin{solution}
+\TODO
+\end{solution}
+\end{Ex}
+
+\end{exercises}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "courseml"
+%%% End: 
+
