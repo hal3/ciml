@@ -1,0 +1,264 @@
+%%
+%% This is file `textpos.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% textpos.dtx  (with options: `package')
+%% Textpos: absolute positioning of text on the page
+%% This software is copyright, 1999, 2001--2003, Norman Gray.
+%%
+%% This program is free software; you can redistribute it and/or
+%% modify it under the terms of the GNU General Public License
+%% as published by the Free Software Foundation; either version 2
+%% of the License, or (at your option) any later version.
+%%
+%% This program is distributed in the hope that it will be useful,
+%% but WITHOUT ANY WARRANTY; without even the implied warranty of
+%% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%% GNU General Public License for more details.
+%%
+%% You should have received a copy of the GNU General Public License
+%% along with this program; if not, write to the Free Software
+%% Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+%%
+%% Author: Norman Gray, norman@astro.gla.ac.uk.
+%% Department of Physics and Astronomy, University of Glasgow, UK
+%%
+%% See the file LICENCE for a copy of the GPL.
+%% You can also find an online copy at http://www.gnu.org/copyleft/gpl.html .
+
+%%% Source: $Id: textpos.dtx,v 1.15 2003/09/07 17:45:57 norman Exp $
+\def\ParseRCSDate$#1: #2 #3 ${\def\TP@Date{#2}}
+\ParseRCSDate$Date: 2003/09/07 17:45:57 $
+\def\filename{textpos}
+\def\fileversion{1.4}  %%VERSION%%
+\def\filedate{\TP@Date}
+\def\docdate{\TP@Date}
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{textpos}[\filedate\space v\fileversion]
+\typeout{Package: `textpos' \fileversion\space<\filedate>}
+\newif\ifTP@showboxes
+\TP@showboxesfalse
+\DeclareOption{showboxes}{\TP@showboxestrue}
+\newif\ifTP@showtext
+\TP@showtexttrue
+\DeclareOption{noshowtext}{\TP@showtextfalse}
+\newif\ifTP@abspos
+\TP@absposfalse
+\DeclareOption{absolute}{\TP@abspostrue}
+\newif\ifTP@overlay
+\TP@overlayfalse
+\DeclareOption{overlay}{\TP@overlaytrue}
+\newif\ifTP@chatter
+\TP@chattertrue
+\DeclareOption{quiet}{\TP@chatterfalse}
+\DeclareOption{verbose}{\TP@chattertrue}
+\ProcessOptions
+\ifTP@abspos
+  \RequirePackage{everyshi}
+\fi
+\newbox\TP@textbox
+\ifTP@abspos
+  \newbox\TP@holdbox            % starts off void
+  \AtEndDocument{\ifvoid\TP@holdbox \else \hbox{}\fi}
+\fi
+\newdimen\TPHorizModule
+\newdimen\TPVertModule
+\def\TPGrid{%
+  \@ifnextchar[{\@tempswatrue\TP@Grid}{\@tempswafalse\TP@Grid[0pt,0pt]}}
+\def\TP@Grid[#1,#2]#3#4{
+  \setlength{\@tempdima}{#1}
+  \multiply\@tempdima by 2
+  \TPHorizModule=\paperwidth
+  \advance\TPHorizModule by -\@tempdima
+  \divide\TPHorizModule by #3
+  \setlength{\@tempdima}{#2}
+  \multiply\@tempdima by 2
+  \TPVertModule=\paperheight
+  \advance\TPVertModule by -\@tempdima
+  \divide\TPVertModule by #4
+  \ifTP@chatter
+    \typeout{Grid set #3 x #4 = \the\TPHorizModule\space x \the\TPVertModule}%
+  \fi
+  \ifTP@abspos\if@tempswa \textblockorigin{#1}{#2}\fi\fi
+}
+\TPGrid{16}{16}
+\newdimen\TPboxrulesize
+\setlength{\TPboxrulesize}{0.4pt}
+\def\showtextsize{\normalsize}
+\ifTP@abspos
+  \newdimen\TP@ox
+  \newdimen\TP@oy
+\fi
+\def\textblockorigin#1#2{%
+  \ifTP@abspos
+    \TP@ox=-1in    \addtolength\TP@ox{#1}
+    \TP@oy=-1in    \addtolength\TP@oy{#2}
+    \ifTP@chatter\typeout{TextBlockOrigin set to #1 x #2}\fi
+  \else
+    \PackageError{textpos}
+      {The \protect\textblockorigin\space command\MessageBreak
+       may only be used if the package was given\MessageBreak
+       the`absolute' option when it was invoked}
+      {If you want to use the \protect\textblockorigin\space command, then
+         \MessageBreak
+       invoke the package with the syntax\MessageBreak
+       \protect\usepackage[absolute]{textpos}}
+  \fi
+  }
+\def\textblocklabel#1{\gdef\TP@textblocklabel{#1}}
+\def\textblockcolour#1{%
+  \@ifundefined{color}%
+    {\gdef\TP@blockcolour{}}% ignore argument, switch off colour blocking below
+    {%
+      \def\@tempa{#1}
+      \gdef\TP@blockcolour{#1}
+      \ifx\TP@defaultblockcolour\@undefined
+        \gdef\TP@defaultblockcolour{#1}
+      \fi
+    }}
+\def\TP@blockcolour{}           % safe initial default
+\let\textblockcolor\textblockcolour
+\let\tekstblokkulur\textblockcolour
+\def\textblock#1{%
+  \@tempdima=#1\TPHorizModule
+  \ifvmode\else
+    \ifmmode
+      \PackageError{textpos}
+        {You cannot use textblock in maths mode}
+        {You may use the textblock environment only in \MessageBreak
+         vertical mode or horizontal mode (when it triggers a\MessageBreak
+         new paragraph).  You cannot use it in maths mode.}
+    \else % in horizontal mode
+      \par % force us back into vertical mode
+    \fi
+  \fi
+  \@ifnextchar[{\TP@textblock}{\TP@textblock[0,0]}%] bracematch
+}
+\def\TP@textblockstar#1{%
+  \setlength{\@tempdima}{#1}
+  \ifvmode\else
+    \PackageWarning{textpos}{environment textblock* not in vertical mode.
+      \MessageBreak
+      Environment textblock* should not have any text\MessageBreak
+      or printable material appearing before it.\MessageBreak
+      Alignment may work out wrongly.}%
+    \par % force us back into vertical mode
+  \fi
+  \@ifnextchar[{\TP@textblock}{\TP@textblock[0,0]}%] bracematch
+}
+\expandafter\let\csname textblock*\endcsname\TP@textblockstar
+\newtoks\TP@tbargs
+\def\TP@textblock[#1,#2](#3,#4){%
+  \TP@tbargs={{#1}{#2}{#3}{#4}}%
+  \setbox\TP@textbox=\vbox\bgroup
+    \ifTP@showboxes
+      \hrule height0pt depth \TPboxrulesize
+      \vskip-\TPboxrulesize
+    \fi
+    \hsize=\@tempdima
+    \textwidth\hsize \columnwidth\hsize \linewidth\hsize
+  }
+\def\endtextblock{\global\@tempswatrue\TP@commonendtextblock}
+\@namedef{endtextblock*}{\global\@tempswafalse\TP@commonendtextblock}
+\newdimen\TP@prevdepth
+\def\TP@commonendtextblock{%
+  \ifTP@showboxes
+    \vskip-\TPboxrulesize
+    \hrule depth 0pt height \TPboxrulesize
+  \fi
+  \egroup
+  \TP@prevdepth=\prevdepth
+  \prevdepth=-1000pt  % = \nointerlineskip
+  \expandafter\TP@endtextblock\the\TP@tbargs
+  }
+\def\TP@endtextblock#1#2#3#4{%
+  \if@tempswa % modular/unstarred endtextblock
+    \@tempdima=#3\TPHorizModule
+    \@tempdimb=#4\TPVertModule
+  \else % absolute/starred endtextblock
+    \setlength{\@tempdima}{#3}
+    \setlength{\@tempdimb}{#4}
+  \fi
+  \@tempdimc=-#1\wd\TP@textbox
+  \advance\@tempdima\@tempdimc
+  \@tempdimc=-#2\ht\TP@textbox
+  \advance\@tempdimb\@tempdimc
+  \ifTP@abspos
+    \advance\@tempdima by \TP@ox
+    \advance\@tempdimb by \TP@oy
+  \fi
+  \setbox0=\vbox to 0pt{\vskip\@tempdimb
+    \hbox to 0pt{\hskip\@tempdima
+    \ifx\TP@blockcolour\@empty \else
+      {% defaults for TP@blockcolour mean we should never get here if
+       % the {color} package is not loaded
+        \color{\TP@blockcolour}%
+        \color@block{\wd\TP@textbox}{\ht\TP@textbox}{\dp\TP@textbox}%
+      }%
+    \fi
+    \ifx\TP@defaultblockcolour\@undefined \else
+      \global\let\TP@blockcolour\TP@defaultblockcolour
+    \fi
+    \ifTP@showboxes \vrule width \TPboxrulesize \hskip -\TPboxrulesize \fi
+    \ifTP@showtext
+      \box\TP@textbox
+    \else
+      \vbox to\ht\TP@textbox{%
+        \ifTP@showboxes
+          \hrule depth 0pt height \TPboxrulesize \vskip-\TPboxrulesize
+        \fi
+        \vskip\smallskipamount
+        \hbox to\wd\TP@textbox{%
+          \ifx\TP@textblocklabel\undefined
+            \hbox{}%
+          \else
+            \hskip\smallskipamount
+            \fbox{\showtextsize \TP@textblocklabel}%
+            \global\let\TP@textblocklabel\undefined
+          \fi
+          \hss
+        }%
+        \vss
+        \ifTP@showboxes
+          \vskip -\TPboxrulesize
+          \hrule depth 0pt height \TPboxrulesize
+        \fi
+      }%
+    \fi
+    \ifTP@showboxes \hskip -\TPboxrulesize \vrule width \TPboxrulesize \fi
+    \hss}%
+  \vss
+  }%  end of box0
+  \ifTP@abspos
+    \global\setbox\TP@holdbox\vbox{%
+      \box0
+      \unvbox\TP@holdbox
+    }%
+  \else
+    \box0
+    \prevdepth=\TP@prevdepth
+  \fi
+  }%
+\ifTP@abspos
+  \ifTP@overlay
+    \EveryShipout{%
+      \global\setbox\@cclv\vbox{%
+        \vbox to 0pt{\ifvbox\@cclv \unvbox\@cclv \else \box\@cclv \fi \vss}%
+        \unvbox\TP@holdbox      % TP@holdbox is now void
+      }
+    }%
+  \else
+    \EveryShipout{%
+      \global\setbox\@cclv\vbox{%
+        \unvbox\TP@holdbox
+        \ifvbox\@cclv \unvbox\@cclv \else \box\@cclv \fi
+      }%
+    }%
+  \fi
+  \textblockorigin{0pt}{0pt}%
+\fi
+\endinput
+%%
+%% End of file `textpos.sty'.

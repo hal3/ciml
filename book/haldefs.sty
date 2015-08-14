@@ -1,0 +1,321 @@
+% the packages i need
+
+\usepackage{xcolor}
+\usepackage{latexsym}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+%\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{url}
+%\usepackage{psfiga}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+% mathcal letters
+\newcommand{\cA}{\mathcal{A}}
+\newcommand{\cB}{\mathcal{B}}
+\newcommand{\cC}{\mathcal{C}}
+\newcommand{\cD}{\mathcal{D}}
+\newcommand{\cE}{\mathcal{E}}
+\newcommand{\cF}{\mathcal{F}}
+\newcommand{\cG}{\mathcal{G}}
+\newcommand{\cH}{\mathcal{H}}
+\newcommand{\cI}{\mathcal{I}}
+\newcommand{\cJ}{\mathcal{J}}
+\newcommand{\cK}{\mathcal{K}}
+\newcommand{\cL}{\mathcal{L}}
+\newcommand{\cM}{\mathcal{M}}
+\newcommand{\cN}{\mathcal{N}}
+\newcommand{\cO}{\mathcal{O}}
+\newcommand{\cP}{\mathcal{P}}
+\newcommand{\cQ}{\mathcal{Q}}
+\newcommand{\cR}{\mathcal{R}}
+\newcommand{\cS}{\mathcal{S}}
+\newcommand{\cT}{\mathcal{T}}
+\newcommand{\cU}{\mathcal{U}}
+\newcommand{\cV}{\mathcal{V}}
+\newcommand{\cW}{\mathcal{W}}
+\newcommand{\cX}{\mathcal{X}}
+\newcommand{\cY}{\mathcal{Y}}
+\newcommand{\cZ}{\mathcal{Z}}
+
+% greek letters
+\newcommand{\al}{\alpha}
+\newcommand{\be}{\beta}
+\newcommand{\ga}{\gamma}
+\newcommand{\de}{\delta}
+\newcommand{\ep}{\epsilon}
+\newcommand{\ze}{\zeta}
+\newcommand{\et}{\eta}
+\renewcommand{\th}{\theta}
+\newcommand{\io}{\iota}
+\newcommand{\ka}{\kappa}
+\newcommand{\la}{\lambda}
+\newcommand{\rh}{\rho}
+\newcommand{\si}{\sigma}
+\newcommand{\ta}{\tau}
+\newcommand{\up}{\upsilon}
+\newcommand{\ph}{\phi}
+\newcommand{\ch}{\chi}
+%\newcommand{\ps}{\psi}
+\newcommand{\om}{\omega}
+\newcommand{\Ga}{\Gamma}
+\newcommand{\De}{\Delta}
+\newcommand{\Th}{\Theta}
+\newcommand{\La}{\Lambda}
+\newcommand{\Si}{\Sigma}
+\newcommand{\Up}{\Upsilon}
+\newcommand{\Ph}{\Phi}
+\newcommand{\Ps}{\Psi}
+\newcommand{\Om}{\Omega}
+
+\renewcommand{\digamma}{\Psi}
+
+\definecolor{darkgrey}{rgb}{0.2,0.2,0.2}
+\definecolor{grey}{rgb}{0.9,0.9,0.9}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.5}
+\definecolor{darkpurple}{rgb}{0.4,0.0,0.4}
+\definecolor{darkred}{rgb}{0.5,0.0,0.0}
+\definecolor{darkorange}{rgb}{0.5,0.45,0.4}
+\definecolor{darkgreen}{rgb}{0.0,0.5,0.0}
+\definecolor{darkergreen}{rgb}{0.0,0.4,0.0}
+\definecolor{lightblue}{rgb}{0.8,0.8,1.0}
+\definecolor{lightgreen}{rgb}{0.8,1.0,0.8}
+\definecolor{lightred}{rgb}{1.0,0.8,0.8}
+\definecolor{lightyellow}{rgb}{1.0,1.0,0.8}
+\definecolor{lightorange}{rgb}{1.0,0.9,0.8}
+\definecolor{lightgrey}{rgb}{0.96,0.97,0.98}
+
+
+% some definitions
+%\newcommand{\defeq}{=^{\hspace{-2.9mm}\textsf{\tiny def}}}
+\newcommand{\defeq}{\triangleq}
+\newcommand{\order}{\cO}
+\newcommand{\ud}{\textrm{d}}
+\renewcommand{\|}{\textrm{~}\arrowvert\textrm{~}}
+\newcommand{\dbar}{\textrm{~}\arrowvert\arrowvert\textrm{~}}
+\newcommand{\bars}{\textrm{~}\arrowvert\arrowvert\textrm{~}}
+\renewcommand{\;}{\textrm{~}{\boldsymbol ;}\textrm{~}}
+\newcommand{\by}{\sim}
+\newcommand{\impl}{\Longrightarrow}
+\newcommand{\fto}{\rightarrow}
+\newcommand{\from}{\leftarrow}
+\newcommand{\restricted}{\upharpoonright}
+\newcommand{\inv}{^{-1}}
+\newcommand{\pinv}{^{\dagger}}
+\renewcommand{\brack}[1]{\left\{\begin{array}{ll}#1\end{array}\right.}
+\renewcommand{\vec}[1]{\boldsymbol{#1}}
+\newcommand{\mat}[1]{\text{\bf #1}}
+\newcommand{\missing}{\bullet}
+\newcommand{\T}{{}^\top}
+\newcommand{\TT}{^\top}
+%\newcommand{\inv}{{}^{-1}}
+\newcommand{\prop}{\varpropto}
+\newcommand{\norm}[1]{\left\vert\left\vert #1 \right\vert\right\vert}
+%\newcommand{\card}[1]{\left\vert #1 \right\vert}
+\newcommand{\ddx}{\frac \partial {\partial x}}
+
+
+\newcommand{\p}[1]{p\left(#1\right)}
+\newcommand{\pprime}[1]{p'\left(#1\right)}
+\newcommand{\pleft}[1]{p\left(#1\right.}
+\newcommand{\pright}[1]{p\left.#1\right)}
+
+\newcommand{\prob}[1]{\mathcal{P}\left\{{#1}\right\}}
+
+% for hierarchical models
+\newenvironment{hierarchical}
+  {\begin{equation}%
+   \begin{array}{r@{\|}l@{~\by~}l}}
+  {\end{array}%
+   \end{equation}}
+
+\newenvironment{hierarchicalnocond}
+  {\begin{equation}%
+   \begin{array}{r@{~\by~}l}}
+  {\end{array}%
+   \end{equation}}
+
+\newenvironment{hierarchical2col}
+  {\begin{equation}%
+   \begin{array}{r@{\|}l@{~\by~}l@{~~~}r@{\|}l@{~\by~}l}}
+  {\end{array}%
+   \end{equation}}
+
+
+% indicator variable
+\newcommand{\Ind}{\boldsymbol{1}}
+\newcommand{\1}{\Ind}
+
+\renewcommand{\(}{\left(}
+\renewcommand{\)}{\right)}
+
+\newcommand{\vx}{{\vec x}}
+\newcommand{\vy}{{\vec y}}
+\newcommand{\vp}{{\vec \phi}}
+\newcommand{\vw}{{\vec w}}
+\newcommand{\vth}{{\vec \theta}}
+\newcommand{\vg}{{\vec g}}
+\newcommand{\vz}{{\vec z}}
+\newcommand{\dotp}[2]{#1 \cdot #2}
+
+\newcommand{\txtif}{\text{if } }
+
+\newcommand{\ones}{\ensuremath{\mathbf{1}}}
+\newcommand{\zeros}{\ensuremath{\mathbf{0}}}
+\newcommand{\eye}{\ensuremath{\mathbf{I}}}
+
+\let\Oldtimes\times
+\renewcommand{\times}{\!\!\Oldtimes\!\!}
+
+\newcommand{\myiff}{\Longleftrightarrow}
+
+\newcommand{\subgrad}{\pmb\partial}
+
+\newcommand{\partialby}[1]{\frac \partial {\partial #1}}
+\newcommand{\partialof}[2]{\frac {\partial #1} {\partial #2}}
+
+\newcommand{\xth}[1]{{}^{\textcolor{darkgrey}{\textsf{(#1)}}}}
+\newcommand{\kth}{\xth{k}}
+\newcommand{\Kth}{\xth{K}}
+\newcommand{\tth}{\xth{t}}
+\newcommand{\kpth}{\xth{k-1}}
+\newcommand{\zth}{\xth{0}}
+\newcommand{\oth}{\xth{1}}
+
+\newcommand{\pth}{p_{\vec\th}}
+% ALGORITHMIC STUFF
+
+\algsetup{linenosize=\tiny,
+          linenodelimiter=:
+          }
+
+\newcommand{\algorithmicfont}{\normalfont\sffamily\normalsize\bfseries}
+\floatname{algorithm}{\textcolor{\algorithmiccolor}{\algorithmicfont Algorithm}}
+
+
+% some useful spaces
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Rplus}{\R^{+}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\Sbb}{\mathbb{S}}
+\renewcommand{\H}{\mathcal{H}}
+
+\newcommand{\without}{\backslash}
+
+% sets/functions
+\newcommand{\dom}{\textrm{dom}}
+\newcommand{\ran}{\textrm{ran}}
+\newcommand{\sgn}{\textrm{sgn}}
+\newcommand{\sign}{\textrm{sign}}
+
+% distributions
+%% \newcommand{\Nor}{\mathcal{N}}
+%% \newcommand{\Gam}{\mathcal{G}}
+%% \newcommand{\Dir}{\mathcal{D}}
+%% \newcommand{\Exp}{\mathcal{E}}
+%% \newcommand{\Mult}{\mathcal{M}}
+%% \newcommand{\Stu}{\mathfrak{t}}
+%% \newcommand{\Bet}{\mathcal{B}}
+
+\newcommand{\Uni}{\mathcal{U}\hspace{-0.5mm}\textit{ni}}
+\newcommand{\Nor}{\mathcal{N}\hspace{-0.5mm}\textit{or}}
+\newcommand{\Gam}{\mathcal{G}\hspace{-0.5mm}\textit{am}}
+\newcommand{\Dir}{\mathcal{D}\hspace{-0.5mm}\textit{ir}}
+\newcommand{\PY}{\mathcal{P}\mathcal{Y}}
+\newcommand{\Exp}{\mathcal{E}\hspace{-0.5mm}\textit{xp}}
+\newcommand{\Mult}{\mathcal{M}\hspace{-0.5mm}\textit{ult}}
+\newcommand{\Stu}{\mathcal{S}\hspace{-0.5mm}\textit{tu}}
+\newcommand{\Bet}{\mathcal{B}\hspace{-0.5mm}\textit{et}}
+\newcommand{\Bin}{\mathcal{B}\hspace{-0.5mm}\textit{in}}
+\newcommand{\Ber}{\mathcal{B}\hspace{-0.5mm}\textit{er}}
+\newcommand{\Wish}{\mathcal{W}\hspace{-0.5mm}\textit{ish}}
+\newcommand{\Disc}{\mathcal{D}\hspace{-0.5mm}\textit{isc}}
+\newcommand{\IW}{\mathcal{IW}}
+
+\newcommand{\DP}{\mathcal{DP}}
+\newcommand{\Poi}{\mathcal{P}\hspace{-0.5mm}\textit{oi}}
+
+% expectations, variances, etc.
+\newcommand{\Ep}{\mathbb{E}}
+\newcommand{\Var}{\mathbb{V}}
+\newcommand{\KL}{\textrm{KL}}
+\newcommand{\divr}{\vert\vert}
+
+% complexity
+\renewcommand{\O}{\mathcal{O}}
+
+% min, max
+\def\argmax{\qopname\relax n{argmax}}
+\def\argmin{\qopname\relax n{argmin}}
+
+\def\Tr{\qopname\relax n{Tr}}
+
+\def\abs{\qopname\relax n{abs}}
+\newcommand{\ab}[1]{\left\vert #1 \right\vert}
+\newcommand{\card}[1]{\left\vert #1 \right\vert}
+
+\def\tr{\qopname\relax n{tr}}
+\def\diag{\qopname\relax n{diag}}
+
+% gradient
+\newcommand{\grad}{\nabla}
+
+% notes and warnings
+\newenvironment{mynote}
+  {\par\linespread{1}\center%
+   \begin{tabular}{|p{4in}|}%
+     \hline\vspace{+0.02in}%
+     \rule{1ex}{1ex} NOTE \rule{1ex}{1ex}%
+     }
+  { \vspace{+0.05in}\\\hline%
+   \end{tabular}\vspace{+0.1in}\\}
+
+\newenvironment{mywarn}
+  {\par\linespread{1}\center%
+   \begin{tabular}{|p{4in}|}%
+     \hline\vspace{+0.02in}%
+     \rule{1ex}{1ex} WARNING \rule{1ex}{1ex}%
+     }
+  { \vspace{+0.05in}\\\hline%
+   \end{tabular}\vspace{+0.1in}\\}
+
+
+\allowdisplaybreaks[3]
+
+\newcommand{\TODO}{{\bf TODO\dots}}
+
+% change page size
+\newcommand{\widenpage}{%
+  \addtolength{\hoffset}{-5mm}%
+  \addtolength{\textwidth}{10mm}%
+  }
+
+\newcommand{\lengthenpage}{%
+  \addtolength{\voffset}{-5mm}%
+  \addtolength{\textheight}{10mm}%
+  }
+
+\newcommand{\margin}[1]{\-\mbox{}\marginpar[\hspace{1pt}\raggedright\small\sf #1]{\hspace{1pt}\raggedleft\small\sf #1}}
+\newcommand{\marginuse}[1]{{\bf #1}\margin{#1}}
+
+\newcommand{\marginr}[1]{\-\mbox{}\marginpar[\hspace{1pt}\raggedright\small\sf #1]{\hspace{1pt}\raggedright\small\sf #1}}
+\newcommand{\marginruse}[1]{{\bf #1}\marginr{#1}}
+
+
+\newtheorem{mytheorem}{Theorem}
+\newtheorem{myproposition}{Proposition}
+\newtheorem{mydefinition}{Definition}
+\newtheorem{mycorollary}{Corollary}
+\newtheorem{myexample}{Example}
+\newtheorem{myexercise}{Exercise}
+
+
+\makeatletter
+\def\url@leostyle{%
+  \@ifundefined{selectfont}{\def\UrlFont{\sf}}{\def\UrlFont{\small\ttfamily}}}
+\makeatother
+\urlstyle{leo}
