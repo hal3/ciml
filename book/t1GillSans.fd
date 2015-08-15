@@ -1,0 +1,3 @@
+\ProvidesFile{t1GillSans.fd}[GillSans Font]
+\DeclareFontFamily{T1}{GillSans}{}
+\DeclareFontShape{T1}{GillSans}{m}{n}{ <-> GillSans}{}

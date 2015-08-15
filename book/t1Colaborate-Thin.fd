@@ -1,0 +1,3 @@
+\ProvidesFile{t1Colaborate-Thin.fd}[Colaborate-Thin Font]
+\DeclareFontFamily{T1}{Colaborate-Thin}{}
+\DeclareFontShape{T1}{Colaborate-Thin}{m}{n}{ <-> Colaborate-Thin}{}
