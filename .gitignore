@@ -1,0 +1,5 @@
+# Ignore .aux files
+book/*.aux
+
+# Ignore foo directory
+book/foo

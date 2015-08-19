@@ -11,4 +11,15 @@ pdf: courseml.tex
 	mkdir foo
 	pdfsam-console -f courseml.pdf -o foo/ -s BLEVEL -bl 1 split
 
-
+clean:
+	rm -f *.aux
+	rm -rf foo
+	rm -rf courseml.bbl
+	rm -rf courseml.blg
+	rm -rf courseml.idx
+	rm -rf courseml.ilg
+	rm -rf courseml.ind
+	rm -rf courseml.log
+	rm -rf courseml.out
+	rm -rf courseml.pdf
+	rm -rf courseml.toc
