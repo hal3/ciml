@@ -1,0 +1,91 @@
+In this lab, we'll explore using decision trees to make classification
+decisions on two tasks: gender prediction (is this blog post written
+by a male of female author?) and sentiment analysis (is this review a
+positive or negative evaluation of a product?).
+
+In both cases, the features we'll use for prediction are simply the
+presence/absence of words in the text. If you look in data/gender.tr,
+you'll see training data for the gender prediction task. The first
+column is zero or one (one = male, zero = female). The rest is a list
+of all the words that appear in this blog post. These are *binary*
+features: any word listed has value "=1" and any word not listed has
+value "=0" (implicitly... it would be painful to list all
+non-occurring words!).
+
+If you take a look at the README file, you'll see some simple test
+cases to make sure that FastDT is working properly.
+
+=======================================================================
+========= TASK 1: UNDERSTANDING WHAT DECISION TREES ARE DOING =========
+=======================================================================
+
+Train a decision tree of (maximum) depth 2 on the gender data. Use
+drawDT.py to pretty print it. 
+
+A) Draw it on a piece of paper.
+
+B) Convince yourself that it *makes* sense that going from depth 1 to
+depth 2 is not likely to be useful for this data. How do you know?
+
+C) Now build a depth 3 tree. Again draw it on a piece of paper. This
+one is more likely to be useful. Why? Run it on the development data
+and see if it was, indeed, helpful.
+
+D) It's important to recognize that decision trees are essentially
+learning *conjunctions* of features. In particular, you can convert a
+decision tree to a sequence of if-then-else statements, of the form:
+
+  if    A and  B and  C and  D then return POSITIVE
+  elif  A and  B and  C and !D then return NEGATIVE
+  elif  ...
+
+This is called a "decision list." Write down the decision list
+corresponding to the tree that you learned of depth 3.
+
+E) Build a depth 3 decision tree on the sentiment data. Draw it.
+
+F) "Explain" the decision tree. In other words, if your boss asked you
+to tell her, intuitively, what your tree is doing, how would you
+explain it? Write a few sentences.
+
+=======================================================================
+================ TASK 2: UNDERFITTING AND OVERFITTING =================
+=======================================================================
+
+I've provided a helper script that will train a decision tree and the
+compute error rates for training data, development data and test
+data. If you run:
+
+  ./traintest.sh gender 1
+
+This will train a depth 1 decision tree on the gender training data,
+and then compute three error rates. It will print a single line, like:
+
+1 0.447571 0.461 0.439
+
+The columns are: depth, training error, dev error, test error.
+
+A) Compute these errors on the gender data for depth ranging from 1 to
+20 (inclusive). Plot these three curves (yes, by hand if you
+must). Hint: you can run something like:
+
+  bash:  for d in `seq 1 20` ; do ./traintest.sh gender $d ; done
+  csh :  foreach d (`seq 1 20`)
+           ./traintest.sh gender $d
+         end
+
+B) What trend do you observe for the training error rates? Why should
+this happen?
+
+C) If you were to choose the depth hyperparameter based on TRAINING
+data, what TEST error would you get? If you were to choose depth based
+on the DEV data, what TEST error would you get? Finally, if you were
+to choose the depth based on the TEST data, what TEST error would you
+get. Precisely one of these three is "correct" -- which one and why?
+
+D) Repeat the same 1..20 experiment on the sentiment data. Answer the
+same questions as in (C) for this data.
+
+E) You'll notice that the error rates for the gender classification
+task are, in general, much higher than that for the sentiment
+classification task (even on the training data). What does this mean?

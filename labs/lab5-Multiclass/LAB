@@ -1,0 +1,119 @@
+In this lab we'll explore two methods for multiclass to binary
+reduction: OVA (one versus all) and AVA (aka all pairs). I have
+(nicely) provided an implementation of OVA for you and a nearly
+complete implementation of AVA in multiclass.py. I've also included
+the P1 solution code for the classifiers you had before.
+
+The classification task we'll work with is wine classification (sorry
+if you're not a wine snob and this doesn't mean much to you). I
+downloaded 4000 wines from allwines.com. Your job is, given the
+description of the wine, predict the type of wine. There are two
+tasks: WineData has 20 different wines, WineDataSmall is just the
+first give of those (sorted roughly by frequency).
+
+You can find the names of the wines both in WineData.labels as well as
+the file wines.names.
+
+To get you started, here's how we can train decision "stumps" (aka
+depth=1 decision trees) on the large data set:
+
+>>> h = OVA(20, lambda: DT({'maxDepth': 1}))
+>>> h.train(WineData.X, WineData.Y)
+>>> P = h.predictAll(WineData.Xte)
+>>> mean(P == WineData.Yte)
+0.22356215213358072
+
+That means 22% accuracy on this task. The most frequent class is:
+
+>>> mode(WineData.Y)
+1
+>>> WineData.labels[1]
+'Cabernet-Sauvignon'
+
+And if you were to always predict label 1, you would get the following
+accuracy:
+
+>>> mean(WineData.Yte == 1)
+0.17254174397031541
+
+So we're doing a bit (5%) better than that using decision stumps.
+
+Switching to the smaller data set for a minute, we can train, say,
+depth 3 decision trees:
+
+>>> h = OVA(5, lambda: DT({'maxDepth': 3}))
+>>> h.train(WineDataSmall.X, WineDataSmall.Y)
+>>> P = h.predictAll(WineDataSmall.Xte)
+>>> mean(P == WineDataSmall.Yte)
+0.53829321663019691
+>>> mean(WineDataSmall.Yte == 1)
+0.40700218818380746
+
+So using depth 3 trees we get an accuracy of 54%, versus a baseline of
+41%. That not too terrible, but not great.
+
+We can look at what this classifier is doing.
+
+>>> WineDataSmall.labels[0]
+'Sauvignon-Blanc'
+>>> print h.f[0].displayTree(0, WineDataSmall.words)
+
+This should show the tree that's associated with predicting label 0
+(which is stored in h.f[0]). The +1s mean "likely to be
+Sauvignon-Blanc" and the -1s mean "likely not to be".
+
+(A) What words are most indicative of *being* Sauvignon-Blanc? Which
+words are most indicative of not being Sauvignon-Blanc? What about
+Pinot-Noir (label==2)?
+
+(B) Train depth 3 decision trees on the full WineData task (with 20
+labels). How long does this take (in seconds)? Write it down (you will
+compare to it later). One of my favorite wines is Viognier -- what
+words are indicative of this? What accuracy do you get on this (write
+this down too).
+
+
+Now, go in and complete the AVA implementation. You should be able to
+train an AVA model on the small data set by:
+
+>>> h = AVA(5, lambda: DT({'maxDepth': 1}))
+>>> h.train(WineDataSmall.X, WineDataSmall.Y)
+>>> P = h.predictAll(WineDataSmall.Xte)
+>>> mean(P == WineDataSmall.Yte)
+0.53829321663019691
+
+That's actually *identical* performance to what we got last time using
+depth 3 trees with OVA!  Let's see if we can do even better by having
+deeper trees:
+
+>>> h = AVA(5, lambda: DT({'maxDepth': 3}))
+>>> h.train(WineDataSmall.X, WineDataSmall.Y)
+>>> P = h.predictAll(WineDataSmall.Xte)
+>>> mean(P == WineDataSmall.Yte)
+0.62144420131291034
+
+So, at least on this data set with a fixed depth of 3, AVA outperforms
+OVA.
+
+(C) Inspecting the individual classifiers for AVA is a bit more
+involved. If we want to see how it decides between Cabernet-Sauvignon
+(label=1) and Pinot-Noir (label=2), two red wines, we can look at:
+
+>>> print h.f[2][1].displayTree(0, WineDataSmall.words)
+...
+
+The indices are set up so that the larger is always first, and that a
++1 classification means that the second label is more likely. What
+words are most indicatove of Pinot-Noir? What about
+Cabernet-Sauvignon?
+
+(D) Now compare Cabernet-Sauvignon (label=1) to Sauvignon-Blanc
+(label=0). The former is red, the latter is white. Which words are
+indicative of Cabernet-Sauvignon this time? How does this compare to
+the words in the comparison with Pinot-Noir from (C)?
+
+(E) Train a model using AVA, depth=3 on the full WineData
+dataset. What accuracy does this get on the test data? How does this
+compare to (B)? How long did it take in comparison to (B)? Why is it
+faster or slower?
+
