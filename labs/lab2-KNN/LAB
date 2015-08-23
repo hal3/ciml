@@ -1,0 +1,106 @@
+In this lab, we'll look at high dimensional data and explore using KNN
+for classification (no K-means for now).
+
+=======================================================================
+============= TASK 0 (OPTIONAL): PLAYING WITH HIGH-D DATA =============
+=======================================================================
+
+If you have numpy and matplotlib correctly installed, you should be
+able to run:
+
+% python HighD.py 
+
+and get a picture of histograms like the ones from class.
+
+This is a good exercise to make sure that these are successfully
+installed. Note that for P1 you *will need* this working, so if you
+want to use the lab time to make that happen, it's probably a good
+idea.
+
+
+=======================================================================
+====================== TASK 1: CLASSIFYING DIGITS =====================
+=======================================================================
+
+Our first task will be to use KNN to classify digits. In other words,
+we get an image of a hand-drawn digit (28x28 pixels, greyscale), and
+have to decide what digit is is. To make life simpler, we'll consider
+only the binary classification version, in two setups: (A)
+distinguishing ONEs from TWOs and (B) distinguishing TWOs from
+THREEs.
+
+(A) In the data directory, you'll find two .png files that show the
+training data. Open them up. Are there any that you, as a human, have
+difficulty distinguishing (if so, list the row/column, where 0,0 is
+the upper left and 9,9 is the bottom right). Which of these (1vs2 or
+2vs3) do you expect to be a harder classification problem?
+
+(B) Let's verify that KNN does very well on training data. Run the
+following:
+
+% python KNN.py digit data/1vs2.tr data/1vs2.tr 1
+0.0
+
+This says "do KNN for digits, with 1vs2.tr as the training data and
+1vs2.tr as the testing data, using K=1." The 0.0 is the error rate,
+which is zero. Verify the same thing for 2vs3.tr
+
+(C) The KNN.py implementation will let you specify multiple values for
+K and get error rates for all of them. In particular, you can say
+something like:
+
+% python KNN.py digit data/1vs2.tr data/1vs2.tr 1 5 10 25 50 100
+0.0	0.08	0.12	0.16	0.28	0.5
+
+This runs the same thing for six values of K (1, 5, ..., 100) and
+prints the respective error rates. Notice that for K=100 the error
+rate is 50% -- why does this happen?
+
+(D) Repeat the same exercise, this time evaluating on the development
+data, and using odd values of K ranging from 1 to 21. Do this for both
+1vs2 and 2vs3. Which one is harder? For each, what is the optimal
+value of K? (In the case of ties, how would you choose to break ties?)
+
+(E) Now, go edit KNN.py. This might take a bit of effort since you'll
+have to figure out what it's doing. But the function I want you to
+look at is "classifyKNN." This takes D (the training data) and knn
+(the list of the K nearest neighbors, together with their
+distances). It iterates over each of the (dist,n) nearest
+neighbors. Here, dist is the distance and n is the training example
+id, so D[n] is the corresponding training example. It then "votes"
+this into a prediction yhat.
+
+Modify this function so that each example gets a weighted vote, where
+its weight is equal to exp(-dist). This should be a one- or two-liner.
+
+Rerun the same experiments as in (D). Does this help or hurt? What do
+you observe as K gets larger and _WHY_ do you observe this?
+
+If you want to play around, try exp(-dist / CONSTANT) where CONSTANT
+now is a hyperparameter. What happens as CONSTANT tends toward zero?
+Tends toward infinity?
+
+=======================================================================
+====================== TASK 2: CLASSIFYING TEXT =======================
+=======================================================================
+
+This KNN implementation will also do text categorization, but you have
+to tell it how to read in files. You'll find that this is somewhat
+slow, so I've set it up so that testing only happens on the first 100
+examples in the test set. For instance, you can run:
+
+% python KNN.py text ../lab1/data/gender.tr  ../lab1/data/gender.de 1 3 5
+0.49	0.43	0.47
+
+(assuming that's where the data from lab1 lives. and this is after
+*removing* the weighted voting.)
+
+(A) You'll notice that this is pretty crappy performance -- just
+barely below random guessing performance of 50%. Yet for digits we did
+quite well! Why do you suppose this is.
+
+(B) Try to find a value of K and a CONSTANT for distance weighting
+that does as well as possible on the dev data for gender. How well
+does it do on the test data?
+
+

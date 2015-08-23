@@ -1,0 +1,55 @@
+A quick test to make sure life is sane...
+
+---------------------------------------------------------------------------
+% FastDT -maxd 1 data/gender.tr > output/gender.dt
+Loading data from data/gender.tr...
+7000 examples, 20178 features
+Building model....3133...
+
+% cat output/gender.dt 
+1
+1
+N my
+L 2166 2498
+L 1369 967
+
+% python drawDT.py output/gender.dt 
+my
+-Y-> 46.4%	(2166 pos, 2498 neg)
+-N-> 58.6%	(1369 pos, 967 neg)
+
+
+**NOTE** This means that the first question you ask is "does this
+  document contain the word 'my'?" If so, then there's a 46.4% chance
+  that the label is positive (in this case, "male"). If not, then
+  there's a 58.6% change that the label is positive. Ergo, saying "my"
+  is mildly indicative of female authors.
+
+% FastDT -load output/gender.dt data/gender.de > gender.de.pred
+Loading model from output/gender.dt...
+Predicting on data/gender.de...
+Error = 461 / 1000 = 0.461
+---------------------------------------------------------------------------
+% FastDT -maxd 2 data/gender.tr > output/gender.dt
+% python drawDT.py output/gender.dt 
+my
+-Y-> love
+|    -Y-> 35.7%	(248 pos, 446 neg)
+|    -N-> 48.3%	(1918 pos, 2052 neg)
+-N-> i
+|    -Y-> 55.7%	(1016 pos, 808 neg)
+|    -N-> 68.9%	(353 pos, 159 neg)
+
+**NOTE** This means that first you ask if "my" is included. If so,
+  then you ask about "love"; if not, you ask about "i". Comparing with
+  the previous tree, in the context of "my", "love" is mildly
+  indicative of female authors; and when "my" does not occur, "i" is
+  mildly indicative of female authors.
+
+% FastDT -load output/gender.dt data/gender.de > gender.de.pred
+Loading model from output/gender.dt...
+Predicting on data/gender.de...
+Error = 461 / 1000 = 0.461
+
+**NOTE** Well that didn't help...
+---------------------------------------------------------------------------

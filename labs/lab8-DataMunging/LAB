@@ -1,0 +1,272 @@
+In this lab, we'll use some simple tools to gather data and build a
+classifier on that data. We're going to try to distinguish between
+really bad movies and really good movies. This should be an easy
+classification task based on reviews, but to make it more fun we'll do
+it based on plot summaries. IMDB keeps a top250 and bottom100 list:
+
+  http://www.imdb.com/chart/top
+  http://www.imdb.com/chart/bottom
+
+The first thing we need to do is grab those web pages, we can use wget
+to do this:
+
+  wget -O top.html   http://www.imdb.com/chart/top
+  wget -O bot.html   http://www.imdb.com/chart/bottom
+
+Now, we need to extract the (appropriate) links from these files. I'll
+show it below for top.html; it's analogous for bot.html.
+
+  ./getlinks.pl < top.html | head
+
+You'll note that a lot of thinks links *aren't* actually links to
+movies. But if we look at the top.html page, we can see that the links
+we want are of the form "/title/Ty..." so we can grep those out:
+
+  ./getlinks.pl < top.html | grep ^/title | head
+
+This looks good, and we can count them as a sanity check:
+
+  ./getlinks.pl < top.html | grep ^/title | wc
+
+gives 250 lines which is exactly what we want.
+
+The problem at this point is that these are relative URLs, so we need
+to shove "http://www.imdb.com" at the beginning. We also need to get
+the plot summaries instead of the info pages. If you click on one of
+the movies, you'll find that the summary of
+
+  http://www.imdb.com/title/tt0111161/
+
+is at
+  
+  http://www.imdb.com/title/tt0111161/plotsummary?ref_=tt_stry_pl
+
+We can use sed to add all this info:
+
+  ./getlinks.pl < top.html    \
+     | grep ^/title   \
+     | sed 's+.*+http://www.imdb.com&plotsummary?ref_=tt_stry_pl+' \
+     > top.links
+
+The sed command says to replace (that the "s") everything between the
+first and second + with everything between the second and third +. In
+this case, the .* matches the entire line and the "&" in the
+replacement string says "copy whatever you matched."
+
+  mkdir top_files
+  ./wgetall.sh top.links top_files
+
+This will save the links as files name ##.html, where ## is a counter
+that starts at 1 and (in this case) ends at 250.
+
+Once you've got that started (perhaps in the background), you'll want
+to do the same thing for the bottom links to, for instance,
+bot_files. (Of which there should be 100.)
+
+Now that we've got the data downloaded in html form, we need to (a)
+pull out the relevant text and (b) get it into a format that makes
+libsvm happy!
+
+For (a), if you look at one of the downloaded synopses, you'll see
+that the entire text of the synopsis is contained within the html tags
+<p class="plotpar">...</div>. This makes it really easy to extract
+just using grep!
+
+First, let's change to top_files directory.
+
+  cd top_files
+
+If we say:
+
+  grep '<p class="plotpar">' 1.html
+
+we'll see the line that _starts_ the section we want. Luckily, we can
+tell grep to give us 1000 lines that _follow_ that match:
+
+  grep -A1000 '<p class="plotpar">' 1.html
+
+We need to stop printing when we reach the </p> command, which sed
+will do for us:
+
+  grep -A1000 '<p class="plotpar">' 1.html \
+    | sed '/<\/p>/q'
+
+Now, we just want to execute this for all of these files. How to do
+this will depend on the shell you're using. I like bash, in which you
+can do the following:
+
+  for n in `seq 1 250` ; do
+    grep -A1000 '<p class="plotpar">' $n.html \
+      | sed '/<\/p>/q' \
+      > $n.txt
+  done
+
+Here, `seq 1 250` will generate a list of all numbers from 1 to 250
+that we use in the for loop.
+
+If you're using (t)csh, it has its own loop syntax:
+
+  foreach n (`seq 1 250`)
+    grep -A1000 '<p class="plotpar">' $n.html \
+      | sed '/<\/p>/q' \
+      > $n.txt
+  end
+
+If you're using some other shell, you're on your own :P.
+
+You'll need to repeat this process for the bottom movies too (remember
+there are only 100 of them).
+
+Unfortunately, with the "bottom" movies, not all of them have
+summaries, so to make life easier we would like to remove them now. We
+can use "find" to find all the files that are empty:
+
+  find . -size 0
+
+This should give you a list of 22 files that we need to delete. You
+can do this in one of the two following ways:
+
+  find . -size 0 | xargs rm
+  find . -size 0 -exec rm {} ';'
+
+In the first case, we're saying "take the output of find and make in
+an argument to 'rm'"; in the latter case we're saying "for each thing
+returned by find, execute rm {} on it, where {} is filled in with the
+file name... the ';' at the end says 'end of command.'"
+
+Now, we need to clean up the txt (which still contains html tags) and
+turn it in to something libsvm-friendly. From the bot_files directory,
+let's look at a specific file:
+
+  cat 21.txt
+
+(sounds like an excellent movie!)
+
+It's fairly easy to get rid of html junk:
+
+  cat 21.txt \
+    | sed 's/<[^>]*>//g'
+
+This says "replace anything of the form <....> with the empty string."
+The [^>]* says "match a sequence of anything except for '>'. To get
+something resembling a bag of words representation, we need to
+lowercase and get rid of extraneous characters:
+
+  cat 21.txt \
+    | sed 's/<[^>]*>//g' \
+    | tr 'A-Z\n' 'a-z ' \
+    | sed 's/[^a-z ]/ /g' \
+    | sed 's/$/\n/'
+
+The "tr" line says to replace A-Z with a-z and to replace newline with
+space. The first "sed" line says to remove anything that's not a space
+or a-z. The final "sed" command re-inserts a newline at the end.
+
+Finally, we need to add the label; since this is a negative example,
+we want to add "-1" at the beginning, which we can do with sed:
+
+  cat 21.txt \
+    | sed 's/<[^>]*>//g' \
+    | tr 'A-Z\n' 'a-z ' \
+    | sed 's/[^a-z ]/ /g' \
+    | sed 's/$/\n/' \
+    | sed 's/^/-1/'
+
+This is great, except we need to do this for all files. Bash for doing
+this follows:
+
+  cd ..    # back to the lab directory
+
+  for f in bot_files/*.txt ; do
+    cat $f \
+      | sed 's/<[^>]*>//g' \
+      | tr 'A-Z\n' 'a-z ' \
+      | sed 's/[^a-z ]/ /g' \
+      | sed 's/$/\n/' \
+      | sed 's/^/+1/'
+  done \
+  > bot_files.txt
+
+Do the same for the top files to create top_files.txt (be sure to make
+the label "1" instead of "-1").
+
+We can now check how much data we have:
+
+  wc top_files.txt bot_files.txt 
+
+Which tells us we have 250 positive examples and 78 negative examples.
+
+Finally, we can convert this to libSVM format with bow2libsvm.pl which
+I've provided. libSVM (and many svm packages) are annoying because you
+have to map strings to feature ids, which is what bow2libsvm.pl
+does. It creates a file called "libsvm.dict" that gives you to
+word to id mapping.
+
+  cat top_files.txt bot_files.txt \
+    | sort -R \
+    | ./bow2libsvm.pl \
+    > data.all
+
+the "sort -R" command randomizes the data. If you look at the
+resulting file, you'll see that everything has been converted to a
+numeric id (that you can look up in libsvm.dict).
+
+Now, to be good experimentalists, we need to split our data into
+training and test. You can do this using head and tail as
+follows. There are 328 examples in data.all. We'll use 250 as training
+and the rest as test:
+
+  head -n250  data.all > data.tr
+  tail -n+251 data.all > data.te
+
+Now, we can see if libsvm can actually do anything with this data!
+
+  svm-train -t 0 data.tr data.model
+  svm-predict data.te data.model /dev/null
+
+This says to direct the predictions to /dev/null, but it will give you
+an accuracy. I get about 77%, but yours will vary depending on how the
+data got randomized.
+
+To see if this is at all sane, we need to check what you'd get by
+randomly guessing. We can do this by extracting the label column of
+the test data and checking how frequent each label is:
+
+  cat data.te  | cut -d' ' -f1 | sort | uniq -c
+
+I get 55 "1"s and 23 "-1"s, which means that random guessing would get
+me an accuracy of 55/(55+23) = 70%, so yes, we're doing slightly
+better with the SVM.
+
+For *linear* SVMs only, we can actually extract the weight vector:
+
+  ./inspectSVM.pl data.model
+
+Can you make any sense of the learned model?
+
+One nice thing about libSVM is that it will help you do
+cross-validation (which is why we didn't create dev data). For
+instance, if I say:
+
+  svm-train -v 10 -t 0 data.tr data.model
+
+This will give me a cross-validation accuracy of 84%ish (yours will
+vary). I can use this to try different values of C:
+
+  for c in 0.001 0.01 0.1 1 10 100 ; do 
+    echo -n "$c: "
+    svm-train -v 10 -t 0 -c $c data.tr data.model | tail -n1
+  done
+
+I could also use this to try different kernels and parameters for
+those kernels, for instance:
+
+  for c in 1 10 100 1000 ; do 
+    for gamma in 0.00001 0.0001 0.001 0.01 ; do 
+      echo -n "$c $gamma: "
+      svm-train -v 10 -t 2 -g $gamma -c $c data.tr data.model | tail -n1
+    done
+  done
+
+You can probably do better by using different c and gamma, or by
+trying a polynomial kernel.

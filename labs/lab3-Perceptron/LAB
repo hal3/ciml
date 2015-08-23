@@ -1,0 +1,92 @@
+This lab is all about using perceptrons to make predictions. I've
+given you a really stupid perceptron implementation in
+perceptron.pl. We'll use the data from lab1 for this project, so make
+sure you still have it. I've assumed that you've copied it (or
+symlinked it) into the data directory. As a test, you should be able
+to run:
+
+% ./perceptron.pl data/sentiment.tr > data/sentiment.w
+1	49.9
+[snip]
+10	4.9
+
+
+The first column is how many passes over the data we've done, the
+second column is the training error. As you can see, the training
+error decreases over time. (Question: is this guaranteed?)
+
+If you open up data/sentiment.w, this first shows the bias (in this
+case, -132) and then all the features sorted by weight. The extremely
+negative features are the most indicative of the negative class (bad,
+only, worst, etc.) and the extremely positive features are the most
+indicative of positive class (seen, great, most, many).
+
+=======================================================================
+============== TASK 1: OVERFITTING, PASSES AND AVERAGING ==============
+=======================================================================
+
+You can use the same script to evaluate on "auxiliary" data. For
+instance, you can run:
+
+% ./perceptron.pl data/sentiment.tr data/sentiment.de data/sentiment.te > data/sentiment.w
+
+To generate learning curves for the perceptron on these three data
+sets. This will now produce four columns. The first is still the pass;
+the remainder are the error rates on all the files on the command line
+(in this case, first train, then dev, then test).
+
+Do you see evidence of overfitting? If you were to abort the learning
+at some point ("early stopping") how would you decide when do do that?
+What would be the test error at that point?
+
+Is this data linearly separable? How can you find out?
+
+Repeat the same experiments on the gender data and answer the same
+questions.
+
+Now, open up perceptron.pl and set "$DOAVERAGING" to be equal to 1
+(instead of 0). This will turn on weight averaging. Repeat the same
+experiments on the sentiment and on the gender data. What effect do
+you see on training error? What effect do you see on dev/test error?
+
+
+=======================================================================
+=============== TASK 2: INTERPRETING PERCEPTRON WEIGHTS ===============
+=======================================================================
+
+Train an averaged perceptron for 10 iterations on the sentiment data
+and on the gender data and store the learned weights in
+data/sentiment.w and data/gender.w.
+
+From this, you can see which terms "point" most toward
+positive/negative classification decisions for these two problems. Let
+the top and bottom ten features for each of these tasks.
+
+One issue with this way of interpreting perceptron weights is that
+they don't tell the whole story. The issue is that one feature (in the
+case, one word) might have high (absolute) weight, but be very
+rare. This means that when it appears, it is indicative of the
+class. But it often doesn't appear.
+
+You can compute the *expected value* of each feature in the data
+using:
+
+% ./feature_expectations.pl < data/sentiment.tr > data/sentiment.fe
+
+Look at the top of this list. Some of these features have an expected
+count >1, which means that they often occur more than once in a single
+example (or, rather, have a feature value>1).
+
+Once you have feature expectations, you can multiply them by the
+learned weights using:
+
+% ./multiply_weights.pl data/sentiment.w data/sentiment.fe > data/sentiment.ew
+
+This gives you some sense of what's the *expected* effect this feature
+will have on an average example.
+
+Look at the ten top (and bottom) features in sentiment.ew. How do
+these compare to those in sentiment.w? When there is a difference, can
+you explain *why* you see this difference?
+
+Repeat the same thing for the gender data.

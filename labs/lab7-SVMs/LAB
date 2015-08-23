@@ -1,0 +1,80 @@
+In this lab, we'll play around with SVMs and kernels to get a sense of
+what they are actually doing.
+
+We can start by training a simple linear SVM:
+
+% svm-train -t 0 -c 100 data0 data0.model
+% python drawBoundary.py data0
+
+This invocation of svm-train says:
+
+ -t 0    -- use a linear kernel
+ -c 100  -- set "C" = 100, which means "overfit a lot"
+
+This is an easily separable dataset, which is reflected by the small
+number of support vectors. In the plot, the SVs are drawn big (and are
+on the margin, the dashed line one unit away from the decision
+boundary, the solid line).
+
+** QUESTION A: You should have found that it takes 3 support
+   vectors. Could you have fewer (eg., 2) support vectors here?
+
+
+Although it's unnecessary, we can also train a polynomial SVM with
+degree 10 (for instance), with:
+
+% svm-train -t 1 -r 1 -d 10 -c 100 data0 data0.model
+% python drawBoundary.py 
+
+This says:
+
+  -t 1      -- use a polynomial kernel
+  -r 1      -- use (1 + u*v)^degree, where "r" is the "1"
+  -d 10     -- tenth degree
+
+You'll see that you get a curved decision boundary, though of course
+this is somewhat overkill.
+
+
+% svm-train -t 2 -c 100 -g 1 data0 data0.model
+% python drawBoundary.py data0
+
+(Here, -t 2 means RBF and -g 1 means gamma=1)
+
+Again, this is overkill. But we can try to understand RBF kernels a
+bit better by "turning up" the gamma:
+
+% svm-train -t 2 -c 100 -g 100 data0 data0.model
+% python drawBoundary.py data0
+
+A gamma of 100 means that you have to be *really* close to a point to
+have a kernel value that's non-zero.
+
+** QUESTION B: why do you get these little blobs? How high do you have
+   to turn gamma up in order to get a little decision boundary around
+   each example?
+
+---------------------------------------------------------------------
+
+Let's now switch to a more complex dataset. We'll begin by failing
+with a linear model:
+
+% svm-train -t 0 -c 100 data1 data1.model
+% python drawBoundary.py data1
+
+As you can see, this data fails horribly.
+
+** QUESTION C: There are a lot of red support vectors on the red side
+   of the decision boundary. Why?
+
+However, now we can get some mileage out of polynomial kernels:
+
+% svm-train -t 2 -r 1 -d 3 -c 100 data1 data1.model
+% python drawBoundary.py data1
+
+** QUESTION D: based on this data, is the 0/1 loss on the training
+   data zero? Is the hinge loss on the training data zero?
+
+** QUESTION E: train an RBF kernel on this data. What's the smallest
+   gamma for which you can get a good decision boundary?
+
