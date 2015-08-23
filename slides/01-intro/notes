@@ -1,0 +1,31 @@
+The big buzz word for me is "generalization."  The day 1 activity is
+designed to introduce this.  It also serves to introduce notions of
+training/test data and learning bias.
+
+Students pair up and are handed a sheet of "training data" (see
+training.pdf).  This contains a bunch of images, each with a label (A
+or B).  The classes are designed to be ambiguous.  All the As are
+birds (that fly).  All the Bs are mammals (that don't fly).
+
+The are asked to *write down* what they think the A/B distinction is,
+but we don't discuss this.  They are then shown (as slides) other
+images (see test.pdf).  The set of test images is a SUPERSET of the
+training images.  Most of them are classifiable regardless of the fly
+vs bird distinction they made.  Then, we show a penguin.  And then a
+flying squirrel.  (Ok it's a stretch, but make light of it.)  Force
+people to make a classification decision for these (again, in pairs).
+
+Evaluate their accuracy.  (Important concept!)  Now, go through and
+mark which images were from the training data and which were from the
+test (this is encoded on the last slide by a sequence of T/E for
+Train/tEst in the bottom right).
+
+Point out that the training error was zero (I hope!) and the test
+error was not.  And that TEST ERROR IS ALL WE EVER CARE ABOUT!  You
+can liken this to taking a test.
+
+Now, go back to the penguin/flying-squirrel classification.  One of
+them will probably have gotten more votes than the other.  This is a
+LEARNING BIAS.  The data didn't tell us (much) about what we should do
+in this case, so the decision comes down to our own internal biases.
+(We hope that the bias is actually fairly extreme.)
