@@ -1,2 +1,2 @@
-\beamer@endinputifotherversion {3.10pt}
+\beamer@endinputifotherversion {3.24pt}
 \select@language {english}
