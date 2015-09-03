@@ -94,7 +94,7 @@ data set and is likely to perform poorly.
 
 %TODO: be sure iid is defined
 
-\Figure{ens:resample}{picture of sampling with replacement}
+\Figure{ens_resample}{picture of sampling with replacement}
 
 A better solution is to use \concept{bootstrap resampling}.  This is a
 technique from the statistics literature based on the following
@@ -105,7 +105,7 @@ replacement\footnote{To sample with replacement, imagine putting all
   items from $D$ in a hat.  To draw a single sample, pick an element
   at random from that hat, write it down, and then \emph{put it
     back}.}, then $\tilde D$ is \emph{also} a sample from $\cD$.
-Figure~\ref{fig:ens:resample} shows the process of bootstrap
+Figure~\ref{fig:ens_resample} shows the process of bootstrap
 resampling of ten objects.
 
 Applying this idea to ensemble methods yields a technique known as
@@ -128,14 +128,14 @@ this tends to $1/e \approx 0.3679$.  (Already for $N=1000$ this is correct
 to four decimal points.)  So only about $63\%$ of the original
 training examples will be represented in any given bootstrapped set.
 
-\Figure{ens:overfitting}{graph depicting overfitting using regularization versus bagging}
+\Figure{ens_overfitting}{graph depicting overfitting using regularization versus bagging}
 
 Since bagging tends to reduce \emph{variance}, it provides an
 alternative approach to regularization.  That is, even if each of the
 learned classifiers $f_1, \dots, f_M$ are individually overfit, they
 are likely to be overfit to different things.  Through voting, you are
 able to overcome a significant portion of this overfitting.
-Figure~\ref{ens:overfitting} shows this effect by comparing
+Figure~\ref{ens_overfitting} shows this effect by comparing
 regularization via hyperparameters to regularization via bagging.
 
 \section{Boosting Weak Learners}
@@ -263,12 +263,12 @@ error rate \emph{less than} $50\%$, as required.
   examples there are.  Write out the general case to see that you will
   still arrive at an even weighting after one iteration.}
 
-\Figure{ens:boost}{perf comparison of depth vs \# boost}
+\Figure{ens_boost}{perf comparison of depth vs \# boost}
 
 One of the major attractions of boosting is that it is perhaps easy to
 design computationally efficient weak learners.  A very popular type
 of weak learner is a \concept{shallow decision tree}: a decision tree
-with a small depth limit.  Figure~\ref{fig:ens:boost} shows test error
+with a small depth limit.  Figure~\ref{fig:ens_boost} shows test error
 rates for decision trees of different maximum depths (the different
 curves) run for differing numbers of boosting iterations (the
 x-axis).  As you can see, if you are willing to boost for many
