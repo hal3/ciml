@@ -50,7 +50,7 @@ Now, we can train a depth one decision tree (aka "decision stump") on this data:
 <pre>
 >>> from sklearn.tree import DecisionTreeClassifier
 >>> dt = DecisionTreeClassifier(max_depth=1)
->>> dt.fit(X.toarray(), Y)
+>>> dt.fit(X, Y)
 DecisionTreeClassifier(compute_importances=None, criterion='gini',
             max_depth=1, max_features=None, min_density=None,
             min_samples_leaf=1, min_samples_split=2, random_state=None,
@@ -127,9 +127,7 @@ integers in the same way!)
 
 Here, we see that the accuracy has dropped a bit.
 
-=======================================================================
-================ TASK 2: UNDERFITTING AND OVERFITTING =================
-=======================================================================
+# TASK 2: UNDERFITTING AND OVERFITTING
 
 A) For all possible depths from depth 1 to depth 20, compute training
 error, development error and test error for the corresponding decision
