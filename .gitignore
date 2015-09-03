@@ -3,3 +3,12 @@ book/*.aux
 
 # Ignore foo directory
 book/foo
+
+# Ignore generated courseml files
+book/courseml.bbl
+book/courseml.blg
+book/courseml.idx
+book/courseml.ilg
+book/courseml.ind
+book/courseml.log
+book/courseml.out
