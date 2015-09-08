@@ -98,7 +98,7 @@ prediction would be the rating that Alice would give to Algorithms.
   learned function $f$.  This function can then automatically label
   future text examples.}
 
-To make this concrete, Figure~\ref{fig:induction} shows the general
+To make this concrete, Figure~\ref{fig:dt:induction} shows the general
 framework of \concept{induction}.  We are given \concept{training
   data} on which our algorithm is expected to learn.  This training
 data is the examples that Alice observes in her machine learning
@@ -179,14 +179,14 @@ case: binary classification.
 
 Suppose that your goal is to predict whether some unknown user will
 enjoy some unknown course.  You must simply answer ``yes'' or ``no.''
-In order to make a guess, your're allowed to ask binary questions
+In order to make a guess, you're allowed to ask binary questions
 about the user/course under consideration.  For example:
 
 {\bf You:} Is the course under consideration in Systems?\\
 {\bf Me:}  Yes\\
 {\bf You:} Has this student taken any other Systems courses?\\
 {\bf Me:}  Yes\\
-{\bf You:} Has this student like most previous Systems courses?\\
+{\bf You:} Has this student liked most previous Systems courses?\\
 {\bf Me:}  No\\
 {\bf You:} \emph{I predict this student will not like this course.}\\
 
@@ -259,9 +259,9 @@ feature.  From this figure, you can see that asking the first feature
 is not useful: if the value is ``no'' then it's hard to guess the
 label; similarly if the answer is ``yes.''  On the other hand, asking
 the second feature \emph{is} useful: if the value is ``no,'' you can
-be pretty confident that this student will like this course; if the
+be pretty confident that this student will hate this course; if the
 answer is ``yes,'' you can be pretty confident that this student will
-hate this course.
+like this course.
 
 More formally, you will consider each feature in turn.  You might
 consider the feature ``Is this a System's course?''  This feature has
@@ -275,7 +275,7 @@ question on a random example and observe a value of ``no.''  Further
 suppose that you must \emph{immediately} guess the label for this
 example.  You will guess ``like,'' because that's the more prevalent
 label in the NO set (actually, it's the \emph{only} label in the NO
-set).  Alternative, if you recieve an answer of ``yes,'' you will
+set).  Alternatively, if you recieve an answer of ``yes,'' you will
 guess ``hate'' because that is more prevalent in the YES set.
 
 So, for this single feature, you know what you \emph{would} guess if
@@ -378,13 +378,13 @@ subtrees by recursing on itself.  In each recursive call, it uses one
 of the partitions of the data, and removes the just-selected feature
 from consideration.
 
-\thinkaboutit{Is the Algorithm in Figure~\ref{fig:dt:train}
+\thinkaboutit{Is Algorithm~\ref{alg:dt:train}
   guaranteed to terminate?}
 
 The corresponding \emph{prediction} algorithm is shown in
-Algorithm~\ref{alg:dt:test}.  This function recurses down the decision
+Algorithm~\ref{alg:dt:predict}.  This function recurses down the decision
 tree, following the edges specified by the feature values in some
-\VAR{test point}.  When it reaches a leave, it returns the guess
+\VAR{test point}.  When it reaches a leaf, it returns the guess
 associated with that leaf.
 
 TODO: define outlier somewhere!
@@ -444,7 +444,7 @@ rating), then $\cD$ is a distribution over $(\vx,y)$ pairs.
 A useful way to think about $\cD$ is that it gives \emph{high
   probability} to reasonable $(\vx,y)$ pairs, and \emph{low
   probability} to unreasonable $(\vx,y)$ pairs.  A $(\vx,y)$ pair can
-be unreasonable in two ways.  First, $\vx$ might an unusual input.
+be unreasonable in two ways.  First, $\vx$ might be an unusual input.
 For example, a $\vx$ related to an ``Intro to Java'' course might be
 highly probable; a $\vx$ related to a ``Geometric and Solid Modeling''
 course might be less probable.  Second, $y$ might be an unusual rating
@@ -460,7 +460,7 @@ instance, we're not assuming it looks like a Gaussian or some other,
 common distribution.)  We are also not assuming that we know what
 $\cD$ is.  In fact, if you know \emph{a priori} what your data
 generating distribution is, your learning problem becomes
-significantly easier.  Perhaps the hardest think about machine
+significantly easier.  Perhaps the hardest thing about machine
 learning is that we \emph{don't} know what $\cD$ is: all we get is a
 random sample from it.  This random sample is our training data.
 
@@ -632,7 +632,7 @@ downloading the data and only gotten the first five characters of each
 review.  If you had the rest of the features you might be able to do
 well.  But with this limited feature set, there's not much you can do.
 
-Some example may not have a single correct answer.  You might be
+Some examples may not have a single correct answer.  You might be
 building a system for ``safe web search,'' which removes offensive web
 pages from search results.  To build this system, you would collect a
 set of web pages and ask people to classify them as ``offensive'' or
@@ -670,7 +670,7 @@ is a fundamental part of the learning problem.
 As with many problems, it is useful to think about the \emph{extreme
   cases} of learning algorithms.  In particular, the extreme cases of
 decision trees.  In one extreme, the tree is ``empty'' and we do not
-ask any questions at all.  We simply immediate make a prediction.  In
+ask any questions at all.  We simply immediately make a prediction.  In
 the other extreme, the tree is ``full.''  That is, every possible
 question is asked along every branch.  In the full tree, there may be
 leaves with no associated training data.  For these we must simply
@@ -743,10 +743,10 @@ that is expected to do best in the future.
 \section{Separation of Training and Test Data}
 
 Suppose that, after graduating, you get a job working for a company
-that provides persolized recommendations for pottery.  You go in and
+that provides personalized recommendations for pottery.  You go in and
 implement new algorithms based on what you learned in her machine
 learning class (you have learned the power of generalization!).  All
-you need to do now is convince your boss that you has done a good job
+you need to do now is convince your boss that you have done a good job
 and deserve a raise!
 
 How can you convince your boss that your fancy learning algorithms are
@@ -783,7 +783,7 @@ of data.
 \thinkaboutit{If you have more data at your disposal, why might a
   90/10 split be preferable to an 80/20 split?}
 
-They cardinal rule of machine learning is: never touch your test data.
+The cardinal rule of machine learning is: never touch your test data.
 Ever.  If that's not clear enough:
 
 \noindent
