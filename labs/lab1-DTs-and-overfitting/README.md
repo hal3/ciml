@@ -6,7 +6,7 @@ decisions on one simple binary classification task: sentiment analysis
 
 We'll use for prediction are simply the presence/absence of words in
 the text. If you look in data/sentiment.tr, you'll see training data
-for the gender prediction task. The first column is zero or one (one =
+for the sentiment prediction task. The first column is zero or one (one =
 positive, zero = negative). The rest is a list of all the words that
 appear in this product reivew. These are *binary* features: any word
 listed has value "=1" and any word not listed has value "=0"
