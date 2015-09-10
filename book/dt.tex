@@ -497,8 +497,51 @@ should be as small as possible:
 \end{align}
 
 \begin{mathreview}{Expectated Values}
-  remind people what expectations are and explain the notation in
-  Eq~\eqref{eq:expectederror}.
+In this book, we will often write things like $\Ep_{(\vx,y) \sim \cD} [ \ell(y, f(\vx)) ]$ for the expected loss. Here, as always, expectation means ``average.'' In words, this is saying ``if you drew a bunch of $(x,y)$ pairs independently at random from $\cD$, what would your \emph{average} loss be? (More formally, what would be the average of $\ell(y,f(\vx))$ be over these random draws?)
+
+~
+
+More formally, if $\cD$ is a discrete probability distribution, then this expectation can be expanded as:
+
+\begin{equation}
+  \Ep_{(\vx,y) \sim \cD} [ \ell(y, f(\vx)) ] = \sum_{(\vx,y) \in \cD} [ \cD(\vx,y) \ell(y, f(\vx)) ]
+\end{equation}
+
+This is \emph{exactly} the weighted average loss over the all $(\vx,y)$ pairs in $\cD$, weighted by their probability (namely, $\cD(\vx,y)$) under this distribution $\cD$.
+
+~
+
+In particular, if $D$ is a \emph{finite discrete distribution}, for instance one defined by a finite data set $\{ (\vx_1,y_1), \dots, (\vx_N,y_N)$ that puts equal weight on each example (in this case, equal weight means probability $1/N$), then we get:
+
+\begin{align}
+\Ep_{(\vx,y) \sim D} [ \ell(y, f(\vx)) ] 
+&= \sum_{(\vx,y) \in D} [ D(\vx,y) \ell(y, f(\vx)) ]
+   \becauseof{definition of expectation}\\
+&= \sum_{n=1}^N [ D(\vx_n,y_n) \ell(y_n, f(\vx_n)) ]
+   \becauseof{$D$ is discrete and finite}\\
+&= \sum_{n=1}^N [ \frac 1 N \ell(y_n, f(\vx_n)) ] 
+   \becauseof{definition of $D$}\\
+&= \frac 1 N  \sum_{n=1}^N [ \ell(y_n, f(\vx_n)) ]
+   \becauseof{rearranging terms}
+\end{align}
+
+Which is exactly the average loss on that dataset.
+
+~
+
+In the case that the distribution is continuous, we need to replace the discrete sum with a continuous integral over some space $\Omega$:
+
+\begin{equation}
+  \Ep_{(\vx,y) \sim \cD} [ \ell(y, f(\vx)) ] = \int_{\Omega} \cD(\vx,y) \ell(y, f(\vx)) \ud \vx \ud y
+\end{equation}
+
+This is exactly the same but in continuous space rather than discrete space.
+
+The most important thing to remember is that there are two equivalent ways to think about expections:
+\begin{enumerate}
+\item The expectation of some function $g$ is the \emph{weighted average value of $g$}, where the weights are given by the underlying probability distribution.
+\item The expectation of some function $g$ is your \emph{best guess of the value of $g$} if you were to draw a single item from the underlying probability distribution.
+\end{enumerate}
 \end{mathreview}
 
 The difficulty in minimizing our \concept{expected loss} from
