@@ -24,10 +24,20 @@ def computeDistances(data):
             dist.append( computeExampleDistance(data[n],data[m])  / sqrt(D))
     return dist
 
-plt.hist(computeDistances(generateUniformDataset(1, 100)))
-plt.hist(computeDistances(generateUniformDataset(5, 100)))
-plt.hist(computeDistances(generateUniformDataset(10, 100)))
-plt.hist(computeDistances(generateUniformDataset(50, 100)))
-plt.hist(computeDistances(generateUniformDataset(100, 100)))
+N    = 200                   # number of examples
+Dims = [2, 8, 32, 128, 512]   # dimensionalities to try
+Cols = ['#FF0000', '#880000', '#000000', '#000088', '#0000FF']
+Bins = arange(0, 1, 0.02)
+
+for i,d in enumerate(Dims):
+    plt.hist(computeDistances(generateUniformDataset(d, N)),
+             Bins,
+             histtype='step',
+             color=Cols[i])
+
+plt.xlabel('distance / sqrt(dimensionality)')
+plt.ylabel('# of pairs of points at that distance')
+plt.title('dimensionality versus uniform point distances')
+plt.legend(['%d dims' % d for d in Dims])
 plt.show()
 
