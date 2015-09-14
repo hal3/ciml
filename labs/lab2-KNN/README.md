@@ -1,26 +1,27 @@
+# Lab 2: KNN and High Dimensional Data
+
 In this lab, we'll look at high dimensional data and explore using KNN
 for classification (no K-means for now).
 
-=======================================================================
-============= TASK 0 (OPTIONAL): PLAYING WITH HIGH-D DATA =============
-=======================================================================
+## TASK 1: PLAYING WITH HIGH-D DATA
 
 If you have numpy and matplotlib correctly installed, you should be
 able to run:
 
 % python HighD.py 
 
-and get a picture of histograms like the ones from class.
+and get a picture of five histograms. Open up HighD.py to understand
+what's being plotted. Essentially, we are generated 200 random points
+in D dimensions (where D is being varied) and computing pairwise
+distances between these points.
 
-This is a good exercise to make sure that these are successfully
-installed. Note that for P1 you *will need* this working, so if you
-want to use the lab time to make that happen, it's probably a good
-idea.
+(A) As the dimensionality increases, do the distances between pairs of
+points become more or less concentrated around a single value?
 
+(B) In the code, instead of plotting distance on the x-axis, we're
+plotting (distance/sqrt(D)). Why is this the right thing to do?
 
-=======================================================================
-====================== TASK 1: CLASSIFYING DIGITS =====================
-=======================================================================
+## TASK 2: CLASSIFYING DIGITS
 
 Our first task will be to use KNN to classify digits. In other words,
 we get an image of a hand-drawn digit (28x28 pixels, greyscale), and
@@ -38,10 +39,10 @@ the upper left and 9,9 is the bottom right). Which of these (1vs2 or
 (B) Let's verify that KNN does very well on training data. Run the
 following:
 
-% python KNN.py digit data/1vs2.tr data/1vs2.tr 1
+% python KNN.py data/1vs2.tr data/1vs2.tr 1
 0.0
 
-This says "do KNN for digits, with 1vs2.tr as the training data and
+This says "do KNN, with 1vs2.tr as the training data and
 1vs2.tr as the testing data, using K=1." The 0.0 is the error rate,
 which is zero. Verify the same thing for 2vs3.tr
 
@@ -49,7 +50,7 @@ which is zero. Verify the same thing for 2vs3.tr
 K and get error rates for all of them. In particular, you can say
 something like:
 
-% python KNN.py digit data/1vs2.tr data/1vs2.tr 1 5 10 25 50 100
+% python KNN.py data/1vs2.tr data/1vs2.tr 1 5 10 25 50 100
 0.0	0.08	0.12	0.16	0.28	0.5
 
 This runs the same thing for six values of K (1, 5, ..., 100) and
@@ -80,27 +81,38 @@ If you want to play around, try exp(-dist / CONSTANT) where CONSTANT
 now is a hyperparameter. What happens as CONSTANT tends toward zero?
 Tends toward infinity?
 
-=======================================================================
-====================== TASK 2: CLASSIFYING TEXT =======================
-=======================================================================
+# TASK 3: OPTIONAL: RANDOM versus DIGITS data in high dimensions
 
-This KNN implementation will also do text categorization, but you have
-to tell it how to read in files. You'll find that this is somewhat
-slow, so I've set it up so that testing only happens on the first 100
-examples in the test set. For instance, you can run:
+If you've gotten this far, congratulations! This task is taken
+directly out of project 1, so you can do it now if you like, or you
+can wait to do it for the project. (It literally appears verbatim
+there.) Student's choice!
 
-% python KNN.py text ../lab1/data/gender.tr  ../lab1/data/gender.de 1 3 5
-0.49	0.43	0.47
+The goal here is to look at whether what we found for uniformly random
+data points holds for naturally occurring data (like the digits data)
+too! We must hope that it doesn't, otherwise KNN has no hope of
+working, but let's verify.
 
-(assuming that's where the data from lab1 lives. and this is after
-*removing* the weighted voting.)
+The problem is: the digits data is 784 dimensional, period, so it's
+not obvious how to try "different dimensionalities." For now, we will
+do the simplest thing possible: if we want to have 128 dimensions, we
+will just select 128 features randomly.
 
-(A) You'll notice that this is pretty crappy performance -- just
-barely below random guessing performance of 50%. Yet for digits we did
-quite well! Why do you suppose this is.
+This is your task, which you can accomplish by munging together
+HighD.py and KNN.py and making appropriate modifications.
 
-(B) Try to find a value of K and a CONSTANT for distance weighting
-that does as well as possible on the dev data for gender. How well
-does it do on the test data?
+A. First, get a histogram of the raw digits data in 784
+dimensions. You'll probably want to use the `exampleDistance` function
+from KNN together with the plotting in HighD.
 
+B. Extend `exampleDistance` so that it can subsample features down to
+some fixed dimensionality. For example, you might write
+`subsampleExampleDistance(x1,x2,D)`, where `D` is the target
+dimensionality. In this function, you should pick `D` dimensions at
+random (I would suggest generating a permutation of the number
+[1..784] and then taking the first D of them), and then compute the
+distance but _only_ looking at those dimensions.
 
+C. Generate an equivalent plot to HighD with D in [2, 8, 32, 128, 512]
+but for the digits data rather than the random data. Include a copy of
+both plots and describe the differences.

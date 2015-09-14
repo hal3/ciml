@@ -1,26 +1,6 @@
 import sys,os
 from math import *
 
-def loadTextData(filename, maxExamples=100000):
-    h = open(filename, 'r')
-    D = []
-    for l in h.readlines():
-        a = l.split()
-        if len(a) > 1:
-            y = float(a[0])
-            if y > 0.5: y = 1.
-            else: y = -1.
-            x = {}
-            for w in a[1:]:
-                x[w] = 1.
-            for w in x.iterkeys():
-                x[w] /= float(len(x))
-            D.append( (x,y) )
-            if len(D) >= maxExamples:
-                break
-    h.close()
-    return D
-
 def loadDigitData(filename, maxExamples=100000):
     h = open(filename, 'r')
     D = []
@@ -90,15 +70,11 @@ def computeErrorRate(trainingData, testData, allK):
 
 if __name__ == "__main__":
     if len(sys.argv) < 5:
-        print 'usage: python KNN.py [text|digit] [training filename] [testing filename] [K1] [K2] ... [Klast]'
+        print 'usage: python KNN.py [training filename] [testing filename] [K1] [K2] ... [Klast]'
         exit(-1)
 
-    loadData = loadDigitData
-    if sys.argv[1] == 'text':
-        loadData = loadTextData
-
-    tr = loadData(sys.argv[2])
-    te = loadData(sys.argv[3], 100)
+    tr = loadDigitData(sys.argv[2])
+    te = loadDigitData(sys.argv[3], 100)
     allK = [int(arg) for arg in sys.argv[4:]]
     print "\t".join([str(err) for err in computeErrorRate(tr, te, allK)])
     
