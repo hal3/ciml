@@ -3,6 +3,8 @@ import random
 from numpy import *
 import matplotlib.pyplot as plt
 
+waitForEnter=False
+
 def generateUniformExample(numDim):
     return [random.random() for d in range(numDim)]
 
@@ -29,15 +31,21 @@ Dims = [2, 8, 32, 128, 512]   # dimensionalities to try
 Cols = ['#FF0000', '#880000', '#000000', '#000088', '#0000FF']
 Bins = arange(0, 1, 0.02)
 
+plt.xlabel('distance / sqrt(dimensionality)')
+plt.ylabel('# of pairs of points at that distance')
+plt.title('dimensionality versus uniform point distances')
+
 for i,d in enumerate(Dims):
     plt.hist(computeDistances(generateUniformDataset(d, N)),
              Bins,
              histtype='step',
              color=Cols[i])
+    if waitForEnter:
+        plt.legend(['%d dims' % d for d in Dims])
+        plt.show(False)
+        x = raw_input('Press enter to continue...')
 
-plt.xlabel('distance / sqrt(dimensionality)')
-plt.ylabel('# of pairs of points at that distance')
-plt.title('dimensionality versus uniform point distances')
+
 plt.legend(['%d dims' % d for d in Dims])
 plt.show()
 

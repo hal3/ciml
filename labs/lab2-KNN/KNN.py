@@ -69,13 +69,13 @@ def computeErrorRate(trainingData, testData, allK):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 5:
+    if len(sys.argv) < 4:
         print 'usage: python KNN.py [training filename] [testing filename] [K1] [K2] ... [Klast]'
         exit(-1)
 
-    tr = loadDigitData(sys.argv[2])
-    te = loadDigitData(sys.argv[3], 100)
-    allK = [int(arg) for arg in sys.argv[4:]]
+    tr = loadDigitData(sys.argv[1])
+    te = loadDigitData(sys.argv[2], 100)
+    allK = [int(arg) for arg in sys.argv[3:]]
     print "\t".join([str(err) for err in computeErrorRate(tr, te, allK)])
     
     
