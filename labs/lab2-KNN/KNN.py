@@ -69,7 +69,7 @@ def computeErrorRate(trainingData, testData, allK):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 5:
+    if len(sys.argv) < 4:
         print 'usage: python KNN.py [training filename] [testing filename] [K1] [K2] ... [Klast]'
         exit(-1)
 
