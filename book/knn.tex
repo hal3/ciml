@@ -65,14 +65,14 @@ convenient and helps us interpret the feature values.  When we discuss
 practical issues in Chapter~\ref{sec:prac}, you will see other reasons
 why $0/1$ is a good choice.
 
-\Figure{knn:projections}{A figure showing projections of data in
+\Figure{knn_projections}{A figure showing projections of data in
   two dimension in three ways -- see text.  Top: horizontal axis
   corresponds to the first feature (TODO) and the vertical axis
   corresponds to the second feature (TODO); Middle: horizonal is
   second feature and vertical is third; Bottom: horizonal is first and
   vertical is third.}
 
-Figure~\ref{fig:knn:projections} shows the data from
+Figure~\ref{fig:knn_projections} shows the data from
 Table~\ref{tab:data:course} in three views.  These three views are
 constructed by considering two features at a time in different pairs.
 In all cases, the plusses denote positive examples and the minuses
@@ -81,7 +81,7 @@ each other, which is why you cannot see 20 unique points in all
 figures.
 
 \thinkaboutit{Match the example ids from Table~\ref{tab:data:course}
-  with the points in Figure~\ref{fig:knn:projections}.}
+  with the points in Figure~\ref{fig:knn_projections}.}
 
 The mapping from feature values to vectors is straighforward in the
 case of real valued features (trivial) and binary features (mapped to
@@ -133,7 +133,7 @@ $\vec x$.  Since these are vectors with real-valued components in
 $D$-dimensions, we say that they belong to the space $\R^D$.
 
 For $D=2$, our feature vectors are just points in the plane, like in
-Figure~\ref{fig:knn:projections}.  For $D=3$ this is three dimensional
+Figure~\ref{fig:knn_projections}.  For $D=3$ this is three dimensional
 space.  For $D>3$ it becomes quite hard to visualize.  (You should
 resist the temptation to think of $D=4$ as ``time'' -- this will just
 make things confusing.)  Unfortunately, for the sorts of problems you
@@ -155,7 +155,7 @@ two-dimensional space, the distance between $\langle 2,3\rangle$ and
 $\langle 6,1\rangle$ is given by $\sqrt{(2-6)^2 + (3-1)^2} = \sqrt{18}
 \approx 4.24$.  In general, in $D$-dimensional space, the
 \concept{Euclidean distance} between vectors $\vec a$ and $\vec b$ is
-given by Eq~\eqref{eq:euclidean} (see Figure~\ref{fig:knn:euclidean}
+given by Eq~\eqref{eq:euclidean} (see Figure~\ref{fig:knn_euclidean}
 for geometric intuition in three dimensions):
 
 
@@ -163,7 +163,7 @@ for geometric intuition in three dimensions):
 d(\vec a, \vec b) = \left[ \sum_{d=1}^D (a_d - b_d)^2 \right]^{\frac 1 2}
 \end{equation}
 
-\Figure{knn:euclidean}{A figure showing Euclidean distance in
+\Figure{knn_euclidean}{A figure showing Euclidean distance in
   three dimensions}
 
 \thinkaboutit{Verify that $d$ from Eq~\eqref{eq:euclidean} gives the
@@ -195,14 +195,14 @@ In particular, we find the training example $\vx$ that
 it has a corresponding label, $y$.  We predict that the label of
 $\hat\vx$ is also $y$.
 
-\Figure{knn:classifyitbad}{A figure showing an easy NN
+\Figure{knn_classifyitbad}{A figure showing an easy NN
   classification problem where the test point is a ? and should be
   positive, but its NN is actually a negative point that's noisy.}
 
 Despite its simplicity, this nearest neighbor classifier is incredibly
 effective.  (Some might say \emph{frustratingly} effective.)  However,
 it is particularly prone to overfitting label noise.  Consider the
-data in Figure~\ref{fig:knn:classifyitbad}.  You would probably want
+data in Figure~\ref{fig:knn_classifyitbad}.  You would probably want
 to label the test point positive.  Unfortunately, it's nearest
 neighbor happens to be negative.  Since the nearest neighbor algorithm
 only looks at the \emph{single} nearest neighbor, it cannot consider
@@ -214,7 +214,7 @@ nearest neighbor when making a classification decision.  We can
 consider the \koncept{$K$-nearest neighbors}{K-nearest neighbors} and
 let them \concept{vote} on the correct class for this test point.  If
 you consider the $3$-nearest neighbors of the test point in
-Figure~\ref{fig:knn:classifyitbad}, you will see that two of them are
+Figure~\ref{fig:knn_classifyitbad}, you will see that two of them are
 positive and one is negative.  Through voting, positive would win.
 
 \thinkaboutit{Why is it a good idea to use an odd number for $K$?}
@@ -287,28 +287,28 @@ the same amount.  This means that if you have data with only a few
 relevant features and lots of irrelevant features, KNN is likely to do
 poorly.
 
-\Figure{knn:ski}{A figure of a ski and snowboard with width (mm)
+\Figure{knn_ski}{A figure of a ski and snowboard with width (mm)
   and height (cm).}
 
-\Figure{knn:skidata}{Classification data for ski vs snowboard in
+\Figure{knn_skidata}{Classification data for ski vs snowboard in
   2d}
 
 A related issue with KNN is \concept{feature scale}.  Suppose that we
 are trying to classify whether some object is a ski or a snowboard
-(see Figure~\ref{fig:knn:ski}).  We are given two features about this
+(see Figure~\ref{fig:knn_ski}).  We are given two features about this
 data: the width and height.  As is standard in skiing, width is
 measured in millimeters and height is measured in centimeters.  Since
 there are only two features, we can actually plot the entire training
-set; see Figure~\ref{fig:knn:skidata} where ski is the positive class.
+set; see Figure~\ref{fig:knn_skidata} where ski is the positive class.
 Based on this data, you might guess that a KNN classifier would do
 well.
 
-\Figure{knn:skidatabad}{Classification data for ski vs snowboard in
+\Figure{knn_skidatabad}{Classification data for ski vs snowboard in
   2d, with width rescaled to mm.}
 
 Suppose, however, that our measurement of the width was computed in
 millimeters (instead of centimeters).  This yields the data shown in
-Figure~\ref{fig:knn:skidatabad}.  Since the width values are now tiny,
+Figure~\ref{fig:knn_skidatabad}.  Since the width values are now tiny,
 in comparison to the height values, a KNN classifier will effectively
 \emph{ignore} the width values and classify almost purely based on
 height.  The predicted class for the displayed test point had changed
@@ -325,23 +325,23 @@ to now is in the \emph{query model}.  Based on training data, you
 learn something.  I then give you a query example and you have to
 guess it's label.
 
-\Figure{knn:db}{decision boundary for 1nn.}
+\Figure{knn_db}{decision boundary for 1nn.}
 
 An alternative, less passive, way to think about a learned model is to
 ask: what sort of test examples will it classify as positive, and what
-sort will it classify as negative.  In Figure~\ref{fig:knn:db}, we have a
+sort will it classify as negative.  In Figure~\ref{fig:knn_db}, we have a
 set of training data.  The background of the image is colored blue in
 regions that \emph{would} be classified as positive (if a query were
 issued there) and colored red in regions that \emph{would} be
 classified as negative.  This coloring is based on a $1$-nearest
 neighbor classifier.
 
-In Figure~\ref{fig:knn:db}, there is a solid line separating the positive
+In Figure~\ref{fig:knn_db}, there is a solid line separating the positive
 regions from the negative regions.  This line is called the
 \concept{decision boundary} for this classifier.  It is the line with
 positive land on one side and negative land on the other side.
 
-\Figure{knn:db}{decision boundary for knn with k=3.}
+\Figure{knn_db}{decision boundary for knn with k=3.}
 
 Decision boundaries are useful ways to visualize the
 \concept{complexity} of a learned model.  Intuitively, a learned model
@@ -349,11 +349,11 @@ with a decision boundary that is really jagged (like the coastline of
 Norway) is really complex and prone to overfitting.  A learned model
 with a decision boundary that is really simple (like the bounary
 between Arizona and Utah) is potentially underfit.  In
-Figure~\ref{fig:knn:dbmany}, you can see the decision boundaries for KNN
+Figure~\ref{fig:knn_dbmany}, you can see the decision boundaries for KNN
 models with $K \in \{1, 3, 5, 7\}$.  As you can see, the boundaries
 become simpler and simpler as $K$ gets bigger.
 
-\Figure{knn:dtski}{decision tree for ski vs. snowboard}
+\Figure{knn_dtski}{decision tree for ski vs. snowboard}
 
 Now that you know about decision boundaries, it is natural to ask:
 what do decision boundaries for decision trees look like?  In order to
@@ -365,21 +365,21 @@ to ask questions of the form: ``is the value of feature $5$ greater
 than $0.2$?''  That is, for real-valued features, the decision tree
 nodes are parameterized by a feature and a threshold for that
 feature.  An example decision tree for classifying skis versus
-snowboards is shown in Figure~\ref{fig:knn:dtski}.
+snowboards is shown in Figure~\ref{fig:knn_dtski}.
 
-\Figure{knn:dtdb}{decision boundary for dt in previous figure}
+\Figure{knn_dtdb}{decision boundary for dt in previous figure}
 
 Now that a decision tree can handle feature vectors, we can talk about
 decision boundaries.  By example, the decision boundary for the
-decision tree in Figure~\ref{fig:knn:dtski} is shown in
-Figure~\ref{fig:knn:dtdb}.  In the figure, space is first split in half
+decision tree in Figure~\ref{fig:knn_dtski} is shown in
+Figure~\ref{fig:knn_dtdb}.  In the figure, space is first split in half
 according to the first query along one axis.  Then, depending on which
 half of the space you you look at, it is either split again along the
 other axis, or simple classified.
 
 %\TODOFigure{knn:dtdeepdb}{decision boundary for deep dt on ski data}
 
-Figure~\ref{fig:knn:dtdb} is a good visualization of decision boundaries
+Figure~\ref{fig:knn_dtdb} is a good visualization of decision boundaries
 for decision trees in general.  Their decision boundaries are
 axis-aligned cuts.  The cuts must be axis-aligned because nodes can
 only query on a single feature at a time.  In this case, since the
@@ -394,7 +394,7 @@ simple.
   with 1-nearest neighbor?  What about the other way around?}
 
 \section[K-Means Clustering]{$K$-Means Clustering}
-\label{sec:knn:kmeans}
+\label{sec:knn_kmeans}
 
 Up through this point, you have learned all about supervised learning
 (in particular, binary classification).  As another example of the use
@@ -406,10 +406,10 @@ even though no one has provided you with correct labels.  The
 particular notion of ``making sense of'' that we will talk about now
 is the \concept{clustering} task.
 
-\Figure{knn:clustering}{simple clustering data... clusters in UL,
+\Figure{knn_clustering}{simple clustering data... clusters in UL,
   UR and BC.}
 
-Consider the data shown in Figure~\ref{fig:knn:clustering}.  Since
+Consider the data shown in Figure~\ref{fig:knn_clustering}.  Since
 this is unsupervised learning and we do not have access to labels, the
 data points are simply drawn as black dots.  Your job is to split this
 data set into three clusters.  That is, you should label each data
@@ -423,7 +423,7 @@ same as mine.
 
 The $K$-means clustering algorithm is a particularly simple and
 effective approach to producing clusters on data like you see in
-Figure~\ref{fig:knn:clustering}.  The idea is to represent each
+Figure~\ref{fig:knn_clustering}.  The idea is to represent each
 cluster by it's cluster center.  Given cluster centers, we can simply
 assign each point to its nearest center.  Similarly, if we know the
 assignment of points to clusters, we can compute the centers.  This
@@ -431,7 +431,7 @@ introduces a chicken-and-egg problem.  If we knew the clusters, we
 could compute the centers.  If we knew the centers, we could compute
 the clusters.  But we don't know either.
 
-\Figure{knn:kmeans}{first few iterations of k-means running on
+\Figure{knn_kmeans}{first few iterations of k-means running on
   previous data set}
 
 The general computer science answer to chicken-and-egg problems is
@@ -440,11 +440,11 @@ centers.  Based on that guess, we will assign each data point to its
 closest center.  Given these new assignments, we can recompute the
 cluster centers.  We repeat this process until clusters stop moving.
 The first few iterations of the $K$-means algorithm are shown in
-Figure~\ref{fig:knn:kmeans}.  In this example, the clusters converge
+Figure~\ref{fig:knn_kmeans}.  In this example, the clusters converge
 very quickly.
 
 \newalgorithm%
-  {knn:kmeans}%
+  {knn_kmeans}%
   {\FUN{K-Means}(\VAR{$\mat D$}, \VAR{K})}
   {
 \FOR{$\VAR{k} = \CON{1}$ \TO $\VAR{K}$}
@@ -466,7 +466,7 @@ very quickly.
 \RETURN \VAR{$\vec z$} \COMMENT{return cluster assignments}
 }
 
-Algorithm~\ref{alg:knn:kmeans} spells out the $K$-means clustering
+Algorithm~\ref{alg:knn_kmeans} spells out the $K$-means clustering
 algorithm in detail.  The cluster centers are initialized randomly.
 In line 6, data point $\vx_n$ is compared against each cluster center
 $\vec\mu_k$.  It is assigned to cluster $k$ if $k$ is the center with
@@ -501,7 +501,7 @@ are well beyond the scope of this book (and this author!) but suffice
 it to say that $K$-means is fast in practice and is provably fast in
 theory.
 
-%\TODOFigure{knn:kmeansbad}{first few iterations of k-means running on
+%\TODOFigure{knn_kmeansbad}{first few iterations of k-means running on
 %  previous data set with BAD initialization}
 
 It is important to note that although $K$-means is guaranteed to
@@ -511,7 +511,7 @@ unsupervised learning is that we have no way of knowing what the
 ``right answer'' is.  Convergence to a bad solution is usually due to
 poor initialization.  For example, poor initialization in the data set
 from before yields convergence like that seen in
-Figure~\ref{fig:knn:kmeansbad}.  As you can see, the algorithm
+Figure~\ref{fig:knn_kmeansbad}.  As you can see, the algorithm
 \emph{has} converged.  It has just converged to something less than
 satisfactory.
 
@@ -536,7 +536,7 @@ additional problems in high dimensions, both refered to as
 \concept{the curse of dimensionality}.  One is computational, the
 other is mathematical.
 
-\Figure{knn:grid:2d}{2d knn with an overlaid grid, cell with test
+\Figure{knn_grid_2d}{2d knn with an overlaid grid, cell with test
   point highlighted}
 
 From a computational perspective, consider the following problem.
@@ -591,9 +591,9 @@ more like porcupines than like balls.\sidenote{This results was
 The second is that distances between points in high dimensions are all
 approximately the same.
 
-\Figure{knn:cursetwo}{2d spheres in spheres}
+\Figure{knn_cursetwo}{2d spheres in spheres}
 
-Let's start in two dimensions as in Figure~\ref{fig:knn:cursetwo}.
+Let's start in two dimensions as in Figure~\ref{fig:knn_cursetwo}.
 We'll start with four green spheres, each of radius one and each
 touching exactly two other green spheres.  (Remember than in two
 dimensions a ``sphere'' is just a ``circle.'')  We'll place a red
@@ -605,10 +605,10 @@ lies entirely within the cube (cube = square) that contains the grey
 spheres.  (Yes, this is also obvious from the picture, but perhaps you
 can see where this is going.)
 
-\Figure{knn:cursethree}{3d spheres in spheres}
+\Figure{knn_cursethree}{3d spheres in spheres}
 
 Now we can do the same experiment in three dimensions, as shown in
-Figure~\ref{fig:knn:cursethree}.  Again, we can use the pythagorean
+Figure~\ref{fig:knn_cursethree}.  Again, we can use the pythagorean
 theorem to compute the radius of the blue sphere.  Now, we get $1^2 +
 1^2 + 1^2 = (1+r)^2$, so $r = \sqrt3 - 1 \approx 0.73$.  This is still
 entirely enclosed in the cube of width four that holds all eight grey
@@ -636,10 +636,10 @@ $\sqrt9-1 = 2$.  But with a radius of two, the blue hypersphere is now
 edges of the hypercube.  In $10$ dimensional space, the radius is
 approximately $2.16$ and it pokes outside the cube.
 
-\Figure{knn:porcupine}{porcupine versus ball}
+\Figure{knn_porcupine}{porcupine versus ball}
 
 This is why we say that high dimensional spheres look like porcupines
-and not balls (see Figure~\ref{fig:knn:porcupine}).  The moral of this
+and not balls (see Figure~\ref{fig:knn_porcupine}).  The moral of this
 story from a \emph{machine learning} perspective is that intuitions
 you have about space might not carry over to high dimensions.  For
 example, what you think looks like a ``round'' cluster in two or three
@@ -725,16 +725,16 @@ increases.  Third, it treats each dimension independently.  We will
 not address the third issue, as it has not really been solved (though
 it makes a great thought question!).
 
-\Figure{knn:badneighbors}{data set with 5nn, test point closest to
+\Figure{knn_badneighbors}{data set with 5nn, test point closest to
   two negatives, then to three far positives}
 
-Regarding neighborliness, consider Figure~\ref{fig:knn:badneighbors}.
+Regarding neighborliness, consider Figure~\ref{fig:knn_badneighbors}.
 Using $K=5$ nearest neighbors, the test point would be classified as
 positive.  However, we might actually believe that it should be
 classified negative because the two negative neighbors are \emph{much}
 closer than the three positive neighbors.
 
-\Figure{knn:badneighbors2}{same as previous with $\ep$ ball}
+\Figure{knn_badneighbors2}{same as previous with $\ep$ ball}
 
 There are at least two ways of addressing this issue.  The first is
 the \concept{$\ep$-ball} solution.  Instead of connecting each data
@@ -742,7 +742,7 @@ point to some fixed number ($K$) of nearest neighbors, we simply
 connect it to \emph{all} neighbors that fall within some ball of
 radius $\ep$.  Then, the majority class of all the points in the $\ep$
 ball wins.  In the case of a tie, you would have to either guess, or
-report the majority class.  Figure~\ref{fig:knn:badneighbors2} shows an
+report the majority class.  Figure~\ref{fig:knn_badneighbors2} shows an
 $\ep$ ball around the test point that happens to yield the proper
 classification.
 
