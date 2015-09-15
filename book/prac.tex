@@ -123,7 +123,7 @@ A secondary issue is how well these algorithms deal with
 highly correlated, regardless of whether they are correlated with the
 task or not.  For example, having a bright red pixel in an image at
 position $(20,93)$ is probably highly redundant with having a bright
-red pixel at position $(21,93)$.  Both might be useful (eg., for
+red pixel at position $(21,93)$.  Both might be useful (e.g., for
 identifying fire hydrants), but because of how images are structured,
 these two features are likely to co-occur frequently.
 
@@ -170,7 +170,7 @@ label.  This is easy: the probability is $0.5^N$.  Now, we would also
 be confused if it exactly matched \emph{not} the label, which has the
 same probability.  So the chance that it looks perfectly correlated is
 $0.5^N + 0.5^N = 0.5^{N-1}$.  Thankfully, this shrinks down very small
-(eg., $10^{-6}$) after only $21$ data points.
+(e.g., $10^{-6}$) after only $21$ data points.
 
 This makes us happy.  The problem is that we don't have one irrelevant
 feature: we have $D-\log D$ irrelevant features!  If we randomly pick
@@ -281,7 +281,7 @@ sometimes helps!) but eventually we have thrown out all the useful
 features.
 
 \thinkaboutit{Earlier we discussed the problem of \emph{scale} of
-  features (eg., millimeters versus centimeters).  Does this have an
+  features (e.g., millimeters versus centimeters).  Does this have an
   impact on variance-based feature pruning?}
 
 Once you have pruned away irrelevant features, it is often useful to

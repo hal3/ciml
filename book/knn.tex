@@ -18,7 +18,7 @@
 (course reviews) to outputs (course ratings).  As you learned in the
 previous chapter, decomposing an input into a collection of features
 % TODO: make sure this is covered in the previous chapter
-(eg., words that occur in the review) forms the useful abstraction for
+(e.g., words that occur in the review) forms a useful abstraction for
 learning.  Therefore, inputs are nothing more than lists of feature
 values.  This suggests a \concept{geometric view} of data, where we
 have one dimension for every feature.  In this view, examples are
@@ -37,9 +37,9 @@ discovered in \chref{sec:dt}.
 
 \section{From Data to Feature Vectors}
 
-An example, for instance the data in Table~\ref{tab:data:course} from
-the Appendix, is just a collection of feature values about that example.  To
-a person, these features have meaning.  One feature might count how
+An example is just a collection of feature values about that example,
+for instance the data in Table~\ref{tab:data:course} from the Appendix.
+To a person, these features have meaning.  One feature might count how
 many times the reviewer wrote ``excellent'' in a course review.
 Another might count the number of exclamation points.  A third might
 tell us if any text is underlined in the review.
@@ -47,7 +47,7 @@ tell us if any text is underlined in the review.
 To a machine, the \concept{features} themselves have no meaning.  Only
 the \concept{feature values}, and how they vary across examples, mean
 something to the machine.  From this perspective, you can think about
-an example as being reprsented by a \concept{feature vector}
+an example as being represented by a \concept{feature vector}
 consisting of one ``dimension'' for each feature, where each dimenion
 is simply some real value.
 
@@ -84,8 +84,8 @@ figures.
   with the points in Figure~\ref{fig:knn:projections}.}
 
 The mapping from feature values to vectors is straighforward in the
-case of real valued feature (trivial) and binary features (mapped to
-zero or one).  It is less clear what do do with \concept{categorical
+case of real valued features (trivial) and binary features (mapped to
+zero or one).  It is less clear what to do with \concept{categorical
   features}. For example, if our goal is to identify whether an object
 in an image is a tomato, blueberry, cucumber or cockroach, we might
 want to know its color: is it \categ{Red}, \categ{Blue}, \categ{Green}
@@ -110,7 +110,7 @@ categorical feature that takes $V$ values, we can map it to $V$-many
 binary indicator features.
 
 \thinkaboutit{The computer scientist in you might be saying: actually
-  we could map it to $\log_2 K$-many binary features!  Is this a good
+  we could map it to $\log_2 V$-many binary features!  Is this a good
   idea or not?}
 
 With that, you should be able to take a data set and map each example
