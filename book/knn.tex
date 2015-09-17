@@ -645,7 +645,7 @@ you have about space might not carry over to high dimensions.  For
 example, what you think looks like a ``round'' cluster in two or three
 dimensions, might not look so ``round'' in high dimensions.
 
-\TODOFigure{knn:uniform}{100 uniform random points in 1, 2 and 3
+\Figure{knn:uniform}{100 uniform random points in 1, 2 and 3
   dimensions}
 
 The second strange fact we will consider has to do with the distances
@@ -659,10 +659,10 @@ Figure~\ref{fig:knn:uniform} for data distributed uniformly on the
 Now, pick two of these points at random and compute the distance
 between them.  Repeat this process for all pairs of points and average
 the results.  For the data shown in Figure~\ref{fig:knn:uniform}, the
-average distance between points in one dimension is $TODO$; in two
-dimensions is $TODO$; and in three dimensions is $TODO$.
+average distance between points in one dimension is about $0.346$; in two
+dimensions is about $0.518$; and in three dimensions is $0.615$. The fact that these \emph{increase} as the dimension increases is not surprising. The furthest two points can be in a 1-dimensional hypercube (line) is $1$; the furthest in a 2-dimensional hypercube (square) is $\sqrt 2$ (opposite corners); the furthest in a 3-d hypercube is $\sqrt 3$ and so on. In general, the furthest two points in a $D$-dimensional hypercube will be $\sqrt D$.
 
-You can actually compute these value analytically.  Write $\Uni_D$ for
+You can actually compute these values analytically.  Write $\Uni_D$ for
 the uniform distribution in $D$ dimensions.  The quantity we are
 interested in computing is:
 \begin{equation} \label{eq:knn:dist}
@@ -674,12 +674,11 @@ interested in computing is:
 \end{equation}
 We can actually compute this in closed form (see
 Exercise~\ref{ex:knn:dist} for a bit of calculus refresher) and arrive
-at $\textit{avgDist}(D) = TODO$.  Consider what happens as $D
-\rightarrow \infty$.  As $D$ grows, the average distance between
-points in $D$ dimensions goes to $1$!  In other words, \emph{all}
-distances become about the same in high dimensions.
+at $\textit{avgDist}(D) = \sqrt D / 3$. Because we know that the maximum distance between two points grows like $\sqrt D$, this says that the ratio between average distance and maximum distance converges to $1/3$. 
 
-\TODOFigure{knn:uniformhist}{histogram of distances in D=1,2,3,10,20,100}
+What is more interesting, however, is the \emph{variance} of the distribution of distances. You can show that in $D$ dimensions, the variance is \emph{constant} $1/\sqrt{18}$, \emph{independent of $D$}. This means that when you look at (variance) divided-by (max distance), the variance behaves like $1/\sqrt{18 D}$, which means that the effective variance continues to shrink as $D$ grows \cite{brin95nn}.
+
+\Figure{knn:uniformhist}{histogram of distances in D=2,8,32,128,512}
 
 When I first saw and re-proved this result, I was skeptical, as I
 imagine you are.  So I implemented it.  In
@@ -696,8 +695,6 @@ simply cannot work?
 
 \TODOFigure{knn:mnist}{histogram of distances in multiple D for mnist}
 
-\TODOFigure{knn:20ng}{histogram of distances in multiple D for 20ng}
-
 The answer has to be no.  The reason is that the data that we get is
 \emph{not} uniformly distributed over the unit hypercube.  We can see
 this by looking at two real-world data sets.  The first is an image
@@ -706,9 +703,7 @@ Section~\ref{sec:data:mnist}.  Although this data is originally in
 $256$ dimensions ($16$ pixels by $16$ pixels), we can artifically
 reduce the dimensionality of this data.  In Figure~\ref{fig:knn:mnist}
 you can see the histogram of average distances between points in this
-data at a number of dimensions.  Figure~\ref{fig:knn:20ng} shows the
-same sort of histogram for a text data set
-(Section~\ref{sec:data:20ng}.
+data at a number of dimensions.
 
 As you can see from these histograms, distances have \emph{not}
 concentrated around a single value.  This is very good news: it means

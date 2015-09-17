@@ -36,7 +36,9 @@ plt.ylabel('# of pairs of points at that distance')
 plt.title('dimensionality versus uniform point distances')
 
 for i,d in enumerate(Dims):
-    plt.hist(computeDistances(generateUniformDataset(d, N)),
+    distances = computeDistances(generateUniformDataset(d, N))
+    print "D=%d, average distance=%g" % (d, mean(distances) * sqrt(d))
+    plt.hist(distances,
              Bins,
              histtype='step',
              color=Cols[i])
@@ -47,5 +49,6 @@ for i,d in enumerate(Dims):
 
 
 plt.legend(['%d dims' % d for d in Dims])
+plt.savefig('fig.pdf')
 plt.show()
 
