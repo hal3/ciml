@@ -40,6 +40,7 @@ the upper left and 9,9 is the bottom right). Which of these (1vs2 or
 following:
 
 % python KNN.py data/1vs2.tr data/1vs2.tr 1
+
 0.0
 
 This says "do KNN, with 1vs2.tr as the training data and
@@ -51,6 +52,7 @@ K and get error rates for all of them. In particular, you can say
 something like:
 
 % python KNN.py data/1vs2.tr data/1vs2.tr 1 5 10 25 50 100
+
 0.0	0.08	0.12	0.16	0.28	0.5
 
 This runs the same thing for six values of K (1, 5, ..., 100) and
