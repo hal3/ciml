@@ -93,14 +93,14 @@ Now, let's compare these predictions to the truth.  Here's a very
 clever way to compute accuracies (**WU1:** why is this computation
 equivalent to computing classification accuracy?):
 
-```
+```python
 >>> mean((datasets.TennisData.Y > 0) == (h.predictAll(datasets.TennisData.X) > 0))
 0.6428571428571429
 ```
 
 That's training accuracy; let's check test accuracy:
 
-```
+```python
 >>> mean((datasets.TennisData.Yte > 0) == (h.predictAll(datasets.TennisData.Xte) > 0))
 0.5
 ```
@@ -111,7 +111,7 @@ learning anything!!!
 Now, let's use some of the built-in functionality to help do some of
 the grunt work for us.  You'll need to import ``runClassifier``.
 
-```
+```python
 >>> runClassifier.trainTestSet(h, datasets.TennisData)
 Training accuracy 0.642857, test accuracy 0.5
 ```
@@ -125,7 +125,7 @@ simply remember whether +1 is more common or -1 is more common.  It
 will then always predict this label for future data.  Once you've
 implemented this, you can test it:
 
-```
+```python
 >>> h = dumbClassifiers.AlwaysPredictMostFrequent({})
 >>> runClassifier.trainTestSet(h, datasets.TennisData)
 Training accuracy 0.642857, test accuracy 0.5
@@ -135,13 +135,13 @@ AlwaysPredictMostFrequent(1)
 
 Okay, so it does the same as ``AlwaysPredictOne``, but that's
 because +1 is more common in that training data.  We can see a
-difference if we change to a different dataset: ``GenderData`` is
+difference if we change to a different dataset: ``SentimentData`` is
 the data you've seen before, now Python-ified.
 
-```
->>> runClassifier.trainTestSet(dumbClassifiers.AlwaysPredictOne({}), datasets.GenderData)
+```python
+>>> runClassifier.trainTestSet(dumbClassifiers.AlwaysPredictOne({}), datasets.SentimentData)
 Training accuracy 0.503168, test accuracy 0.489
->>> runClassifier.trainTestSet(dumbClassifiers.AlwaysPredictMostFrequent({}), datasets.GenderData)
+>>> runClassifier.trainTestSet(dumbClassifiers.AlwaysPredictMostFrequent({}), datasets.SentimentData)
 Training accuracy 0.503168, test accuracy 0.489
 ```
 
@@ -157,11 +157,9 @@ when ``X[0] <= 0``.  Upon receiving a test point, it checks the
 value of ``X[0]`` and returns the corresponding class.  Once
 you've implemented this, you can check it's performance:
 
-```
+```python
 >>> runClassifier.trainTestSet(dumbClassifiers.FirstFeatureClassifier({}), datasets.TennisData)
 Training accuracy 0.714286, test accuracy 0.666667
->>> runClassifier.trainTestSet(dumbClassifiers.FirstFeatureClassifier({}), datasets.GenderData)
-Training accuracy 0.504668, test accuracy 0.4905
 >>> runClassifier.trainTestSet(dumbClassifiers.FirstFeatureClassifier({}), datasets.SentimentData)
 Training accuracy 0.540833, test accuracy 0.5025
 ```
@@ -189,7 +187,7 @@ at ``util.py`` for some useful functions for implementing
 training.  Once you've implemented the training function, we can test
 it on simple data:
 
-```
+```python
 >>> h = dt.DT({'maxDepth': 1})
 >>> h
 Leaf 1
@@ -204,7 +202,7 @@ Branch 6
 This is for a simple depth-one decision tree (aka a decision stump).
 If we let it get deeper, we get things like:
 
-```
+```python
 >>> h = dt.DT({'maxDepth': 2})
 >>> h.train(datasets.TennisData.X, datasets.TennisData.Y)
 >>> h
@@ -234,11 +232,11 @@ Branch 6
     Leaf 1.0
 ```
 
-We can do something similar on the gender data:
+We can do something similar on the sentiment data:
 
-```
+```python
 >>> h = dt.DT({'maxDepth': 2})
->>> h.train(datasets.GenderData.X, datasets.GenderData.Y)
+>>> h.train(datasets.SentimentData.X, datasets.SentimentData.Y)
 >>> h
 Branch 748
   Branch 287
@@ -250,21 +248,22 @@ Branch 748
 ```
 
 The problem here is that words have been converted into numeric ids
-for features. We can look them up:
+for features. We can look them up (your results here might be
+different due to hashing):
 
-```
->>> GenderData.words[748]
+```python
+>>> SentimentData.words[748]
 'me'
->>> GenderData.words[287]
+>>> SentimentData.words[287]
 'love'
->>> GenderData.words[71]
+>>> SentimentData.words[71]
 'urllink'
 ```
 
 (This last one means "contained a URL reference".) Based on this, we
 can rewrite the tree (by hand) as:
 
-```
+```python
 Branch 'me'
   Branch 'love'
     Leaf 1.0
@@ -277,18 +276,7 @@ Branch 'me'
 Now, you should go implement prediction.  This should be easier than
 training!  We can test by:
 
-```
->>> runClassifier.trainTestSet(dt.DT({'maxDepth': 1}), datasets.GenderData)
-Training accuracy 0.555018, test accuracy 0.553
->>> runClassifier.trainTestSet(dt.DT({'maxDepth': 3}), datasets.GenderData)
-Training accuracy 0.589363, test accuracy 0.5725
->>> runClassifier.trainTestSet(dt.DT({'maxDepth': 5}), datasets.GenderData)
-Training accuracy 0.616539, test accuracy 0.573
-```
-
-Or:
-
-```
+```python
 >>> runClassifier.trainTestSet(dt.DT({'maxDepth': 1}), datasets.SentimentData)
 Training accuracy 0.630833, test accuracy 0.595
 >>> runClassifier.trainTestSet(dt.DT({'maxDepth': 3}), datasets.SentimentData)
@@ -304,10 +292,10 @@ future!
 We can use more ``runClassifier`` functions to generate learning
 curves and hyperparameter curves:
 
-```
->>> curve = runClassifier.learningCurveSet(dt.DT({'maxDepth': 9}), datasets.GenderData)
+```python
+>>> curve = runClassifier.learningCurveSet(dt.DT({'maxDepth': 9}), datasets.SentimentData)
 [snip]
->>> runClassifier.plotCurve('DT on Gender Data', curve)
+>>> runClassifier.plotCurve('DT on Sentiment Data', curve)
 ```
 
 This plots training and test accuracy as a function of the number of
@@ -321,10 +309,10 @@ increasing?
 We can also generate similar curves by chaning the maximum depth
 hyperparameter:
 
-```
->>> curve = runClassifier.hyperparamCurveSet(dt.DT({}), 'maxDepth', [1,2,4,8,16,32], datasets.GenderData)
+```python
+>>> curve = runClassifier.hyperparamCurveSet(dt.DT({}), 'maxDepth', [1,2,4,8,16,32], datasets.SentimentData)
 [snip]
->>> runClassifier.plotCurve('DT on Gender Data (hyperparameter)', curve)
+>>> runClassifier.plotCurve('DT on Sentiment Data (hyperparameter)', curve)
 ```
 
 Now, the x-axis is the value of the maximum depth.
@@ -347,7 +335,7 @@ the ``predict`` function, which does all the work.
 In order to test your implementation, here are some outputs (I suggest
 implementing epsilon-balls first, since they're slightly easier):
 
-```
+```python
 >>> runClassifier.trainTestSet(knn.KNN({'isKNN': False, 'eps': 0.5}), datasets.TennisData)
 Training accuracy 1, test accuracy 1
 >>> runClassifier.trainTestSet(knn.KNN({'isKNN': False, 'eps': 1.0}), datasets.TennisData)
@@ -365,7 +353,7 @@ Training accuracy 0.857143, test accuracy 0.833333
 
 You can also try it on the digits data:
 
-```
+```python
 >>> runClassifier.trainTestSet(knn.KNN({'isKNN': False, 'eps': 6.0}), datasets.DigitData)
 Training accuracy 0.96, test accuracy 0.64
 >>> runClassifier.trainTestSet(knn.KNN({'isKNN': False, 'eps': 8.0}), datasets.DigitData)
