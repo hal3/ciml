@@ -78,7 +78,7 @@ importing ``util``, ``datasets``, ``binary``
 and ``dumbClassifiers``.  Also, be sure you always have ``from
   numpy import **`` and ``from pylab import **`` activated.
 
-```
+```python
 >>> h = dumbClassifiers.AlwaysPredictOne({})
 >>> h
 AlwaysPredictOne
