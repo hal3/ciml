@@ -374,8 +374,8 @@ decision boundaries.  By example, the decision boundary for the
 decision tree in Figure~\ref{fig:knn:dtski} is shown in
 Figure~\ref{fig:knn:dtdb}.  In the figure, space is first split in half
 according to the first query along one axis.  Then, depending on which
-half of the space you you look at, it is either split again along the
-other axis, or simple classified.
+half of the space you look at, it is either split again along the
+other axis, or simply classified.
 
 %\TODOFigure{knn:dtdeepdb}{decision boundary for deep dt on ski data}
 
@@ -545,7 +545,7 @@ large data set.  At the very least you have to look at every training
 example every time you want to make a prediction.  To speed things up
 you might want to create an \emph{indexing} data structure.  You can
 break the plane up into a grid like that shown in
-Figure~\ref{fig:knn:grid}.  Now, when the test point comes in, you can
+Figure~\ref{fig:knn:grid:2d}.  Now, when the test point comes in, you can
 quickly identify the grid cell in which it lies.  Now, instead of
 considering \emph{all} training points, you can limit yourself to
 training points \emph{in that grid cell} (and perhaps the neighboring
@@ -559,7 +559,7 @@ we'll need $125 = 5 \times 5 \times 5$ grid cells.  In four
 dimensions, we'll need $625$.  By the time we get to ``low
 dimensional'' data in $20$ dimensions, we'll need $95,367,431,640,625$
 grid cells (that's $95$ trillion, which is about $6$ to $7$ times the
-US national dept as of January 2011).  So if you're in $20$
+US national debt as of January 2011).  So if you're in $20$
 dimensions, this gridding technique will only be useful if you have at
 least $95$ trillion training examples.
 
@@ -567,7 +567,7 @@ For ``medium dimensional'' data (approximately $1000$) dimesions, the
 number of grid cells is a $9$ followed by $698$ numbers before the
 decimal point.  For comparison, the number of atoms in the universe is
 approximately $1$ followed by $80$ zeros.  So even if each atom
-yielding a googul training examples, we'd still have far fewer
+yielded a googul training examples, we'd still have far fewer
 examples than grid cells.  For ``high dimensional'' data
 (approximately $100000$) dimensions, we have a $1$ followed by just
 under $70,000$ zeros.  Far too big a number to even really comprehend.
@@ -586,7 +586,7 @@ occurances there.  In particular, many of your intuitions that you've
 built up from working in two and three dimensions just do not carry
 over to high dimensions.  We will consider two effects, but there are
 countless others.  The first is that high dimensional spheres look
-more like porcupines than like balls.\sidenote{This results was
+more like porcupines than like balls.\sidenote{This result was
   related to me by Mark Reid, who heard about it from Marcus Hutter.}
 The second is that distances between points in high dimensions are all
 approximately the same.
@@ -595,7 +595,7 @@ approximately the same.
 
 Let's start in two dimensions as in Figure~\ref{fig:knn:cursetwo}.
 We'll start with four green spheres, each of radius one and each
-touching exactly two other green spheres.  (Remember than in two
+touching exactly two other green spheres.  (Remember that in two
 dimensions a ``sphere'' is just a ``circle.'')  We'll place a red
 sphere in the middle so that it touches all four green spheres.  We
 can easily compute the radius of this small sphere.  The pythagorean
@@ -630,7 +630,7 @@ touch them all and will have radius $r = \sqrt D - 1$.
 
 Think about this for a moment.  As the number of dimensions grows, the
 radius of the blue hypersphere \emph{grows without bound!}.  For
-example, in $9$-dimensional the radius of the blue hypersphere is now
+example, in $9$-dimensions the radius of the blue hypersphere is now
 $\sqrt9-1 = 2$.  But with a radius of two, the blue hypersphere is now
 ``squeezing'' between the green hypersphere and \emph{touching} the
 edges of the hypercube.  In $10$ dimensional space, the radius is
@@ -685,12 +685,12 @@ imagine you are.  So I implemented it.  In
 Figure~\ref{fig:knn:uniformhist} you can see the results.  This
 presents a \emph{histogram} of distances between random points in $D$
 dimensions for $D \in \{1,2,3,10,20,100\}$.  As you can see, all of
-these distances begin to concentrate around $1$, even for ``medium
+these distances begin to concentrate around $0.4\sqrt{D}$, even for ``medium
 dimension'' problems.
 
 You should now be terrified: the only bit of information that KNN gets
 is distances.  And you've just seen that in moderately high dimensions,
-all distances becomes equal.  So then isn't is the case that KNN
+all distances becomes equal.  So then isn't it the case that KNN
 simply cannot work?
 
 \TODOFigure{knn:mnist}{histogram of distances in multiple D for mnist}
@@ -803,7 +803,7 @@ shown in Figure~\ref{fig:knn:collapse2} with $L=2$.  Instead of storing the
 entire data set, you would only store the \emph{means} of the $L$
 positive clusters and the means of the $L$ negative clusters.  At test
 time, you would run the $K$-nearest neighbors algorithm against these
-\emph{means} rather than against the full training set.  This leads a
+\emph{means} rather than against the full training set.  This leads to
 a much faster runtime of just $\cO(L D + K \log K)$, which is probably
 dominated by $LD$.
 
