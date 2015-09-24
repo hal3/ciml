@@ -36,13 +36,13 @@ finding a good \concept{linear decision boundary}.
 
 \section{Bio-inspired Learning}
 
-\Figure{perc:neuron}{a picture of a neuron}
+\Figure{perc_neuron}{a picture of a neuron}
 
 Folk biology tells us that our brains are made up of a bunch of little
 units, called \concept{neurons}, that send electrical signals to one
 another.  The \emph{rate} of firing tells us how ``activated'' a
 neuron is.  A single neuron, like that shown in
-Figure~\ref{fig:perc:neuron} might have three incoming neurons.  These
+Figure~\ref{fig:perc_neuron} might have three incoming neurons.  These
 incoming neurons are firing at different rates (i.e., have different
 \concept{activations}).  Based on how much these incoming neurons are
 firing, and how ``strong'' the neural connections are, our main neuron
@@ -51,7 +51,7 @@ whole brain.  Learning in the brain happens by neurons becomming
 connected to other neurons, and the strengths of connections adapting
 over time.
 
-\Figure{perc:example}{figure showing feature vector and weight
+\Figure{perc_example}{figure showing feature vector and weight
   vector and products and sum}
 
 The real biological world is much more complicated than this.
@@ -66,7 +66,7 @@ sum, it decides whether to ``fire'' or not.  Firing is interpreted as
 being a positive example and not firing is interpreted as being a
 negative example.  In particular, if the weighted sum is positive, it
 ``fires'' and otherwise it doesn't fire.  This is shown
-diagramatically in Figure~\ref{fig:perc:example}.
+diagramatically in Figure~\ref{fig:perc_example}.
 
 Mathematically, an input vector $\vx = \langle x_1, x_2, \dots, x_D
 \rangle$ arrives.  The neuron stores $D$-many weights, $w_1, w_2,
@@ -220,7 +220,7 @@ time around!)
 \thinkaboutit{This analysis hold for the case positive examples
   ($y=+1$).  It should also hold for negative examples.  Work it out.}
 
-\Figure{perc:early}{training and test error via early stopping}
+\Figure{perc_early}{training and test error via early stopping}
 
 The only \concept{hyperparameter} of the perceptron algorithm is
 \VAR{MaxIter}, the number of passes to make over the training data.
@@ -228,7 +228,7 @@ If we make many many passes over the training data, then the algorithm
 is likely to overfit.  (This would be like studying \emph{too long}
 for an exam and just confusing yourself.)  On the other hand, going
 over the data only one time might lead to underfitting.  This is shown
-experimentally in Figure~\ref{fig:perc:early}.  The x-axis shows the
+experimentally in Figure~\ref{fig:perc_early}.  The x-axis shows the
 number of passes over the data and the y-axis shows the training error
 and the test error.  As you can see, there is a ``sweet spot'' at
 which test performance begins to degrade due to overfitting.
@@ -250,7 +250,7 @@ would really only have learned from a handful of examples (fifteen in
 this case).
 
 
-\Figure{perc:permute}{training and test error for permuting versus
+\Figure{perc_permute}{training and test error for permuting versus
   not-permuting}
 
 So one thing you need to avoid is presenting the examples in some
@@ -258,7 +258,7 @@ fixed order.  This can easily be accomplished by permuting the order
 of examples once in the beginning and then cycling over the data set
 in the same (permuted) order each iteration.  However, it turns out
 that you can actually do \emph{better} if you re-permute the examples
-in each iteration.  Figure~\ref{fig:perc:permute} shows the effect of
+in each iteration.  Figure~\ref{fig:perc_permute} shows the effect of
 re-permuting on convergence speed.  In practice, permuting each
 iteration tends to yield about $20\%$ savings in number of iterations.
 In theory, you can actually prove that it's expected to be about twice
@@ -298,9 +298,9 @@ they are \concept{perpendicular}.  Thus, if we think of the weights as
 a vector $\vw$, then the decision boundary is simply the plane
 perpendicular to $\vw$.
 
-\Figure{perc:geom}{picture of data points with hyperplane and weight vector}
+\Figure{perc_geom}{picture of data points with hyperplane and weight vector}
 
-This is shown pictorially in Figure~\ref{fig:perc:geom}.  Here, the
+This is shown pictorially in Figure~\ref{fig:perc_geom}.  Here, the
 weight vector is shown, together with it's perpendicular plane.  This
 plane forms the decision boundary between positive points and negative
 points.  The vector points in the direction of the positive examples
@@ -319,7 +319,7 @@ weight vectors, $\vw$, that have length one; i.e., $\norm{\vw} = 1$.
   how do I compute a weight vector $\vw'$ that points in the same
   direction but has a norm of one?}
 
-\Figure{perc:proj}{same picture as before, but with projections onto
+\Figure{perc_proj}{same picture as before, but with projections onto
   weight vector; TODO: then, below, those points along a
   one-dimensional axis with zero marked.}
 
@@ -327,7 +327,7 @@ The geometric intuition can help us even more when we realize that
 dot products compute projections.  That is, the value $\dotp{\vw}{\vx}$
 is just the distance of $\vx$ from the origin when projected
 \emph{onto} the vector $\vw$.  This is shown in
-Figure~\ref{fig:perc:proj}.  In that figure, all the data points are
+Figure~\ref{fig:perc_proj}.  In that figure, all the data points are
 projected onto $\vw$.  Below, we can think of this as a
 one-dimensional version of the data, where each data point is placed
 according to its projection along $\vw$.  This distance along $\vw$ is
@@ -361,11 +361,11 @@ hyperplane divides space in half.  In the rest of this book, we'll
 refer to the weight vector, and to hyperplane it defines,
 interchangeably.
 
-\Figure{perc:update}{perceptron picture with update, no bias}
+\Figure{perc_update}{perceptron picture with update, no bias}
 
 The perceptron update can also be considered geometrically.  (For
 simplicity, we will consider the \concept{unbiased} case.)  Consider
-the situation in Figure~\ref{perc:update}.  Here, we have a current
+the situation in Figure~\ref{perc_update}.  Here, we have a current
 guess as to the hyperplane, and positive training example comes in
 that is currently mis-classified.  The weights are updated: $\vw
 \leftarrow \vw + y \vx$.  This yields the new weight vector, also
@@ -396,7 +396,7 @@ it to decrease.  As long as it is non-positive, the positive example
 will cause it to increase.  Ad infinitum.  (Yes, this is a very
 contrived example.)
 
-\Figure{perc:separable}{separable data}
+\Figure{perc_separable}{separable data}
 
 What does it mean for the perceptron to converge?  It means that it
 can make an entire pass through the training data without making
@@ -404,15 +404,15 @@ can make an entire pass through the training data without making
 \emph{every} training example.  Geometrically, this means that it was
 found some hyperplane that correctly segregates the data into positive
 and negative examples, like that shown in
-Figure~\ref{fig:perc:separable}.
+Figure~\ref{fig:perc_separable}.
 
-\Figure{perc:inseparable}{inseparable data}
+\Figure{perc_inseparable}{inseparable data}
 
 In this case, this data is \concept{linearly separable}.  This means
 that there exists \emph{some} hyperplane that puts all the positive
 examples on one side and all the negative examples on the other side.
 If the training is \emph{not} linearly separable, like that shown in
-Figure~\ref{fig:perc:inseparable}, then the perceptron has no hope of
+Figure~\ref{fig:perc_inseparable}, then the perceptron has no hope of
 converging.  It could never possibly classify each point correctly.
 
 The somewhat surprising thing about the perceptron algorithm is that
@@ -758,14 +758,14 @@ it also does begin to overfit eventually.
 
 \section{Limitations of the Perceptron}
 
-\Figure{perc:xor}{picture of xor problem}
+\Figure{perc_xor}{picture of xor problem}
 
 Although the perceptron is very useful, it is fundamentally limited in
 a way that neither decision trees nor KNN are.  Its limitation is that
 its decision boundaries can \emph{only} be linear.  The classic way of
 showing this limitation is through the XOR problem (XOR = exclusive
 or).  The XOR problem is shown graphically in
-Figure~\ref{fig:perc:xor}.  It consists of four data points, each at a
+Figure~\ref{fig:perc_xor}.  It consists of four data points, each at a
 corner of the unit square.  The labels for these points are the same,
 along the diagonals.  You can try, but you will not be able to find a
 linear decision boundary that perfectly separates these data points.

@@ -445,10 +445,10 @@ binary case.  The result is stated below, but the proof is omitted.
   Why or why not?}
 
 
-\Figure{complex:badova}{data set on which OVA will do terribly with
+\Figure{complex_badova}{data set on which OVA will do terribly with
   linear classifiers}
 
-\thinkaboutit{Consider the data in Figure~\ref{fig:complex:badova} and
+\thinkaboutit{Consider the data in Figure~\ref{fig:complex_badova} and
   assume that you are using a perceptron as the base classifier.  How
   well will OVA do on this data?  What about AVA?}
 
@@ -460,10 +460,10 @@ leaves of this tree correspond to the $K$ labels.  Since there are
 only $\log_2 K$ decisions made to get from the root to a leaf, then
 there are only $\log_2 K$ chances to make an error.
 
-\Figure{complex:tree}{example classification tree for $K=8$}
+\Figure{complex_tree}{example classification tree for $K=8$}
 
 An example of a classification tree for $K=8$ classes is shown in
-Figure~\ref{fig:complex:tree}.  At the root, you distinguish between
+Figure~\ref{fig:complex_tree}.  At the root, you distinguish between
 classes $\{1,2,3,4\}$ and classes $\{5,6,7,8\}$.  This means that you
 will train a binary classifier whose positive examples are all data
 points with multiclass label $\{1,2,3,4\}$ and whose negative examples
@@ -473,11 +473,11 @@ appropriate path in the tree.  When $K$ is not a powwr of $2$, the
 tree will not be full.  This classification tree algorithm achieves
 the following bound.
 
-\begin{theorem}[Tree Error Bound] \label{thm:complex:tree} Suppose the
+\begin{theorem}[Tree Error Bound] \label{thm:complex_tree} Suppose the
   average binary classifiers error is $\ep$.  Then the error rate of
   the tree classifier is \emph{at most} $\ceil{\log_2 K} \ep$.
 \end{theorem}
-\begin{myproof}{\ref{thm:complex:tree}}
+\begin{myproof}{\ref{thm:complex_tree}}
   A multiclass error is made if any classifier on the path from the
   root to the correct leaf makes an error.  Each has probability $\ep$
   of making an error and the path consists of at most $\ceil{\log_2
@@ -761,7 +761,7 @@ it achieves a better error bound, shown below:
 
 \section{Collective Classification}
 
-\Figure{complex:face}{example face finding image and pixel mask}
+\Figure{complex_face}{example face finding image and pixel mask}
 
 You are writing new software for a digital camera that does face
 identification.  However, instead of simply finding a bounding box
@@ -770,7 +770,7 @@ around faces in an image, you must predict where a face is \emph{at
 pixels: this is a really low resolution camera!) and your output is a
 set of $100\times 100$ binary predictions about each pixel.  You are
 given a large collection of training examples.  An example
-input/output pair is shown in Figure~\ref{fig:complex:face}.
+input/output pair is shown in Figure~\ref{fig:complex_face}.
 
 Your first attempt might be to train a binary classifier to predict
 whether pixel $(i,j)$ is part of a face or not.  You might feed in
@@ -778,10 +778,10 @@ features to this classifier about the RGB values of pixel $(i,j)$ as
 well as pixels in a window arround that.  For instance, pixels in the
 region $\{(i+k,j+l) : k \in [-5,5], l \in [-5,5]\}$.
 
-\Figure{complex:facebad}{bad pixel mask for previous image}
+\Figure{complex_facebad}{bad pixel mask for previous image}
 
 You run your classifier and notice that it predicts weird things, like
-what you see in Figure~\ref{fig:complex:facebad}.  You then realize
+what you see in Figure~\ref{fig:complex_facebad}.  You then realize
 that predicting each pixel independently is a bad idea!  If pixel
 $(i,j)$ is part of a face, then this significantly increases the
 chances that pixel $(i+1,j)$ is also part of a face.  (And similarly
@@ -844,12 +844,12 @@ guesses, and then try to improve these guesses over time.
   this too: skip forward to Chapter~\ref{sec:srl} for lots more detail
   here!}
 
-\Figure{complex:stacking}{a charicature of how stacking works}
+\Figure{complex_stacking}{a charicature of how stacking works}
 
 This is the idea of \concept{stacking} for solving collective
-classification (see Figure~\ref{fig:complex:stacking}.  You can train
+classification (see Figure~\ref{fig:complex_stacking}.  You can train
 $5$ classifiers.  The first classifier \emph{just} predicts the value
-of each pixel independently, like in Figure~\ref{fig:complex:facebad}.
+of each pixel independently, like in Figure~\ref{fig:complex_facebad}.
 This doesn't use any of the graph structure at all.  In the second
 level, you can repeat the classification.  However, you can use the
 outputs from the first level as initial guesses of labels.  In
