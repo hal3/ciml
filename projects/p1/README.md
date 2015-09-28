@@ -161,7 +161,7 @@ you've implemented this, you can check it's performance:
 >>> runClassifier.trainTestSet(dumbClassifiers.FirstFeatureClassifier({}), datasets.TennisData)
 Training accuracy 0.714286, test accuracy 0.666667
 >>> runClassifier.trainTestSet(dumbClassifiers.FirstFeatureClassifier({}), datasets.SentimentData)
-Training accuracy 0.540833, test accuracy 0.5025
+Training accuracy 0.504167, test accuracy 0.5025
 ```
 
 
