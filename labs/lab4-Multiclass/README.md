@@ -1,4 +1,4 @@
-# Lab 3: Multiclass
+# Lab 4: Multiclass
 
 In this lab we'll explore two methods for multiclass to binary
 reduction: OAA (one against all) and AllPairs (aka all versus all). I
