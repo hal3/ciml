@@ -275,7 +275,7 @@ question on a random example and observe a value of ``no.''  Further
 suppose that you must \emph{immediately} guess the label for this
 example.  You will guess ``like,'' because that's the more prevalent
 label in the NO set (actually, it's the \emph{only} label in the NO
-set).  Alternatively, if you recieve an answer of ``yes,'' you will
+set).  Alternatively, if you receive an answer of ``yes,'' you will
 guess ``hate'' because that is more prevalent in the YES set.
 
 So, for this single feature, you know what you \emph{would} guess if
@@ -354,7 +354,7 @@ the current piece of the training data that you are looking at.
 \IF{\VAR{tree} is of the form \STR{Leaf}(\VAR{guess})}
 \RETURN \VAR{guess}
 \ELSIF{\VAR{tree} is of the form \STR{Node}(\VAR{f}, \VAR{left}, \VAR{right})}
-\IF{\VAR{f} $=$ \CON{yes} in \VAR{test point}}
+\IF{\VAR{f} $=$ \CON{no} in \VAR{test point}}
 \RETURN \FUN{DecisionTreeTest}(\VAR{left}, \VAR{test point})
 \ELSE
 \RETURN \FUN{DecisionTreeTest}(\VAR{right}, \VAR{test point})
@@ -366,7 +366,7 @@ Putting this all together, we arrive at the algorithm shown in
 Algorithm~\ref{alg:dt:train}.\sidenote{There are more nuanced
   algorithms for building decision trees, some of which are discussed
   in later chapters of this book.  They primarily differ in how they
-  compute the \emph{score} funciton.}  This function,
+  compute the \emph{score} function.}  This function,
 \FUN{DecisionTreeTrain} takes two arguments: our data, and the set of
 as-yet unused features.  It has two base cases: either the data is
 unambiguous, or there are no remaining features.  In either case, it
@@ -561,7 +561,7 @@ That is, our training error is simply our \emph{average error} over
 the training data.  \thinkaboutit{Verify by calculation that we can
   write our training error as $\Ep_{(\vx,y) \sim D} \big[ \ell(y,
   f(\vx)) \big]$, by thinking of $D$ as a distribution that places
-  probability $1/N$ to each example in $D$ and probabiliy $0$ on
+  probability $1/N$ to each example in $D$ and probability $0$ on
   everything else.}
 
 Of course, we can drive $\hat \ep$ to zero by simply memorizing our
