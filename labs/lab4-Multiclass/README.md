@@ -70,17 +70,18 @@ Switching to the smaller data set for a minute, we can train, say,
 depth 3 decision trees:
 
 ```python
->>> h = multiclass.OAA(5, lambda: DecisionTreeClassifier(max_depth=1))
+>>> h = multiclass.OAA(5, lambda: DecisionTreeClassifier(max_depth=3))
 >>> h.train(WineDataSmall.X, WineDataSmall.Y)
 >>> P = h.predictAll(WineDataSmall.Xte)
 >>> mean(P == WineDataSmall.Yte)
-0.54266958424507611
+0.60393873085339167
 >>> mean(WineDataSmall.Yte == 1)
 0.40700218818380746
 ```
 
-So using depth 3 trees we get an accuracy of 54%, versus a baseline of
-41%. That not too terrible, but not great.
+So using depth 3 trees we get an accuracy of about 60% (this number
+varies a bit), versus a baseline of 41%. That's not too terrible, but
+not great.
 
 We can look at what this classifier is doing.
 
@@ -91,8 +92,8 @@ We can look at what this classifier is doing.
 ```
 
 This should show the tree that's associated with predicting label 0
-(which is stored in h.f[0]). The +1s mean "likely to be
-Sauvignon-Blanc" and the -1s mean "likely not to be".
+(which is stored in h.f[0]). The 1s mean "likely to be
+Sauvignon-Blanc" and the 0s mean "likely not to be".
 
 (A) What words are most indicative of *being* Sauvignon-Blanc? Which
 words are most indicative of not being Sauvignon-Blanc? What about
