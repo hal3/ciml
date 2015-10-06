@@ -69,11 +69,11 @@ rather to optimize some other measure, like f-score or AUC.  You want
 your algorithm to make \emph{some} positive predictions, and simply
 prefer those to be ``good.''  We will shortly discuss two heuristics
 for dealing with this problem: subsampling and weighting.  In
-subsampling, you \emph{throw out} some of you negative examples so
+subsampling, you \emph{throw out} some of your negative examples so
 that you are left with a balanced data set ($50\%$ positive, $50\%$
 negative).  This might scare you a bit since throwing out data seems
 like a bad idea, but at least it makes learning much more efficient.
-In weighting, instead of throwing out positive examples, we just given
+In weighting, instead of throwing out positive examples, we just give
 them lower weight.  If you assign an \concept{importance weight} of
 $0.00101$ to each of the positive examples, then there will be as much
 \emph{weight} associated with positive examples as negative examples.
@@ -139,7 +139,7 @@ In order to do this, you need to define a \emph{transformation} that
 maps a concrete weighted problem into a concrete unweighted problem.
 This transformation needs to happen both at training time and at test
 time (though it need not be the same transformation!).
-Algorithm~\ref{alg:complex:subsampletrain} sketches a training-time
+Algorithm~\ref{alg:complex:subsamplemap} sketches a training-time
 \concept{sub-sampling} transformation and
 Algorithm~\ref{alg:complex:subsampletest} sketches a test-time
 transformation (which, in this case, is trivial).  All the training
@@ -156,7 +156,7 @@ optimal algorithm.  You can prove the following result:
 
 \begin{theorem}[Subsampling Optimality] \label{thm:complex:subsample}
   Suppose the binary classifier trained in
-  Algorithm~\ref{alg:complex:subsampletrain} achieves a binary error
+  Algorithm~\ref{alg:complex:subsamplemap} achieves a binary error
   rate of $\ep$.  Then the error rate of the weighted predictor is
   equal to $\al\ep$.
 \end{theorem}
@@ -176,7 +176,7 @@ error metric on which it is evaluated is $\al$ times bigger!
 The proof of this theorem is so straightforward that we will prove it
 here.  It simply involves some algebra on expected values.
 
-\begin{myproof}{\ref{thm:complex:subsampletrain}}
+\begin{myproof}{\ref{thm:complex:subsample}}
   Let $\cD^w$ be the original distribution and let $\cD^b$ be the
   induced distribution.  Let $f$ be the binary classifier trained on
   data from $\cD^b$ that achieves a binary error rate of $\ep^b$ on
@@ -318,14 +318,14 @@ algorithm can output a confidence, as discussed in Section~\ref{}, you
 can often do better by using the confidence as $y$, rather than a
 simple $\pm1$.)
 
-\thinkaboutit{Why would using a confidence help.}
+\thinkaboutit{Why would using a confidence help?}
 
-OVA is very natural, easy to implement, and quite natural.  It also
+OVA is quite natural and easy to implement.  It also
 works very well in practice, so long as you do a good job choosing a
 good binary classification algorithm \emph{tuning} its hyperparameters
 well.  Its weakness is that it can be somewhat brittle.  Intuitively,
 it is not particularly robust to errors in the underlying classifiers.
-If \emph{one} classifier makes a mistake, it eis possible that the
+If \emph{one} classifier makes a mistake, it is possible that the
 entire prediction is erroneous.  In fact, it is entirely possible that
 \emph{none} of the $K$ classifiers predicts positive (which is
 actually the worst-case scenario from a theoretical perspective)!
@@ -338,7 +338,7 @@ This is made explicit in the OVA error bound below.
 \end{theorem}
 
 \begin{myproof}{\ref{thm:complex:ova}}
-  The key question is erroneous predictions from the binary
+  The key question is how erroneous predictions from the binary
   classifiers lead to multiclass errors.  We break it down into false
   negatives (predicting -1 when the truth is +1) and false positives
   (predicting +1 when the truth is -1).
@@ -469,7 +469,7 @@ will train a binary classifier whose positive examples are all data
 points with multiclass label $\{1,2,3,4\}$ and whose negative examples
 are all data points with multiclass label $\{5,6,7,8\}$.  Based on
 what decision is made by this classifier, you can walk down the
-appropriate path in the tree.  When $K$ is not a powwr of $2$, the
+appropriate path in the tree.  When $K$ is not a power of $2$, the
 tree will not be full.  This classification tree algorithm achieves
 the following bound.
 
@@ -484,7 +484,7 @@ the following bound.
     K}$ binary decisions.
 \end{myproof}
 
-One think to keep in mind with tree classifiers is that you have
+One thing to keep in mind with tree classifiers is that you have
 control over how the tree is defined.  In OVA and AVA you have no say
 in what classification problems are created.  In tree classifiers, the
 only thing that matters is that, at the root, half of the classes are
@@ -599,7 +599,7 @@ For non-bipartite ranking problems, you can do better.  First, when
 the preferences that you get at training time are more nuanced than
 ``relevant or not,'' you can incorporate these preferences at training
 time.  Effectively, you want to give a higher weight to binary
-problems that are very different in terms of perference than others.
+problems that are very different in terms of preference than others.
 Second, rather than producing a list of scores and then calling an
 arbitrary sorting algorithm, you can actually use the preference
 function as the sorting function inside your own implementation of
@@ -616,7 +616,7 @@ express the fact that making a mistake on some pairs is worse than
 making a mistake on others.  This will be encoded in a cost function
 $\om$ (omega), where $\om(i,j)$ is the cost for accidentally putting
 something in position $j$ when it should have gone in position $i$.
-To be a valid cost function valid, $\om$ must be (1) symmetric, (2)
+To be a valid cost function, $\om$ must be (1) symmetric, (2)
 monotonic and (3) satisfy the triangle inequality.  Namely: (1)
 $\om(i,j) = \om(j,i)$; (2) if $i<j<k$ or $i>j>k$ then $\om(i,j) \leq
 \om(i,k)$; (3) $\om(i,j) + \om(j,k) \geq \om(i,k)$.  With these
@@ -726,18 +726,18 @@ In order to \emph{solve} this problem, you can follow a recipe similar
 to the naive approach sketched earlier.  At training time, the biggest
 change is that you can \emph{weight} each training example by how bad
 it would be to mess it up.  This change is depicted in
-Algorithm~\ref{alg:complex:ranktrain}, where the binary classiciation
+Algorithm~\ref{alg:complex:ranktrain}, where the binary classification
 data has \emph{weights} \VAR{$w$} provided for saying how important a
 given example is.  These weights are derived from the cost function
 $\om$.
 
 At test time, instead of predicting scores and then sorting the list,
-you essentially run the quicksort algorith, using $f$ as a comparison
+you essentially run the quicksort algorithm, using $f$ as a comparison
 function.  At each step in Algorithm~\ref{alg:complex:ranktest}, a
 pivot $p$ is chosen.  Every other object $u$ is compared to $p$ using
 $f$.  If $f$ thinks $u$ is better, then it is sorted on the left;
 otherwise it is sorted on the right.  There is one major difference
-between this algorithmand quicksort: the comparison function is
+between this algorithm and quicksort: the comparison function is
 allowed to be \emph{probabilistic}.  If $f$ outputs probabilities, for
 instance it predicts that $u$ has an $80\%$ probability of being
 better than $p$, then it puts it on the left with $80\%$ probability
@@ -798,10 +798,10 @@ at the same time.
 The most general way to formulate these problems is as (undirected)
 \concept{graph} prediction problems.  Our input now takes the form of
 a graph, where the vertices are input/output pairs and the edges
-represent the correlations among the putputs.  (Note that edges do not
+represent the correlations among the outputs.  (Note that edges do not
 need to express correlations among the inputs: these can simply be
 encoded on the nodes themselves.)  For example, in the face
-identification case, each pixel would correspond to an vertex in the
+identification case, each pixel would correspond to a vertex in the
 graph.  For the vertex that corresponds to pixel $(5,10)$, the input
 would be whatever set of features we want about that pixel (including
 features about neighboring pixels).  There would be edges between that
@@ -828,7 +828,7 @@ $\Ep_{(V,E) \sim \cD} \left[
 
 In collective classification, you would like to be able to use the
 labels of neighboring vertices to help predict the label of a given
-vertex.  For instance, you might want to add features to the predict
+vertex.  For instance, you might want to add features to the prediction
 of a given vertex based on the labels of each neighbor.  At training
 time, this is easy: you get to see the true labels of each neighbor.
 However, at test time, it is much more difficult: you are, yourself,
@@ -847,7 +847,7 @@ guesses, and then try to improve these guesses over time.
 \Figure{complex:stacking}{a charicature of how stacking works}
 
 This is the idea of \concept{stacking} for solving collective
-classification (see Figure~\ref{fig:complex:stacking}.  You can train
+classification (see Figure~\ref{fig:complex:stacking}).  You can train
 $5$ classifiers.  The first classifier \emph{just} predicts the value
 of each pixel independently, like in Figure~\ref{fig:complex:facebad}.
 This doesn't use any of the graph structure at all.  In the second
