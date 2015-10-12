@@ -90,15 +90,15 @@ recommender system setting, an example would be some particular
 Student/Course pair (such as Alice/Algorithms).  The desired
 prediction would be the rating that Alice would give to Algorithms.
 
-%\TODOFigure{dt:induction}{A figure showing training data to a
+%\TODOFigure{dt_induction}{A figure showing training data to a
 %  ML algorithm to a function $f$ and then predictions on test data.}
 
-\Figure{dt:induction}{The general supervised approach to machine
+\Figure{dt_induction}{The general supervised approach to machine
   learning: a learning algorithm reads in training data and computes a
   learned function $f$.  This function can then automatically label
   future text examples.}
 
-To make this concrete, Figure~\ref{fig:dt:induction} shows the general
+To make this concrete, Figure~\ref{fig:dt_induction} shows the general
 framework of \concept{induction}.  We are given \concept{training
   data} on which our algorithm is expected to learn.  This training
 data is the examples that Alice observes in her machine learning
@@ -194,15 +194,15 @@ The goal in learning is to figure out what questions to ask, in what
 order to ask them, and what answer to predict once you have asked
 enough questions.
 
-%\TODOFigure{dt:example}{A simple picture of a decision tree for course recommendation, consistent with the text example.}
+%\TODOFigure{dt_example}{A simple picture of a decision tree for course recommendation, consistent with the text example.}
 
 \MoveNextFigure{-10cm}
-\Figure{dt:example}{A decision tree for a course recommender system,
+\Figure{dt_example}{A decision tree for a course recommender system,
   from which the in-text ``dialog'' is drawn.}
 
 The decision tree is so-called because we can write our set of
 questions and guesses in a tree format, such as that in
-Figure~\ref{fig:dt:example}.  In this figure, the questions are
+Figure~\ref{fig:dt_example}.  In this figure, the questions are
 written in the internal tree nodes (rectangles) and the guesses are
 written in the leaves (ovals).  Each non-terminal node has two
 children: the left child specifies what to do if the answer to the
@@ -233,12 +233,12 @@ decision tree \emph{greedily.}  We will begin by asking:
 
 {\bf If I could only ask one question, what question would I ask?}
 
-%\TODOFigure{dt:histogram}{A figure showing the histogram of labels
+%\TODOFigure{dt_histogram}{A figure showing the histogram of labels
 %  given features for the first four features from the data in the
 %  appendix.}
 
 \MoveNextFigure{-10cm}
-\Figure{dt:histogram}{A histogram of labels for (a) the entire data
+\Figure{dt_histogram}{A histogram of labels for (a) the entire data
   set; (b-e) the examples in the data set for each value of the first
   four features.}
 
@@ -253,7 +253,7 @@ guess whether this student will enjoy this course.\sidenote{A
   \url{http://blog.computationalcomplexity.org/2007/04/getting-8-year-old-interested-in.html}.}
 A useful way to think about this is to look at the \concept{histogram}
 of labels for each feature.  This is shown for the first four features
-in Figure~\ref{fig:dt:histogram}.  Each histogram shows the frequency
+in Figure~\ref{fig:dt_histogram}.  Each histogram shows the frequency
 of ``like''/``hate'' labels for each possible value of an associated
 feature.  From this figure, you can see that asking the first feature
 is not useful: if the value is ``no'' then it's hard to guess the
@@ -270,7 +270,7 @@ answer of ``no'' -- let's call that the ``NO'' set.  Some of the
 training examples have an answer of ``yes'' -- let's call that the
 ``YES'' set.  For each set (NO and YES) we will build a histogram over
 the labels.  This is the second histogram in
-Figure~\ref{fig:dt:histogram}.  Now, suppose you were to ask this
+Figure~\ref{fig:dt_histogram}.  Now, suppose you were to ask this
 question on a random example and observe a value of ``no.''  Further
 suppose that you must \emph{immediately} guess the label for this
 example.  You will guess ``like,'' because that's the more prevalent
@@ -290,7 +290,7 @@ In the YES set (where you guessed ``hate'') you would classify $8$
 
 \thinkaboutit{How many training examples would you classify correctly
   for each of the other three features from
-  Figure~\ref{fig:dt:histogram}?}
+  Figure~\ref{fig:dt_histogram}?}
 
 You will then repeat this computation for each of the available
 features to us, compute the scores for each of them.  When you must

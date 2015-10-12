@@ -45,13 +45,13 @@ linear!  Namely, they are unable to learn arbitrary decision
 boundaries.  In contrast, decision trees and $K$NN \emph{could} learn
 arbitrarily complicated decision boundaries.
 
-\Figure{nnet:twolayer}{picture of a two-layer network with 5
+\Figure{nnet_twolayer}{picture of a two-layer network with 5
   inputs and two hidden units}
 
 One approach to doing this is to chain together a collection of
 perceptrons to build more complex \concept{neural networks}.  An
 example of a \concept{two-layer network} is shown in
-Figure~\ref{fig:nnet:twolayer}.  Here, you can see five inputs
+Figure~\ref{fig:nnet_twolayer}.  Here, you can see five inputs
 (features) that are fed into two \concept{hidden units}.  These hidden
 units are then fed in to a single \concept{output unit}.  Each edge in
 this figure corresponds to a different weight.  (Even though it looks
@@ -86,13 +86,13 @@ the activation is $+1$.  This is a potentially useful activiation
 function, but you might already have guessed the problem with it: it
 is non-differentiable.
 
-\Figure{nnet:tanh}{picture of sign versus tanh}
+\Figure{nnet_tanh}{picture of sign versus tanh}
 
 EXPLAIN BIAS!!!
 
 A more popular link function is the \concept{hyperbolic tangent}
 function, $\tanh$.  A comparison between the sign function and the
-$\tanh$ function is in Figure~\ref{fig:nnet:tanh}.  As you can see, it
+$\tanh$ function is in Figure~\ref{fig:nnet_tanh}.  As you can see, it
 is a reasonable approximation to the sign function, but is convenient
 in that it is differentiable.\sidenote{It's derivative is just
   $1-\tanh^2(x)$.}  Because it looks like an ``S'' and because the
@@ -100,7 +100,7 @@ Greek character for ``S'' is ``Sigma,'' such functions are usually
 called \concept{sigmoid} functions.
 
 \newalgorithm%
-  {nnet:twolayerpredict}%
+  {nnet_twolayerpredict}%
   {\FUN{TwoLayerNetworkPredict}(\VAR{$\mat W$}, \VAR{$\vec v$}, \VAR{$\hat\vx$})}
   {
 \FOR{\VAR{i} = \CON{1} \TO \VAR{number of hidden units}}
@@ -114,7 +114,7 @@ called \concept{sigmoid} functions.
 
 Assuming for now that we are using $\tanh$ as the link function, the
 overall prediction made by a two-layer network can be computed using
-Algorithm~\ref{alg:nnet:twolayerpredict}.  This function takes a
+Algorithm~\ref{alg:nnet_twolayerpredict}.  This function takes a
 matrix of weights $\mat W$ corresponding to the first layer weights
 and a vector of weights $\vec v$ corresponding to the second layer.
 You can write this entire computation out in one line as:
@@ -180,7 +180,7 @@ partially provided in the following Theorem, due originally to George
 Cybenko for one particular type of link function, and extended later
 by Kurt Hornik to arbitrary link functions.
 
-\begin{theorem}[Two-Layer Networks are Universal Function Approximators] \label{thm:nnet:twolayer}
+\begin{theorem}[Two-Layer Networks are Universal Function Approximators] \label{thm:nnet_twolayer}
 %
   Let $F$ be a continuous function on a bounded subset of
   $D$-dimensional space.  Then there exists a two-layer neural network
@@ -250,7 +250,7 @@ Again, this is mostly for historic reasons.  You could easily replace
 squared error with your loss function of choice.  Our overall
 objective is:
 %
-\optimizeuc{nnet:twolayer}{\mat W,\vec v}{%
+\optimizeuc{nnet_twolayer}{\mat W,\vec v}{%
   \sum_n \frac 1 2 \left( \textcolor{darkblue}{y_n - 
      \sum_i v_i f(\dotp{\vec w_i}{\vx_n})}
      \right)^2}
@@ -327,7 +327,7 @@ at $\vw_i$ should also flip signs.  The name
 gradients backward through the network, starting at the end.
 
 \newalgorithm%
-  {nnet:twolayertrain}%
+  {nnet_twolayertrain}%
   {\FUN{TwoLayerNetworkTrain}(\VAR{$\mat D$}, \VAR{$\eta$}, \VAR{K}, \VAR{MaxIter})}
   {
 \SETST{$\mat W$}{$D \times K$ matrix of small random values}
@@ -366,7 +366,7 @@ gradients backward through the network, starting at the end.
 
 The complete instantiation of gradient descent for a two layer network
 with $K$ hidden units is sketched in
-Algorithm~\ref{alg:nnet:twolayertrain}.  Note that this really is
+Algorithm~\ref{alg:nnet_twolayertrain}.  Note that this really is
 \emph{exactly} a gradient descent algorithm; the only different is
 that the computation of the gradients of the input layer is moderately
 complicated.
@@ -388,7 +388,7 @@ them together.
 
 Based on what you know about linear models, you might be tempted to
 initialize all the weights in a neural network to zero.  You might
-also have noticed that in Algorithm~\ref{al:nnet:twolayertrain}, this
+also have noticed that in Algorithm~\ref{al:nnet_twolayertrain}, this
 is not what's done: they're initialized to small random values.  The
 question is why?
 
@@ -429,7 +429,7 @@ and they were all symmetric: then finding one of them would be as good
 as finding any other.  Unfortunately there are additional local
 optima that are \emph{not} global optima.
 
-\Figure{nnet:converge}{convergence of randomly initialized networks}
+\Figure{nnet_converge}{convergence of randomly initialized networks}
 
 Random initialization of the weights of a network is a way to address
 \emph{both} of these problems.  By initializing a network with small
@@ -439,7 +439,7 @@ by training a collection of networks, each with a different random
 initialization, you can often obtain better solutions that with just
 one initialization.  In other words, you can train ten networks with
 different random seeds, and then pick the one that does best on
-held-out data.  Figure~\ref{fig:nnet:converge} shows prototypical
+held-out data.  Figure~\ref{fig:nnet_converge} shows prototypical
 \emph{test-set} performance for ten networks with different random
 initialization, plus an eleventh plot for the trivial symmetric
 network initialized with zeros.
@@ -475,20 +475,20 @@ different hidden units are doing.
 
 \section{Beyond Two Layers}
 
-\Figure{nnet:layered}{multi-layer network}
+\Figure{nnet_layered}{multi-layer network}
 
 The definition of neural networks and the back-propagation algorithm
 can be generalized beyond two layers to any arbitrary directed acyclic
 graph.  In practice, it is most common to use a layered network like
-that shown in Figure~\ref{fig:nnet:layered} unless one has a very
+that shown in Figure~\ref{fig:nnet_layered} unless one has a very
 strong reason (aka inductive bias) to do something different.
 However, the view as a directed graph sheds a different sort of
 insight on the back-propagation algorithm.
 
-\Figure{nnet:dag}{DAG network}
+\Figure{nnet_dag}{DAG network}
 
 Suppose that your network structure is stored in some directed acyclic
-graph, like that in Figure~\ref{fig:nnet:dag}.  We index nodes in this
+graph, like that in Figure~\ref{fig:nnet_dag}.  We index nodes in this
 graph as $u,v$.  The activation \emph{before} applying non-linearity
 at a node is $a_u$ and after non-linearity is $h_u$.  The graph has a
 single sink, which is the output node $y$ with activation $a_y$ (no
@@ -505,7 +505,7 @@ activation of the sink $y$ given the inputs.  Back-propagation
 computes derivatives of the edge weights for a given input.
 
 \newalgorithm%
-  {nnet:forwardprop}%
+  {nnet_forwardprop}%
   {\FUN{ForwardPropagation}{($\vx$)}}
   {
 \FORALL{input nodes $u$}
@@ -518,7 +518,7 @@ computes derivatives of the edge weights for a given input.
 \RETURN $a_y$
 }
 \newalgorithm%
-  {nnet:backprop}%
+  {nnet_backprop}%
   {\FUN{BackPropagation}{($\vx$, $y$)}}
   {
 \STATE{run \FUN{ForwardPropagation}(\VAR{$\vx$}) to compute activations}
@@ -535,18 +535,18 @@ computes derivatives of the edge weights for a given input.
 \RETURN all gradients $g_e$
 }
 
-\Figure{nnet:forwardprop}{picture of forward prop}
+\Figure{nnet_forwardprop}{picture of forward prop}
 
 The key aspect of the \concept{forward-propagation} algorithm is to
 iteratively compute activations, going deeper and deeper in the DAG.
 Once the activations of all the parents of a node $u$ have been
 computed, you can compute the activation of node $u$.  This is spelled
-out in Algorithm~\ref{alg:nnet:forwardprop}.  This is also explained
-pictorially in Figure~\ref{fig:nnet:forwardprop}.
+out in Algorithm~\ref{alg:nnet_forwardprop}.  This is also explained
+pictorially in Figure~\ref{fig:nnet_forwardprop}.
 
-\Figure{nnet:backprop}{picture of back prop}
+\Figure{nnet_backprop}{picture of back prop}
 
-Back-propagation (see Algorithm~\ref{alg:nnet:backprop}) does the
+Back-propagation (see Algorithm~\ref{alg:nnet_backprop}) does the
 opposite: it computes gradients top-down in the network.  The key idea
 is to compute an \emph{error} for each node in the network.  The error
 at the output unit is the ``true error.''  For any input unit, the
@@ -554,7 +554,7 @@ error is the amount of gradient that we see coming from our children
 (i.e., higher in the network).  These errors are computed backwards in
 the network (hence the name \concept{back-propagation}) along with the
 gradients themselves.  This is also explained pictorially in
-Figure~\ref{fig:nnet:backprop}.
+Figure~\ref{fig:nnet_backprop}.
 
 Given the back-propagation algorithm, you can directly run gradient
 descent, using it as a subroutine for computing the gradients.
