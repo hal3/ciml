@@ -21,9 +21,9 @@
 \item Apply several debugging techniques to learning algorithms.
 \end{learningobjectives}
 
-TODO: one two two examples per feature
+TODO: one to two examples per feature
 
-\dependencies{\chref{ch:dt},\chref{ch:knn},\chref{ch:perc}}
+\dependencies{\chref{sec:dt},\chref{sec:knn},\chref{sec:perc}}
 
 \newthought{At this point,} you have seen three qualitatively
 different models for learning: decision trees, nearest neighbors, and
@@ -71,7 +71,7 @@ algorithms don't care about features: they only care about feature
 values.  So I can \emph{permute} all of the features, with no effect
 on the learning algorithm (so long as I apply the same permutation to
 all training and test examples).  Figure~\ref{fig:prac:imagepix} shows
-some images whos pixels have been randomly permuted (in this case only
+some images whose pixels have been randomly permuted (in this case only
 the pixels are permuted, not the colors).  All of these objects are
 things that you've seen plenty of examples of; can you identify them?
 Should you expect a machine to be able to?
@@ -192,7 +192,7 @@ left as Exercise~\ref{ex:prac:dtbound} for those who want some
 practice with probabilistic analysis.)  Suffice it to say that even
 decision trees can become confused.
 
-\TODOFigure{prac:addirel}{data from high dimensional warning, interpolated}
+\TODOFigure{prac:addirrel}{data from high dimensional warning, interpolated}
 
 In the case of \concept{$K$-nearest neighbors}, the situation is
 perhaps more dire.  Since KNN weighs each feature just as much as
@@ -793,7 +793,7 @@ between two responses has mean zero and unknown variance.  The t-test
 actually assumes that data is distributed according to a Gaussian
 distribution, which is probably \emph{not} true of binary responses.
 Fortunately, for large samples (at least a few hundred), binary
-seamples are well approximated by a Gaussian distribution.  So long as
+samples are well approximated by a Gaussian distribution.  So long as
 your sample is sufficiently large, the t-test is reasonable either for
 regression or classification problems.
 

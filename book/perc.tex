@@ -365,7 +365,7 @@ interchangeably.
 
 The perceptron update can also be considered geometrically.  (For
 simplicity, we will consider the \concept{unbiased} case.)  Consider
-the situation in Figure~\ref{perc:update}.  Here, we have a current
+the situation in Figure~\ref{fig:perc:update}.  Here, we have a current
 guess as to the hyperplane, and positive training example comes in
 that is currently mis-classified.  The weights are updated: $\vw
 \leftarrow \vw + y \vx$.  This yields the new weight vector, also
@@ -457,8 +457,8 @@ data (otherwise it is just $-\infty$).  In the case that it separates
 the data, we find the point with the minimum activation, after the
 activation is multiplied by the label.
 \thinkaboutit{So long as the margin is not $-\infty$, it is always
-  positive.  Geometrically this makes sense, but what does
-  Eq~\eqref{eq:margin} yeild this?}
+  positive.  Geometrically this makes sense, but why does
+  Eq~\eqref{eq:margin} yield this?}
 
 For some historical reason (that is unknown to the author), margins
 are always denoted by the Greek letter $\gamma$ (gamma).  One often
@@ -525,7 +525,7 @@ between them has to be shrinking.  The rest is algebra.
   $\vw\kth = \vw\kpth + y \vx$.  We do a little computation:
   \begin{align}
     \dotp{\vw^*}{\vw\kth}
-    &= \dotp{\vw^*}{\vw\kpth + y \vx} 
+    &= \dotp{\vw^*}{\left(\vw\kpth + y \vx\right)} 
          \becauseof{definition of $\vw\kth$}
     \\
     &= \dotp{\vw^*}{\vw\kpth} + y \dotp{\vw^*}{\vx}
@@ -535,7 +535,7 @@ between them has to be shrinking.  The rest is algebra.
          \becauseof{$\vw^*$ has margin $\ga$}
   \end{align}
   Thus, every time $\vw\kth$ is updated, its projection onto $\vw^*$
-  incrases by at least $\ga$.  \textcolor{darkblue}{Therefore:
+  increases by at least $\ga$.  \textcolor{darkblue}{Therefore:
     $\dotp{\vw^*}{\vw\kth} \geq k \ga$.}
 
   Next, we need to show that the increase of $\ga$ along $\vw^*$
@@ -570,7 +570,7 @@ between them has to be shrinking.  The rest is algebra.
   \end{equation}
   Taking the left-most and right-most terms, we get that $\sqrt{k}
   \geq k \ga$.  Dividing both sides by $k$, we get $\frac 1 {\sqrt{k}}
-  \geq \ga$ and therefore $k \leq \frac 1 {\sqrt{\ga}}$.  This means
+  \geq \ga$ and therefore $k \leq \frac 1 {\ga^2}$.  This means
   that once we've made $\frac 1 {\ga^2}$ updates, we cannot make
   any more!
 \end{myproof}
@@ -614,7 +614,7 @@ after the first $100$ examples, the perceptron has learned a really
 good classifier.  It's so good that it goes over the next $9899$
 examples without making \emph{any} updates.  It reaches the $10,000$th
 example and makes an error.  It updates.  For all we know, the update
-on this $10,000$th example \emph{completely ruines} the weight vector
+on this $10,000$th example \emph{completely ruins} the weight vector
 that has done so well on $99.99\%$ of the data!
 
 What we would like is for weight vectors that ``survive'' a long time
@@ -667,7 +667,7 @@ voting.  In particular, the prediction is:
       \right)
 \end{equation}
 The only difference between the voted prediction,
-Eq~\eqref{eq:perc:voted}, and the averaged prediction,
+Eq~\eqref{eq:perc:vote}, and the averaged prediction,
 Eq~\eqref{eq:perc:avg}, is the presense of the interior $\sign$
 operator.  With a little bit of algebra, we can rewrite the test-time
 prediction as:
@@ -741,7 +741,7 @@ vector changes.  The slightly clever computation in
 Algorithm~\ref{alg:perc:avgperc} achieves this.
 
 \thinkaboutit{By writing out the computation of the averaged weights
-  from Eq~\eqref{eq:perc:avgperc} as a telescoping sum, derive the
+  from Eq~\eqref{eq:perc:avg} as a telescoping sum, derive the
   computation from Algorithm~\ref{alg:perc:avgperc}.}
 
 \TODOFigure{perc:avgperc}{train/test performance of vanilla versus
@@ -840,7 +840,7 @@ this is the \concept{kernels} approach (see Chapter~\ref{sec:kernel}).
 
 
 \begin{comment}
-   - "Neural network" interpretation
+   -``Neural network'' interpretation
    - Update rule
    - Linear decision boundaries
    - Connection to geometry, linear algebra, dot products, etc.
