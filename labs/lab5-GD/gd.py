@@ -1,0 +1,79 @@
+from pylab import *
+from numpy import *
+
+delta = 0.02
+
+def func1(x):
+    return (x[0] ** 2 + x[1] ** 2,
+            array([2*x[0], 2*x[1]]),
+            array([0,0]))
+
+def func2(x):
+    return (x[0] ** 2 + 2 * x[1] ** 2 + x[0] * x[1],
+            array([2*x[0] + x[1], 4*x[1] + x[0]]),
+            array([0,0]))
+
+def computeF(X,Y,f):
+    F = 0 * X
+    for i in xrange(x.shape[0]):
+        for j in xrange(y.shape[0]):
+            F[i,j],_,_ = f(array([x[i],y[j]]))
+    return F
+
+def gradStep(f,x,eta):
+    _,grad,_ = f(x)
+    size=norm(grad)/50
+    arrow(x[0],x[1],-eta*grad[0],-eta*grad[1],fc='b',ec='b',head_length=size,head_width=size)
+    show(False)
+    x1 = x - eta * grad
+    return x1
+                            
+
+def sleepIt(sleepTime):
+    if sleepTime is None:
+        raw_input('Press enter to continue...')
+    else:
+        raise Exception
+    
+def runGD(f,x0,eta,sleepTime=None):  # sleepTime=None means wait for enter
+    x = arange(-2.0, 2.0, delta)
+    y = arange(-2.0, 2.0, delta)
+    X,Y = meshgrid(x,y)
+    F = computeF(X,Y,f)
+
+    _,_,xopt = f(x0)
+    
+    figure()
+    subplot(131)
+    contour(X,Y,F,20)
+    show(False)
+
+    epoch = []
+    fval  = []
+    dopt  = []
+
+    i = 0
+    while True:
+        subplot(131)
+        plot(x0[0],x0[1],'bo')
+        epoch.append(i)
+        fval.append(f(x0)[0])
+        dopt.append(norm(x0-xopt))
+        i += 1
+        subplot(132)
+        plot(array(epoch),array(fval))
+        subplot(133)
+        plot(array(epoch),array(dopt))
+        
+        show(False)
+        sleepIt(sleepTime)
+        subplot(131)
+        x0 = gradStep(f,x0,eta)
+        sleepIt(sleepTime)
+        print x0
+
+# runGD(func1, array([-1.5,1.2]), 0.1)
+# runGD(func1, array([-1.5,1.2]), 0.9)
+
+# runGD(func2, array([1.5,1.5]), 0.1)
+# runGD(func2, array([1.5,-1.5]), 0.9)
