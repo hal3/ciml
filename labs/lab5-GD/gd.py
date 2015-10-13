@@ -1,5 +1,6 @@
 from pylab import *
 from numpy import *
+import time
 
 delta = 0.02
 
@@ -13,7 +14,7 @@ def func2(x):
             array([2*x[0] + x[1], 4*x[1] + x[0]]),
             array([0,0]))
 
-def computeF(X,Y,f):
+def computeF(x,y,X,f):
     F = 0 * X
     for i in xrange(x.shape[0]):
         for j in xrange(y.shape[0]):
@@ -33,20 +34,26 @@ def sleepIt(sleepTime):
     if sleepTime is None:
         raw_input('Press enter to continue...')
     else:
-        raise Exception
+        time.sleep(sleepTime)
     
-def runGD(f,x0,eta,sleepTime=None):  # sleepTime=None means wait for enter
+def runGD(f,x0,eta,multiplot=False,sleepTime=None):  # sleepTime=None means wait for enter
     x = arange(-2.0, 2.0, delta)
     y = arange(-2.0, 2.0, delta)
     X,Y = meshgrid(x,y)
-    F = computeF(X,Y,f)
+    F = computeF(x,y,X,f)
 
     _,_,xopt = f(x0)
     
     figure()
-    subplot(131)
+    if multiplot:
+        subplot(132)
+        title('function value')
+        subplot(133)
+        title('||x - opt||')
+        subplot(131)
     contour(X,Y,F,20)
     show(False)
+    draw()
 
     epoch = []
     fval  = []
@@ -54,21 +61,23 @@ def runGD(f,x0,eta,sleepTime=None):  # sleepTime=None means wait for enter
 
     i = 0
     while True:
-        subplot(131)
+        if multiplot: subplot(131)
         plot(x0[0],x0[1],'bo')
         epoch.append(i)
         fval.append(f(x0)[0])
         dopt.append(norm(x0-xopt))
         i += 1
-        subplot(132)
-        plot(array(epoch),array(fval))
-        subplot(133)
-        plot(array(epoch),array(dopt))
-        
-        show(False)
-        sleepIt(sleepTime)
-        subplot(131)
+        if multiplot:
+            subplot(132)
+            plot(array(epoch),array(fval), 'k-')
+            subplot(133)
+            plot(array(epoch),array(dopt), 'k-')
+            
+        draw()
+        sleepIt(sleepTime if i > 1 else None)
+        if multiplot: subplot(131)
         x0 = gradStep(f,x0,eta)
+        draw()
         sleepIt(sleepTime)
         print x0
 
