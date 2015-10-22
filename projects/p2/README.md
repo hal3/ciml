@@ -30,7 +30,7 @@ False
 True
 ```
 
-**WU1 (10%):** From LAB4, Answer A, B, C.
+**WU1 (10%):** From LAB4, Answer A, B, C for both OVA and AVA.
 
 **WU2 (10%):** Using decision trees of constant depth for each
 classifier (but you choose it as well as you can!), train AVA, OVA and
