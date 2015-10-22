@@ -10,12 +10,11 @@ multiclass-to-binary reductions: one-against-all (OVA), all-versus-all
 on LAB4, and the evaluation will be on the quizbowl question answering
 dataset that we used recently to beat Ken Jennings.
 
-First, you must implement AVA and the tree based reduction (the
-`multiclass.py` file that comes with this project is identical to the
-one from the lab, except the existence of the extra class for
-trees). Second, you must implement a tree-based reduction. Most of
-train is given to you, but predict you must do all on your own. I've
-provided a tree class to help you:
+First, you must implement AVA (the `multiclass.py` file that comes
+with this project is identical to the one from the lab, except the
+existence of the extra class for trees). Second, you must implement a
+tree-based reduction. Most of train is given to you, but predict you
+must do all on your own. I've provided a tree class to help you:
 
 ```python
 >>> t = multiclass.makeBalancedTree(range(6))
@@ -31,7 +30,7 @@ False
 True
 ```
 
-**WU1 (10%):** From LAB4, Answer A, B, C, D.
+**WU1 (10%):** From LAB4, Answer A, B, C.
 
 **WU2 (10%):** Using decision trees of constant depth for each
 classifier (but you choose it as well as you can!), train AVA, OVA and
