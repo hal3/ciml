@@ -164,11 +164,11 @@ Now, we can try different loss functions.  Implement logistic loss and
 hinge loss.  Here are some simple test cases:
 
 ```python
->>> f = linear.LinearClassifier({'lossFunction': linear.SquaredLoss(), 'lambda': 10, 'numIter': 100, 'stepSize': 0.5})
+>>> f = linear.LinearClassifier({'lossFunction': linear.LogisticLoss(), 'lambda': 10, 'numIter': 100, 'stepSize': 0.5})
 >>> runClassifier.trainTestSet(f, datasets.TwoDDiagonal)
-Training accuracy 0.98, test accuracy 0.86
+Training accuracy 0.99, test accuracy 0.86
 >>> f
-w=array([ 0.33864367,  1.28110942])
+w=array([ 0.29809083,  1.01287561])
 
 >>> f = linear.LinearClassifier({'lossFunction': linear.HingeLoss(), 'lambda': 1, 'numIter': 100, 'stepSize': 0.5})
 >>> runClassifier.trainTestSet(f, datasets.TwoDDiagonal)
