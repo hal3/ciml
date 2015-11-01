@@ -54,7 +54,7 @@ class SquaredLoss(LossFunction):
 
 class LogisticLoss(LossFunction):
     """
-    Logistic loss is sum_n (1 / (1 + exp(- y_n * y'_n)))
+    Logistic loss is sum_n log(1 + exp(- y_n * y'_n))
     """
 
     def loss(self, Y, Yhat):
