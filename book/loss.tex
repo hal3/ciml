@@ -14,7 +14,7 @@
 
 \dependencies{}
 
-\newthought{In \chref{ch:perc}, you learned} about the perceptron
+\newthought{In \chref{sec:perc}, you learned} about the perceptron
 algorithm for linear classification.  This was both a \emph{model}
 (linear classifier) and \emph{algorithm} (the perceptron update rule)
 in one.  In this section, we will separate these two, and consider
@@ -151,7 +151,7 @@ parameters.
 To see this more clearly, it is useful to look at plots that relate
 \emph{margin} to \emph{loss}.  Such a plot for zero/one loss is shown
 in Figure~\ref{fig:loss:zeroone}.  In this plot, the horizontal axis
-measure the margin of a data point and the vertical axis measures the
+measures the margin of a data point and the vertical axis measures the
 loss associated with that margin.  For zero/one loss, the story is
 simple.  If you get a positive margin (i.e., $y(\dotp{\vw}{\vx}+b)>0$)
 then you get a loss of zero.  Otherwise you get a loss of one.  By
@@ -170,21 +170,21 @@ benefit of using such an S-function is that it is smooth, and
 potentially easier to optimize.  The difficulty is that it is not
 \concept{convex}.
 
-\Figure{loss:convex}{plot of convex and non-convex functions
-  with two chords each}
-
 If you remember from calculus, a convex function is one that looks
 like a happy face ($\smile$).  (On the other hand, a \concept{concave}
 function is one that looks like a sad face ($\frown$); an easy
 mnemonic is that you can hide under a con{\bf cave} function.)  There
-are two equivalent definitions of a concave function.  The first is
+are two equivalent definitions of a convex function.  The first is
 that it's second derivative is always non-negative.  The second, more
 geometric, defition is that any \concept{chord} of the function lies
-above it.  This is shown in Figure~\ref{fig:loss:convexfn}.  There you
+above it.  This is shown in Figure~\ref{fig:loss:convex}.  There you
 can see a convex function and a non-convex function, both with two
 chords drawn in.  In the case of the convex function, the chords lie
 above the function.  In the case of the non-convex function, there are
 parts of the chord that lie below the function.
+
+\Figure{loss:convex}{plot of convex and non-convex functions
+  with two chords each}
 
 Convex functions are nice because they are \emph{easy to minimize}.
 Intuitively, if you drop a ball anywhere in a convex function, it will
@@ -204,7 +204,7 @@ surrogate loss, you are also pushing down the real loss.
 
 \Figure{loss:surrogate}{surrogate loss fns}
 
-There are four common surrogate loss function, each with their own
+There are four common surrogate loss functions, each with their own
 properties: \concept{hinge loss}, \concept{logistic loss},
 \concept{exponential loss} and \concept{squared loss}.  These are
 shown in Figure~\ref{fig:loss:surrogate} and defined below.  These are
@@ -239,7 +239,7 @@ on a positive example as it is to predict $-1$ on a positive example.
 
 \section{Weight Regularization}
 
-In our learning objective, Eq~\eqref{loss:zeroonereg}, we had a term
+In our learning objective, Eq~\eqref{opt:loss:zeroonereg}, we had a term
 correspond to the zero/one loss on the training data, plus a
 \concept{regularizer} whose goal was to ensure that the learned
 function didn't get too ``crazy.''  (Or, more formally, to ensure that
@@ -271,9 +271,9 @@ if $w_1$ is large, this could have a large effect.
 
 Another way of saying the same thing is to look at the derivative of
 the predictions as a function of $w_1$.  The derivative of
-$\dotp{\vw,\vx}+b$ with respect to $w_1$ is:
+$\dotp{\vw}{\vx}+b$ with respect to $w_1$ is:
 \begin{equation}
-\frac {\partial \dotp{\vw,\vx}+b} {\partial w_1}
+\frac {\partial \left[\dotp{\vw}{\vx}+b\right]} {\partial w_1}
 = \frac {\partial \left[\sum_d w_d x_d+b\right]} {\partial w_1}
 = x_1
 \end{equation}
@@ -366,7 +366,7 @@ The idea of gradient-based methods of optimization is exactly the
 same.  Suppose you are trying to find the maximum of a function
 $f(\vx)$.  The optimizer maintains a current estimate of the parameter
 of interest, $\vx$.  At each step, it measures the \concept{gradient}
-of the function it is trying optimize.  This measurement occurs
+of the function it is trying to optimize.  This measurement occurs
 \emph{at} the current location, $\vx$.  Call the gradient $\vg$.  It
 then takes a step in the direction of the gradient, where the size of
 the step is controlled by a parameter $\eta$ (eta).  The complete step
@@ -460,7 +460,7 @@ respect to $\vw$.
 %
 Now you can repeat the previous exercise.  The update is of the form
 $\vw \leftarrow \vw - \eta \grad_\vw \cL$.  For well classified points
-(ones that are tend toward $y_n \infty$), the gradient is near zero.
+(ones that tend toward $y_n \infty$), the gradient is near zero.
 For poorly classified points, the gradient points in the direction
 $-y_n\vx_n$, so the update is of the form $\vw \leftarrow \vw + c
 y_n\vx_n$, where $c$ is some constant.  This is just like the
@@ -493,7 +493,7 @@ gradient descent will approach the optimal value at a fast
   \concept{convergence rate} of gradient descent is $\cO(1/k)$.  More
   specifically, letting $\vz^*$ be the global minimum of $\cF$, we
   have: $\cF(\vz\kth) - \cF(\vz^*) \leq \frac {2
-    \norm{\vz\zth-\vz^*}^2} {\eta k)}$.
+    \norm{\vz\zth-\vz^*}^2} {\eta k}$.
 \end{theorem}
 
 \thinkaboutit{A naive reading of this theorem seems to say that you
@@ -878,7 +878,7 @@ visually as ensuring that there is a non-trivial margin between the
 positive points and negative points.
 
 The difficulty with the optimization problem in
-Eq~\eqref{eq:loss:svmhard} is what happens with data that is not
+Eq~\eqref{opt:loss:svmhard} is what happens with data that is not
 linearly separable.  In that case, there \emph{is no} set of
 parameters $\vw,b$ that can simultaneously satisfy all the
 constraints.  In optimization terms, you would say that the
