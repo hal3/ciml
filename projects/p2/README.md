@@ -210,20 +210,20 @@ RUNNING ON EASY DATA
 
 training oaa
 predicting oaa
-error = 0.285714
+error = 0.293413
 training ava
 predicting ava
-error = 0.186107
+error = 0.218563
 
 
 RUNNING ON HARD DATA
 
 training oaa
 predicting oaa
-error = 0.672346
+error = 0.592814
 training ava
 predicting ava
-error = 0.635649
+error = 0.553892
 ```
 
 This is running on a shrunken version of the data (that only contains answers that occur at least 20 times in the data).

@@ -65,6 +65,24 @@ ax.plot_surface(X, Y, Z, alpha=0.8, cmap=cm.coolwarm)
 cset = ax.contour(X, Y, Z, 40, zdir='z', offset=Z.min(), cmap=cm.coolwarm)
 #cset = ax.contour(X, Y, Z, zdir='x', offset=xmin, cmap=cm.coolwarm)
 #cset = ax.contour(X, Y, Z, zdir='y', offset=almax, cmap=cm.coolwarm)
+
+A = Z.argmax(axis=1)
+
+xyz = zeros((lx,3))
+for i in range(lx):
+    j = Z[i,:].argmax()
+    xyz[i,0] = xvals[i]
+    xyz[i,1] = alvals[j]
+    xyz[i,2] = Z[i,j] + 10
+ax.plot3D(xyz[:,0], xyz[:,1], xyz[:,2], 'k-', linewidth=10)
+
+ayz = zeros((la,3))
+for i in range(la):
+    j = Z[:,i].argmin()
+    ayz[i,0] = xvals[j]
+    ayz[i,1] = alvals[i]
+    ayz[i,2] = Z[j,i]
+ax.plot3D(ayz[:,0], ayz[:,1], ayz[:,2], 'b-', linewidth=10)
 show(False)
 
 figure(3)
