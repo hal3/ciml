@@ -603,12 +603,12 @@ given example $n$, the subgradient of hinge loss can be computed as:
 %
 \begin{align}
 &\subgrad_\vw \max \{ 0, 1 - y_n ( \dotp{\vw}{\vx_n}+b ) \} \\
-&= \subgrad_\vw \brack{ 0 & \txtif -y_n ( \dotp{\vw}{\vx_n}+b ) > 1 \\
-                        y_n ( \dotp{\vw}{\vx_n}+b )  & \text{otherwise}}\\
-&= \brack{ \subgrad_\vw 0 & \txtif -y_n ( \dotp{\vw}{\vx_n}+b ) > 1 \\
-           \subgrad_\vw y_n ( \dotp{\vw}{\vx_n}+b )  & \text{otherwise}}\\
-&= \brack{ \vec 0 & \txtif -y_n ( \dotp{\vw}{\vx_n}+b ) > 1 \\
-           y_n \vx_n  & \text{otherwise}}
+&= \subgrad_\vw \brack{ 0 & \txtif y_n ( \dotp{\vw}{\vx_n}+b ) > 1 \\
+                        1 - y_n ( \dotp{\vw}{\vx_n}+b )  & \text{otherwise}}\\
+&= \brack{ \subgrad_\vw 0 & \txtif y_n ( \dotp{\vw}{\vx_n}+b ) > 1 \\
+           \subgrad_\vw 1 - y_n ( \dotp{\vw}{\vx_n}+b )  & \text{otherwise}}\\
+&= \brack{ \vec 0 & \txtif y_n ( \dotp{\vw}{\vx_n}+b ) > 1 \\
+           - y_n \vx_n  & \text{otherwise}}
 \end{align}
 
 \newalgorithm%
