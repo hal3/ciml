@@ -13,11 +13,11 @@ First, run `saddle_point` in python:
 This will generate four figures:
 
 * Figure 1 shows the function we're trying to optimize (a simple quadratic) and the single constraint (x >= 3). Clearly the optimum here is x=3 (by visual inspection).
-* Figure 2 shows the Lagrangian. One axis (the one ranging from -8 to +8) is "x". The other axis (ranging from 0 to 100) is alpha. The black line shows the optimal (maximal) value of alpha for any given x; the blue line shows the optimal (minimal) value of x for any given alpha.
+* Figure 2 shows the Lagrangian. One axis (the one ranging from -8 to +8) is "x". The other axis (ranging from 0 to 10) is alpha. The black line shows the optimal (maximal) value of alpha for any given x; the blue line shows the optimal (minimal) value of x for any given alpha.
 * Figure 3 shows the same thing as Figure 2, but as a contour plot instead of a 3D plot
 * Figure 4 shows the optimization problem just as a function of alpha. The optimum is clearly at alpha=6, which, in this case, corresponds to x=3.
 
-**QUESTION A:** Spin the 3D figure around so that you're looking at it from the perspective of x. So you see -8..8 on the x-axis and the 0..100 axis is going "away" from you. You should be able to see a saddle point in the black curve where it hits a minimum. For what value of x does it attain that minimum?
+**QUESTION A:** Spin the 3D figure around so that you're looking at it from the perspective of x. So you see -8..8 on the x-axis and the 0..10 axis is going "away" from you. You should be able to see a saddle point in the black curve where it hits a minimum. For what value of x does it attain that minimum?
 
 Edit the code in `saddle_point.py` so that the constraint is "x >= -2" (rather than the current "x >= 3". You should only have to change line 9. Rerun.
 
@@ -60,7 +60,7 @@ degree 10 (for instance), with:
 
 ```
 % svm-train -t 1 -r 1 -d 10 -c 100 data0 data0.model
-% python drawBoundary.py 
+% python drawBoundary.py data0
 ```
 
 This says:

@@ -44,7 +44,7 @@ def lagrangian(obj, xge):
 L = lagrangian(objective, constraint_x_ge)
 
 almin = 0
-almax = 100
+almax = 10
 alstep = 1
 alvals = arange(almin, almax+alstep, alstep)
 fig = figure(2)
@@ -88,6 +88,8 @@ show(False)
 figure(3)
 clf()
 contour(X,Y,Z,40, cmap=cm.coolwarm)
+plot(xyz[:,0], xyz[:,1], 'k-', linewidth=5)
+plot(ayz[:,0], ayz[:,1], 'b-', linewidth=5)
 show(False)
 
 
