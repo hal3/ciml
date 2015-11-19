@@ -112,7 +112,7 @@ As you can see, this data fails horribly.
 However, now we can get some mileage out of polynomial kernels:
 
 ```
-% svm-train -t 2 -r 1 -d 3 -c 100 data1 data1.model
+% svm-train -t 1 -r 1 -d 3 -c 100 data1 data1.model
 % python drawBoundary.py data1
 ```
 
