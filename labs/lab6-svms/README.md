@@ -106,7 +106,7 @@ with a linear model:
 
 As you can see, this data fails horribly.
 
-**QUESTION C:** There are a lot of red support vectors on the red side
+**QUESTION C:** There are a lot of red support vectors on the blue side
    of the decision boundary. Why?
 
 However, now we can get some mileage out of polynomial kernels:
