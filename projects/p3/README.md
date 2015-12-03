@@ -50,26 +50,26 @@ happen, but let's make sure it happens anyway.
 ```python
 >>> (P,Z,evals) = dr.pca(x, 2)
 >>> Z
-array([[ 0.57546631, -0.81782549],
-       [-0.81782549, -0.57546631]])
+array([[-0.60270316, -0.79796548],
+       [-0.79796548,  0.60270316]])
 >>> evals
-array([ 5.2620058 ,  1.25255969])
+array([ 5.72199341,  1.45051781])
 ```
 
 This tells us that the largest eigenvalue corresponds to the
-direction `[0.57, -0.82]` and the second largest corresponds to
-the direction `[-0.82, -0.57]`.  We can project the data onto
+direction `[-0.603, -0.798]` and the second largest corresponds to
+the direction `[-0.798, 0.603]`.  We can project the data onto
 the first eigenvalue and plot it in red, and the second eigenvalue in
 green.  (Unfortunately we have to do some ugly reshaping to get
 dimensions to match up.)
 
 ```python
->>> x0 = dot(dot(x, Z[0,:]).reshape(1000,1), Z[0,:].reshape(1,2))
->>> x1 = dot(dot(x, Z[1,:]).reshape(1000,1), Z[1,:].reshape(1,2))
+>>> x0 = dot(dot(x, Z[:,0]).reshape(1000,1), Z[:,0].reshape(1,2))
+>>> x1 = dot(dot(x, Z[:,1]).reshape(1000,1), Z[:,1].reshape(1,2))
 >>> plot(x[:,0], x[:,1], 'b.', x0[:,0], x0[:,1], 'r.', x1[:,0], x1[:,1], 'g.')
 ```
 
-**WU1:** Depending exactly on your random data, one or more of these
+IGNORE THIS QUESTION: **WU1:** Depending exactly on your random data, one or more of these
 lines might not pass exactly through the data as we would like it to.
 Why not?
 
@@ -93,7 +93,8 @@ accounted for 90% of the variance?  95%?  (Hint: see function
 Now, let's plot the top 50 eigenvectors:
 
 ```python
->>> util.drawDigits(Z[1:50,:], arange(50))
+>>> util.drawDigits(Z.T[:50,:], arange(50))
+>>> show(False)
 ```
 
 **WU3:** Do these look like digits?  Should they?  Why or why not?
