@@ -286,9 +286,10 @@ make the math easier.)  Suppose the two dimensional data is $\vx_1,
 \dots, \vx_N$ and you're looking for a vector $\vec u$ that points in
 the direction of maximal variance.  You can compute this by projecting
 each point onto $\vec u$ and looking at the variance of the result.
-In order for the projection to make sense, you need to constrain $\norm{\vec
-u}^2 = 1$.  In this case, the projections are $\dotp{\vx_1, \vec u},
-\dots, \dotp{\vx_N, \vec u}$.  Call these values $p_1, \dots, p_N$.
+In order for the projection to make sense, you need to constrain
+$\norm{\vec u}^2 = 1$.  In this case, the projections are
+$\dotp{\vx_1}{\vec u}, \dotp{\vx_2}{\vec u}, \dots, \dotp{\vx_N}{\vec
+  u}$.  Call these values $p_1, \dots, p_N$.
 
 The goal is to compute the variance of the $\{p_n\}$s and then choose
 $\vec u$ to maximize this variance.  To compute the variance, you
@@ -362,12 +363,12 @@ and differentiate:
 \begin{align}
 \cL(\vec v, \la_1, \la_2) &=
 \norm{ \mat X \vec v }^2
-  - \la_1 \left( \norm{\vec u}^2 - 1 \right)
+  - \la_1 \left( \norm{\vec v}^2 - 1 \right)
   - \la_2 \dotp{\vec u}{\vec v}\\
 \grad_{\vec u} \cL &=
-  2 \mat X\T\mat X \vec v  - 2 \la_1 \vec v - 2 \la_2 \vec u\\
+  2 \mat X\T\mat X \vec v  - 2 \la_1 \vec v - \la_2 \vec u\\
 \Longrightarrow & \quad\la_1 \vec v =  \left(\mat X\T\mat X\right)\vec v
-- \la_2 \vec u
+- \frac {\la_2} 2 \vec u
 \end{align}
 %
 However, you know that $\vec u$ is the first eigenvector of $\mat
