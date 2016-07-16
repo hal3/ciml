@@ -449,7 +449,7 @@ very quickly.
   {
 \FOR{$\VAR{k} = \CON{1}$ \TO $\VAR{K}$}
 \SETST{$\vec\mu_k$}{some random location} \COMMENT{randomly initialize
-  mean for $k$th cluster}
+  center for $k$th cluster}
 \ENDFOR
 \REPEAT
 \FOR{$\VAR{n} = \CON{1}$ \TO $\VAR{N}$}
@@ -460,7 +460,7 @@ very quickly.
 \SETST{$\mat X_k$}{$\{$ \VAR{$\vx_n$} : \VAR{$z_n$} = \VAR{$k$} $\}$}
   \COMMENT{points assigned to cluster $k$}
 \SETST{$\vec\mu_k$}{\FUN{mean}(\VAR{$\mat X_k$})}
-  \COMMENT{re-estimate mean of cluster $k$}
+  \COMMENT{re-estimate center of cluster $k$}
 \ENDFOR
 \UNTIL{\VAR{$\vec\mu$}s stop changing}
 \RETURN \VAR{$\vec z$} \COMMENT{return cluster assignments}
@@ -476,11 +476,36 @@ of example $n$.  In lines 8-12, the cluster centers are re-computed.
 First, $\mat X_k$ stores all examples that have been assigned to
 cluster $k$.  The center of cluster $k$, \VAR{$\vec\mu_k$} is then
 computed as the mean of the points assigned to it.  This process
-repeats until the means converge.
+repeats until the centers converge.
 
-\begin{mathreview}{Vector Arithmetic, Norms and Means}
-  define vector addition, scalar addition, subtraction, scalar
-  multiplication and norms.  define mean.
+\begin{mathreview}{Vector Arithmetic and Vector Norms}
+  A (real-valued) \textbf{vector} is just an array of real values, for
+  instance $\vx = \langle 1, 2.5, -6 \rangle$ is a three-dimensional
+  vector. In general, if $\vx = \langle x_1, x_2, \dots, x_D \rangle$,
+  then $x_d$ is it's $d$th component. So $x_3 = -6$ in the previous
+  example.
+  
+~
+
+  \textbf{Vector sums} are computed pointwise, and are only defined when
+  dimensions match, so $\langle 1, 2.5, -6 \rangle + \langle 2, -2.5,
+  3 \rangle = \langle 3, 0, -3 \rangle$. In general, if $\vec c = \vec
+  a + \vec b$ then $c_d = a_d + b_d$ for all $d$. Vector addition can
+  be viewed geometrically as taking a vector $\vec a$, then tacking on
+  $\vec b$ to the end of it; the new end point is exactly $\vec c$.
+
+~
+
+  Vectors can be \textbf{scaled} by real values; for instance $2
+  \langle 1, 2.5, -6 \rangle = \langle 2, 5, -12 \rangle$; this is
+  called scalar multiplication. In general, $a \vx = \langle a x_1, a
+  x_2, \dots, a x_D \rangle$.
+
+~
+
+  The \textbf{norm} of a vector $\vx$, written $\norm{\vx}$ is its
+  length. Unless otherwise specified, this is its \emph{Euclidean}
+  length, namely: $\norm{\vx} = \sqrt{\sum_d x_d^2}$.
 \end{mathreview}
 
 An obvious question about this algorithm is: does it converge?  A
@@ -822,17 +847,6 @@ Computational complexity
 Reducing each class to one point: means
 K-means clustering
 \end{comment}
-
-\begin{exercises}
-\begin{Ex}
-\TODO
-
-\begin{solution}
-\TODO
-\end{solution}
-\end{Ex}
-
-\end{exercises}
 
 %%% Local Variables: 
 %%% mode: latex

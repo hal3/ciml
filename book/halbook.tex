@@ -22,6 +22,9 @@
 
 %%%%%%%%%%%%% FORMATTING
 
+\definecolor{darkbookcolor}{rgb}{0.4,0.0,0.45} % was darkergreen
+\definecolor{lightbookcolor}{rgb}{0.98,0.9,1.0} % was green!20
+
 \newcommand*\chapterlabel{}
 \makeatletter
 \titleformat{\chapter}%
@@ -33,11 +36,11 @@
   {\begin{tikzpicture}[remember picture,overlay]
     \node[yshift=-3cm] at (current page.north west)
       {\begin{tikzpicture}[remember picture, overlay]
-        \draw[fill=lightgreen] (0,0) rectangle
+        \draw[fill=lightbookcolor] (0,0) rectangle
           (\paperwidth,3cm);
         \node[anchor=east,xshift=.9\paperwidth,rectangle,
               rounded corners=20pt,inner sep=11pt,
-              fill=darkergreen]
+              fill=darkbookcolor]
               {\color{white}\chapterlabel#1};
        \end{tikzpicture}
       };
@@ -51,7 +54,7 @@
 \titleformat{\section}%
   [hang]% shape
   {\normalfont\Large\itshape}% format applied to label+text
-  {\textcolor{darkergreen}{\makebox[0pt][r]{\thesection\quad }#1}}% label
+  {\textcolor{darkbookcolor}{\makebox[0pt][r]{\thesection\quad }#1}}% label
   {1em}% horizontal separation between label and title body
   {}% before the title body
   []% after the title body
@@ -59,7 +62,7 @@
 \titleformat{\subsection}%
   [hang]% shape
   {\normalfont\large\itshape}% format applied to label+text
-  {\textcolor{darkergreen}{\makebox[0pt][r]{\thesubsection\quad }#1}}% label
+  {\textcolor{darkbookcolor}{\makebox[0pt][r]{\thesubsection\quad }#1}}% label
   {1em}% horizontal separation between label and title body
   {}% before the title body
   []% after the title body
@@ -96,8 +99,8 @@
 \newenvironment{learningproblemenv}[1]
   {\gdef\learningproblemargument{#1}\begin{lrbox}{\learningproblembox}\begin{minipage}{4in}}
   {\end{minipage}\end{lrbox}%
-   \tikzstyle{mybox} = [draw=darkgreen, fill=green!5, very thick, rectangle, rounded corners, inner sep=10pt, inner ysep=12pt]%
-   \tikzstyle{fancytitle} =[fill=darkgreen, text=white, rectangle, rounded corners]%
+   \tikzstyle{mybox} = [draw=darkbookcolor, fill=lightbookcolor, very thick, rectangle, rounded corners, inner sep=10pt, inner ysep=12pt]%
+   \tikzstyle{fancytitle} =[fill=darkbookcolor, text=white, rectangle, rounded corners]%
    \vspace{1em}
    \noindent
    \begin{tikzpicture}
@@ -121,7 +124,7 @@
 
 \DefineVerbatimEnvironment%
   {chapternotes}{Verbatim}
-  {baselinestretch=1.0,frame=single,fillcolor=\color{lightgreen}}
+  {baselinestretch=1.0,frame=single,fillcolor=\color{lightbookcolor}}
 %\renewenvironment{chapternotes}{\begin{comment}}{\end{comment}}
 
 \newenvironment{editedout}{\begin{comment}}{\end{comment}}
@@ -220,8 +223,8 @@
 
 
 \newcommand{\chapterquote}[2]
-  {\tikzstyle{mybox} = [draw=darkergreen, fill=green!20, very thick, rectangle, rounded corners, inner sep=5pt, inner ysep=5pt]
-   \tikzstyle{fancytitle} =[fill=darkergreen, text=white]
+  {\tikzstyle{mybox} = [draw=darkbookcolor, fill=lightbookcolor, very thick, rectangle, rounded corners, inner sep=5pt, inner ysep=5pt]
+   \tikzstyle{fancytitle} =[fill=darkbookcolor, text=white]
    \begin{textblock}{7.5}(2,2.5)
    \begin{tikzpicture}[transform shape, rotate=0, baseline=-3.5cm]
    \noindent%
@@ -231,7 +234,7 @@
       \begin{large}%
       \textsf{#1}%
       \end{large}
-      \hfill\textcolor{darkergreen}{\textsf{--~#2}}
+      \hfill\textcolor{darkbookcolor}{\textsf{--~#2}}
     \end{minipage}
     };
 %   \node[fancytitle] at (box.south) {\emph{-- #2}};
@@ -239,8 +242,8 @@
   \end{textblock}}
 
 \newcommand{\chapterimage}[2]
-  {\tikzstyle{mybox} = [draw=darkergreen, fill=green!20, very thick, rectangle, rounded corners, inner sep=5pt, inner ysep=5pt]
-   \tikzstyle{fancytitle} =[fill=darkergreen, text=white]
+  {\tikzstyle{mybox} = [draw=darkbookcolor, fill=lightbookcolor, very thick, rectangle, rounded corners, inner sep=5pt, inner ysep=5pt]
+   \tikzstyle{fancytitle} =[fill=darkbookcolor, text=white]
    \begin{textblock}{7.5}(2,2.5)
    \begin{tikzpicture}[transform shape, rotate=0, baseline=-3.5cm]
    \noindent
@@ -248,7 +251,7 @@
     \begin{minipage}[t!]{\textwidth}
       \includegraphics[width=\textwidth]{#1}
 
-      \hfill\textcolor{darkergreen}{\textsf{--~#2}}
+      \hfill\textcolor{darkbookcolor}{\textsf{--~#2}}
     \end{minipage}
     };
 %   \node[fancytitle] at (box.south) {\emph{-- #2}};
@@ -256,8 +259,8 @@
   \end{textblock}}
 
 \newcommand{\chapterimageopt}[3]
-  {\tikzstyle{mybox} = [draw=darkergreen, fill=green!20, very thick, rectangle, rounded corners, inner sep=5pt, inner ysep=5pt]
-   \tikzstyle{fancytitle} =[fill=darkergreen, text=white]
+  {\tikzstyle{mybox} = [draw=darkbookcolor, fill=lightbookcolor, very thick, rectangle, rounded corners, inner sep=5pt, inner ysep=5pt]
+   \tikzstyle{fancytitle} =[fill=darkbookcolor, text=white]
    \begin{textblock}{7.5}(2,2.5)
    \begin{tikzpicture}[transform shape, rotate=0, baseline=-3.5cm]
    \noindent
@@ -265,7 +268,7 @@
     \begin{minipage}[t!]{\textwidth}
       \includegraphics[#2]{#1}
 
-      \hfill\textcolor{darkergreen}{\textsf{--~#3}}
+      \hfill\textcolor{darkbookcolor}{\textsf{--~#3}}
     \end{minipage}
     };
 %   \node[fancytitle] at (box.south) {\emph{-- #2}};
@@ -281,7 +284,7 @@
 
 \newcommand{\blankpage}{\newpage\hbox{}\thispagestyle{empty}\newpage}
 \newcommand{\mycite}[1]{\sidenote{\citealt{#1}}}
-\newcommand{\bookurl}{\url{http://hal3.name/courseml/}}
+\newcommand{\bookurl}{\url{http://ciml.info/}}
 
 \newcommand{\TODOFigure}[2]{%
   \begin{marginfigure}

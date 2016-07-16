@@ -93,7 +93,7 @@ prediction would be the rating that Alice would give to Algorithms.
 %\TODOFigure{dt:induction}{A figure showing training data to a
 %  ML algorithm to a function $f$ and then predictions on test data.}
 
-\Figure{dt:induction}{The general supervised approach to machine
+\Figure{dt_induction.svg}{The general supervised approach to machine
   learning: a learning algorithm reads in training data and computes a
   learned function $f$.  This function can then automatically label
   future text examples.}
@@ -635,14 +635,14 @@ guess we can at that point.  This variant is called a \concept{shallow
 The key question is: What is the inductive bias of shallow decision
 trees?  Roughly, their bias is that decisions can be made by only
 looking at a small number of features.  For instance, a shallow
-decision tree would be very good at learning a function like ``students
-only like AI courses.''  It would be very bad at learning a function
-like ``if this student has liked an odd number of his past courses, he
-will like the next one; otherwise he will not.''  This latter is the
-\emph{parity} function, which requires you to inspect every feature to
-make a prediction.  The inductive bias of a decision tree is that the
-sorts of things we want to learn to predict are more like the first
-example and less like the second example.
+decision tree would be very good at learning a function like
+``students only like AI courses.''  It would be very bad at learning a
+function like ``if this student has liked an odd number of their past
+courses, they will like the next one; otherwise they will not.''  This
+latter is the \emph{parity} function, which requires you to inspect
+every feature to make a prediction.  The inductive bias of a decision
+tree is that the sorts of things we want to learn to predict are more
+like the first example and less like the second example.
 
 
 \section{Not Everything is Learnable}
@@ -986,6 +986,17 @@ the world.
 
 %\section{Decision Trees with Real-Valued Features}
 
+
+\section{Further Reading}
+
+In our discussion of decision trees, we used \emph{misclassification rate} for selecting features.
+While simple and intuitive, misclassification rate has problems.
+There has been a significant amount of work that considers more advanced splitting criteria; the two most popular are ID3 \cite{quinlan} and the Gini index \cite{gini}.
+We have also only considered a very simple mechanism for controlling inductive bias: limiting the depth of the decision tree.
+Again, there are more advanced ``tree pruning'' techniques \cite{pruning} that typically operate by growing deep trees and then pruning back some of the branches.
+These approaches have the advantage that different branches can have different depths, accounting for the fact that the amount of data that gets passed down each branch might differ dramatically.
+
+
 \begin{comment}
 Predicting the future
  - Not memorizing the past (simple prediction problem)
@@ -1005,16 +1016,6 @@ Pruning
 From two classes to M classes
 \end{comment}
 
-\begin{exercises}
-\begin{Ex}
-\TODO
-
-\begin{solution}
-\TODO
-\end{solution}
-\end{Ex}
-
-\end{exercises}
 
 %%% Local Variables: 
 %%% mode: latex

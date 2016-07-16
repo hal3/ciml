@@ -5,14 +5,24 @@
 
 \chapter{About this Book} \label{sec:intro}
 
-\newthought{Machine learning is a broad and fascinating field.}  It
-has been called one of the attractive fields to work in\cite{}.  It has
-applications in an incredibly wide variety of application areas, from
-medicine to advertising, from military to pedestrian.  Its importance
-is likely to grow, as more and more areas turn to it as a way of
-dealing with the massive amounts of data available.
+\newthought{Machine learning is a broad and fascinating field.} 
+Even today, machine learning technology runs a substantial part of your life, often without you knowing it.
+Any plausible approach to artificial intelligence must involve learning, at some level, if for no other reason than it's hard to call a system intelligent if it \emph{cannot} learn.
+Machine learning is also fascinating in its own right for the philosophical questions it raises about what it means to learn and succeed at tasks.
+
+Machine learning is also a very broad field, and attempting to cover everything would be a pedagogical disaster.
+It is also so quickly moving that any book that attempts to cover the latest developments will be outdated before it gets online.
+Thus, this book has two goals.
+First, to be a gentle introduction to what is a very deep field.
+Second, to provide readers with the skills necessary to pick up new technology as it is developed.
 
 \section{How to Use this Book}
+
+This book is designed to be read linearly, since it's goal is not to be a generic reference.
+That said, once you get through chapter 6, you can pretty much jump anywhere.
+When I teach a one-semester undergraduate course, I typically cover the chapter 1-13, sometimes skipping 7 or 9 or 10 depending on time and interest.
+For a graduate course for students with no prior machine learning background, I would very quickly blaze through 1-4, then cover the rest, augmented with some additional reading.
+At the end of some of the chapters, I have provided some links to ``advanced papers'' on that chapter's topic, which I often use for extra credit for undergraduate courses and required reading for graduates.
 
 
 \section{Why Another Textbook?}
@@ -29,8 +39,7 @@ models, not on math.  It is not possible (or even advisable) to avoid
 math.  But math should be there to \emph{aid} understanding, not
 hinder it.  Finally, this book attempts to have minimal dependencies,
 so that one can fairly easily pick and choose chapters to read.  When
-dependencies exist, they are listed at the start of the chapter, as
-well as the list of dependencies at the end of this chapter.
+dependencies exist, they are listed at the start of the chapter.
 
 The \emph{audience} of this book is anyone who knows differential
 calculus and discrete math, and can program reasonably well.  (A
@@ -44,31 +53,20 @@ faster pace.
 
 There is an associated web page, \bookurl, which contains an online
 copy of this book, as well as associated code and data.  It also
-contains errate.  For instructors, there is the ability to get a
-solutions manual.
-
-This book is suitable for a single-semester undergraduate course,
-graduate course or two semester course (perhaps the latter
-supplemented with readings decided upon by the instructor).  Here are
-suggested course plans for the first two courses; a year-long course
-could be obtained simply by covering the entire book.
-
-%Undergraduate course: 1-8, 10, 13
-
-%Graduate course: 1-11, 13-15
+contains errata. Please submit bug reports on github: \url{github.com/hal3/ciml}.
 
 \section{Acknowledgements}
 
-% {\bf Acknowledgements:} I am indebted to many people for this book.
-% My teachers, especially Rami Grossberg (from whom the title of this
-% book was borrowed) and Stefan Schaal.  Students who have taken machine
-% learning from me over the past four years, including those who
-% suffered through the initial versions of the class before I figured
-% out how to teach it.  Especially Scott Alfeld, Josh de Bever, Cecily
-% Heiner, Jeffrey Ferraro, Seth Juarez, John Moeller, JT Olds, Piyush
-% Rai.  People who have helped me edit, including \TODO.  And the
-% University of Maryland, which gave me a semester off that I used to
-% write most of this.
+{\bf Acknowledgements:} I am indebted to many people for this book.
+My teachers, especially Rami Grossberg (from whom the title of this
+book was borrowed) and Stefan Schaal.  Students who have taken machine
+learning from me over the past ten years, including those who suffered
+through the initial versions of the class before I figured out how to
+teach it.  Especially Scott Alfeld, Josh de Bever, Cecily Heiner,
+Jeffrey Ferraro, Seth Juarez, John Moeller, JT Olds, Piyush Rai.
+People who have helped me edit, and who have submitted bug reports,
+including \TODO, but also check github for the latest list of
+contributors!
 
 \begin{comment}
 
@@ -103,7 +101,6 @@ Acknowledgements:
 - teachers
 - students
 - editors
-- umd for time off
 
 
 \end{comment}
