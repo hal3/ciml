@@ -205,7 +205,7 @@ expanded version denoted $\phi(\vx)$:
 %
 \begin{scriptsize}
 \begin{align}
-  \phi(\vx) = \langle &1, 2x_1, 2x_2, 2x_3, \dots, 2x_D, \nonumber\\
+  \phi(\vx) = \langle &1, \sqrt 2x_1,\sqrt 2x_2,\sqrt 2x_3, \dots,\sqrt 2x_D, \nonumber\\
   & x_1^2, x_1 x_2, x_1 x_3, \dots, x_1 x_D, \nonumber\\
   & x_2 x_1, x_2^2, x_2 x_3, \dots, x_2 x_D, \nonumber\\
   & x_3 x_1, x_3 x_2, x_3^2, \dots, x_2 x_D, \nonumber\\
@@ -216,8 +216,8 @@ expanded version denoted $\phi(\vx)$:
 %
 \item
 (Note that there are repetitions here, but hopefully most learning
-algorithms can deal well with redundant features; in particular, the
-$2x_1$ terms are due to collapsing some repetitions.)
+algorithms can deal well with redundant features; the reason for
+$\sqrt 2x_i$ terms will be clear later.)
 \end{itemize}
 \end{frame}
 \begin{frame}
@@ -277,7 +277,7 @@ above, and the dot-product between two vectors.  You get:
 \begin{scriptsize}
 \begin{align}
 \dotp{\phi(\vx)}{\phi(\vz)}
-&= 1 + x_1 z_1 + x_2 z_2 + \dots + x_D z_D + x_1^2 z_1^2 + \dots + x_1 x_D z_1 z_D + \nonumber\\
+&= 1 + 2x_1 z_1 + 2x_2 z_2 + \dots + 2x_D z_D + x_1^2 z_1^2 + \dots + x_1 x_D z_1 z_D + \nonumber\\
 &\quad \dots + x_D x_1 z_D z_1 + x_D x_2 z_D z_2 + \dots + x_D^2 z_D^2 \\
 &= 1 + 2 \sum_d x_d z_d + \sum_d \sum_e x_d x_e z_d z_e \\
 &= 1 + 2 \dotp{\vx}{\vz} + \left(\dotp{\vx}{\vz}\right)^2\\
@@ -328,7 +328,7 @@ explicit weight vectors.
   \frametitle{Kernelized Perceptron}
 \begin{itemize}
 \item 
-Consider the original perceptron algorithm from
+Consider the original perceptron algorithm 
  repeated above
 using linear algebra notation and using feature expansion notation
 $\phi(\vx)$. 
@@ -664,12 +664,12 @@ connection is well beyond the scope of this treatment, but is covered well
 is external sources.
 \item  For now, simply take it as a given that this is
 an equivalent requirement.
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-  \frametitle{What Makes a Kernel}
-\begin{itemize}
+%\end{itemize}
+%\end{frame}
+%
+%\begin{frame}
+%  \frametitle{What Makes a Kernel}
+%\begin{itemize}
 \item 
 The question is: why is this alternative characterization useful? 
 \item It
@@ -698,16 +698,18 @@ products after feature mappings.
 You need to verify the positive semi-definite property on $K$.  You
 can do this as follows:
 %
+\begin{footnotesize}
 \begin{align}
-\int\!\!\!\int f(\vx) K(\vx,\vz) f(\vz) \ud \vx \ud \vz 
-&= \int\!\!\!\int f(\vx) \left[ K_1(\vx,\vz) + K_2(\vx,\vz) \right] f(\vz) \ud \vx \ud \vz 
+\int\!\!\!\int f(\vx) K(\vx,\vz) f(\vz) \ud \vx \ud \vz \\
+= \int\!\!\!\int f(\vx) \left[ K_1(\vx,\vz) + K_2(\vx,\vz) \right] f(\vz) \ud \vx \ud \vz 
    \becauseof{definition of $K$}\\
-&= \int\!\!\!\int f(\vx) K_1(\vx,\vz) f(\vz) \ud \vx \ud \vz \nonumber\\
-&\quad + \int\!\!\!\int f(\vx) K_2(\vx,\vz) f(\vz) \ud \vx \ud \vz 
+= \int\!\!\!\int f(\vx) K_1(\vx,\vz) f(\vz) \ud \vx \ud \vz \nonumber\\
+\quad + \int\!\!\!\int f(\vx) K_2(\vx,\vz) f(\vz) \ud \vx \ud \vz 
   \becauseof{distributive rule}\\
-&> 0 + 0
+> 0 + 0
    \becauseof{$K_1$ and $K_2$ are psd}
 \end{align}
+\end{footnotesize}
 \end{myproof}
 \end{frame}
 
@@ -751,10 +753,12 @@ f(\vx) &= \sum_n \al_n K(\vx_n, \vx) + b \\
 the label of the test point $\vx$.
 \item  The amount of ``vote'' that the
 $n$th training example gets is proportional to the negative
-exponential of the distance between the test point and itself.  ù
+exponential of the distance between the test point and itself. 
 \item This
 is very much like an RBF neural network, in which there is a Gaussian
-``bump'' at each training example, with variance $1/(2\ga)$, and where
+``bump'' at each training example
+%, with variance $1/(2\ga)$, and 
+where
 the $\al_n$s act as the weights connecting these RBF bumps to the
 output.
 \end{itemize}
@@ -874,8 +878,8 @@ example).
 Previously, you optimized this by explicitly computing the slack
 variables $\xi_n$, given a solution to the decision boundary, $\vw$
 and $b$.
-\item  However, you are now an expert with using Lagrange
-multipliers to optimize constrained problems!  
+\item  You can use Lagrange
+multipliers to optimize constrained problems. 
 \item The overall \emph{goal}
 is going to be to rewrite the SVM optimization problem in a way that
 it no longer explicitly depends on the weights $\vw$ and only depends
@@ -890,14 +894,14 @@ on the examples $\vx_n$ through kernel products.
 There are $2N$ constraints in this optimization, one for each slack
 constraint and one for the requirement that the slacks are
 non-negative.
-\item  Unlike the last time, these constraints are now
-\emph{inequalities}, which require a slightly different solution.
+%\item  Unlike the last time, these constraints are now
+%\emph{inequalities}, which require a slightly different solution.
 \item
 First, you rewrite all the inequalities so that they read as
 $\textit{something} \geq 0$ and then add corresponding Lagrange
 multipliers.
-\item  The main difference is that the Lagrange multipliers are
-now constrained to be non-negative, and their sign in the augmented
+\item   Lagrange multipliers are
+constrained to be non-negative, and their sign in the augmented
 objective function matters.
 \end{itemize}
 \end{frame}
@@ -1096,7 +1100,7 @@ C - \be_n = \al_n
 %
 \item
 Again, this doesn't allow you to substitute, but it does mean that you
-can rewrite the second term, which as $\sum_n (C-\be_n)\xi_n$ as
+can rewrite the second term, which is $\sum_n (C-\be_n)\xi_n$, as
 $\sum_n \al_n \xi_n$. 
 \item This then cancels with (most of) the final
 term. 
@@ -1207,7 +1211,7 @@ variables.
 everything in it has a name. 
 \item The original problem variables
 ($\vw,b,\vec\xi$) are called the \concept{primal variables}; 
-\item the
+\item The
 Lagrange variables are called the \concept{dual variables}. 
 \item The
 optimization problem that results after removing all of the primal
@@ -1385,7 +1389,7 @@ solution that only uses a subset of the training data.
 \item 
 From the first discussion, you know that the points that wind up being
 support vectors are exactly those that are ``confusable'' in the sense
-that you have to examples that are nearby, but have different labels.
+that you have  examples that are nearby, but have different labels.
 \item
 This is a completely in line with the previous discussion.  
 \item If you

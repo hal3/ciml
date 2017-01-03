@@ -204,7 +204,7 @@ that makes the \emph{fewest errors} on the training data.
 write this down as a formal mathematics \concept{optimization problem}
 as follows:
 %
-\optimizeuc{loss:zeroone}{\vw,b}{\sum_n \Ind[y_n (\dotp{\vec w}{\vx_n}+b) > 0]}
+\optimizeuc{loss:zeroone}{\vw,b}{\sum_n \Ind[y_n (\dotp{\vec w}{\vx_n}+b) \leq 0]}
 %
 \end{itemize}
 \end{frame}
@@ -275,8 +275,9 @@ or two more errors than it has to.
 \item  Zero/one loss is NP-hard to even \emph{appproximately
   minimize}.  
   \item There is no efficient algorithm for even
-finding a solution that's a small constant worse than optimal.  (The
-best known constant at this time is $418/415 \approx 1.007$.)
+finding a solution that's a small constant worse than optimal.  
+%(The
+%best known constant at this time is $418/415 \approx 1.007$.)
 \end{itemize}
 \end{frame}
 
@@ -309,7 +310,7 @@ This leads to the following, \concept{regularized
   objective}:
 %
 \optimizeuc{loss:zeroonereg}{\vw,b}{\sum_n \Ind[y_n (\dotp{\vec
-    w}{\vx_n}+b) > 0] + \la R(\vw,b)}
+    w}{\vx_n}+b) \leq 0] + \la R(\vw,b)}
 %
 \item
 In Eq~\eqref{opt:loss:zeroonereg}, we are now trying to optimize a
@@ -485,7 +486,7 @@ Two big differences in these loss functions:
 \begin{itemize}
 \item How ``upset'' they get by erroneous predictions.  In the
 case of hinge loss and logistic loss, the growth of the function as
-$\hat y$ goes negative is linear.  For squared loss and exponential
+$y\hat y$ goes negative is linear.  For squared loss and exponential
 loss, it is super-linear.  This means that exponential loss would
 rather get a few examples a little wrong than one example really
 wrong. 
@@ -504,7 +505,7 @@ on a positive example as it is to predict $-1$ on a positive example.
   \frametitle{Weight Regularization}
 \begin{itemize}
 \item
-If you replace to zero/one loss with a
+If you replace  zero/one loss with a
 surrogate loss, you obtain the following objective:
 %
 \optimizeuc{loss:reg}{\vw,b}{%
@@ -551,11 +552,11 @@ if $w_1$ is large, this could have a large effect.
 \begin{itemize}
 \item
  The derivative of
-$\dotp{\vw}{\vx}+b$ with respect to $w_1$ is:
+$\dotp{\vw}{\vx}+b$ with respect to $x_1$ is:
 \begin{equation}
-\frac {\partial \left[\dotp{\vw}{\vx}+b\right]} {\partial w_1}
-= \frac {\partial \left[\sum_d w_d x_d+b\right]} {\partial w_1}
-= x_1
+\frac {\partial \left[\dotp{\vw}{\vx}+b\right]} {\partial x_1}
+= \frac {\partial \left[\sum_d w_d x_d+b\right]} {\partial x_1}
+= w_1
 \end{equation}
 \item Interpreting the derivative as the rate of change, we can see that the
 rate of change of the prediction function is proportional to the
@@ -619,7 +620,7 @@ flavor.
 \end{equation}
 %
 \item The $2$-norm exactly corresponds to the usual
-Euclidean norm, and that the $1$-norm corresponds to the ``absolute''
+Euclidean norm, and  the $1$-norm corresponds to the ``absolute''
 regularizer described above.
 \end{itemize}
 \end{frame}
@@ -986,8 +987,8 @@ $w_d=0$, and the hinge loss is not differentiable around $y\hat y=1$.
 \item 
 The solution to this is to use \concept{subgradient} optimization.
 \item One way to think about subgradients is just to not think about it: you
-essentially need to just ignore the fact that you forgot that your
-function wasn't differentiable, and just try to apply gradient descent
+essentially need to just ignore the fact that  your
+function isn't differentiable, and just try to apply gradient descent
 anyway.
 \item 
 Consider the hinge function $f(z) =
@@ -1009,7 +1010,7 @@ differentiation by parts:
   \partialby{z} f(z)
   &= \partialby{z} \brack{ 0 & \txtif z > 1 \\ 1-z & \txtif z < 1} \\
   &= \brack{ \partialby{z} 0 & \txtif z > 1 \\ \partialby{z} (1-z) & \txtif z < 1}\\
-  &= \brack{ 0 & \txtif z \geq 1 \\ -1 & \txtif z < 1}
+  &= \brack{ 0 & \txtif z > 1 \\ -1 & \txtif z < 1}
 \end{align}
 %
 \end{itemize}
@@ -1214,18 +1215,18 @@ This can be expanded visually as:
 \end{array}
 \right]
 }_{\vec{\hat Y}}
-\approx
-\underbrace{
-\textcolor{darkred}{
-\left[
-\begin{array}{c}
-  y_{1} \\
-  y_{2} \\ 
-  \vdots \\
-  y_{N}
-\end{array}
-\right]
-}}_{\textcolor{darkred}{\vec{\hat Y}}}
+%\approx
+%\underbrace{
+%\textcolor{darkred}{
+%\left[
+%\begin{array}{c}
+%  y_{1} \\
+%  y_{2} \\ 
+%  \vdots \\
+%  y_{N}
+%\end{array}
+%\right]
+%}}_{\textcolor{darkred}{\vec{\hat Y}}}
 \end{equation}
 \end{itemize}
 \end{frame}
@@ -1290,7 +1291,6 @@ precisely what we want for the weights.
 \begin{frame}
   \frametitle{Closed-form Optimization for Squared Loss}
 \begin{itemize}
-\item 
 %\thinkaboutit{For those who are keen on linear algebra, you might be
 %  worried that the matrix you must invert might not be invertible.  Is
 %  this actually a problem?}
@@ -1570,14 +1570,22 @@ or the other by adjusting the bias $b$.
 \begin{frame}
   \frametitle{Support Vector Machines}
 \begin{itemize}
+\item The distance from any point $\vx$ to the decision surface is $\frac{\dotp{\vw}{\vx}+b}{\norm{\vw}}$.
 \item 
 There is some positive example that that lies
 exactly $1$ unit from the hyperplane.  Call it $\vx^+$, so that
 $\dotp{\vw}{\vx^+}+b = 1$.
+\item If not, we can rescale $\vw$ and $b$: $\vw\rightarrow \kappa\vw$, $b\rightarrow \kappa b$
+so that $\dotp{\vw}{\vx^+}+b = 1$ without changing the distance.
 \item  Similarly, there is some negative example,
 $\vx^-$, that lies exactly on the other side of the margin: for which
 $\dotp{\vw}{\vx^-}+b = -1$. 
+\end{itemize}
+\end{frame}
+\begin{frame}
+  \frametitle{Support Vector Machines}
 \Figure{loss:marginsize}{copy of figure from p5 of cs544 svm tutorial}{0.28}
+\begin{itemize}
 \item We can measure the size of the margin by
 looking at the difference between the lengths of projections of
 $\vx^+$ and $\vx^-$ onto the hyperplane.  
@@ -1587,12 +1595,11 @@ $\vx^+$ and $\vx^-$ onto the hyperplane.
   \frametitle{Support Vector Machines}
 \begin{itemize}
 \item 
-Since projection requires a
-normalized vector, we can measure the distances as:
+We can measure the distances as:
 %
 \begin{align}
-d^+ &= \frac 1 {\norm{\vw}} \dotp{\vw}{\vx^+} + b - 1 \\
-d^- &= - \frac 1 {\norm{\vw}} \dotp{\vw}{\vx^-} - b + 1
+d^+ &= \frac 1 {\norm{\vw}} (\dotp{\vw}{\vx^+} + b) - 1 \\
+d^- &= - \frac 1 {\norm{\vw}}(\dotp{\vw}{\vx^-} - b) + 1
 \end{align}
 %
 \end{itemize}
@@ -1608,14 +1615,14 @@ d^- &= - \frac 1 {\norm{\vw}} \dotp{\vw}{\vx^-} - b + 1
                   - \textcolor{darkred}{d^-} \right] \\
 &= \frac 1 2
    \left[
-   \textcolor{darkblue}{\frac 1 {\norm{\vw}} \dotp{\vw}{\vx^+} + b - 1}
- - \textcolor{darkred}{\frac 1 {\norm{\vw}} \dotp{\vw}{\vx^-} - b + 1}
+   \textcolor{darkblue}{\frac 1 {\norm{\vw}} (\dotp{\vw}{\vx^+} + b) - 1}
+ - \textcolor{darkred}{\frac 1 {\norm{\vw}} (\dotp{\vw}{\vx^-} - b) + 1}
    \right]
-\\
-&= \frac 1 2 \left[
-   \textcolor{darkblue}{\frac 1 {\norm{\vw}} \dotp{\vw}{\vx^+}}
- - \textcolor{darkred}{\frac 1 {\norm{\vw}} \dotp{\vw}{\vx^-}}
- \right]
+%\\
+%&= \frac 1 2 \left[
+%   \textcolor{darkblue}{\frac 1 {\norm{\vw}} \dotp{\vw}{\vx^+}}
+% - \textcolor{darkred}{\frac 1 {\norm{\vw}} \dotp{\vw}{\vx^-}}
+% \right]
 \\
 &= \frac 1 2 \left[
    \textcolor{darkblue}{\frac 1 {\norm{\vw}} (+1) }

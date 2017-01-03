@@ -228,7 +228,7 @@ Mathematically, an input vector $\vx = \langle x_1, x_2, \dots, x_D
 \begin{equation} \label{eq:perc:sum}
 a = \sum_{d=1}^D w_d x_d
 \end{equation}
-to determine it's amount of ``activation.''
+to determine its amount of ``activation.''
 \item  If this activiation is
 positive (i.e., $a > 0$) it predicts that this example is a positive
 example.  Otherwise it predicts a negative example.
@@ -632,7 +632,7 @@ bias means that more examples should be classified positive.
 \begin{itemize}
 \item
 The decision boundary in
-$D$ dimensional space, it is always a $D-1$-dimensional hyperplane.
+$D$ dimensional space is always a $D-1$-dimensional hyperplane.
 (In two dimensions, a 1-d hyperplane is simply a line.  In three
 dimensions, a 2-d hyperplane is like a sheet of paper.) 
 \item We'll
@@ -801,7 +801,8 @@ of the $\sup$, and therefore the value of the margin, is $-\infty$.
 \begin{itemize}
 \item
 There is a famous theorem due to
-Rosenblatt \cite{rosenblatt58perceptron} that shows that the number
+Rosenblatt %\cite{rosenblatt58perceptron} 
+that shows that the number
 of errors that the perceptron algorithm makes is bounded by
 $\ga^{-2}$.  More formally:
 \end{itemize}
@@ -969,7 +970,7 @@ only gets a vote of $1$.
 \begin{itemize}
 \item 
 Let $(\vw,b)\oth, \dots,
-(\vw,b)\Kth$ be the $K+1$ weight vectors encountered during training,
+(\vw,b)\Kth$ be the $K$ weight vectors encountered during training,
 and $c\oth, \dots, c\Kth$ be the survival times for each of these
 weight vectors
 \item A weight vector that gets immediately updated gets
@@ -1048,63 +1049,63 @@ term) and averaged bias (the red term).  Test-time prediction is then
 just as efficient as it is with the vanilla perceptron.
 \end{itemize}
 \end{frame}
-\begin{frame}
-  \frametitle{Improved Generalization: Voting and Averaging}
-\newalgorithm%
-  {perc:avgperc}%
-  {\FUN{AveragedPerceptronTrain}(\VAR{$\mat D$}, \VAR{MaxIter})}
-  {
-\SETST{$\vw$}{$\langle \CON{0}, \CON{0}, \dots \CON{0} \rangle$
-  \quad,\quad
-  \VAR{$b$} $\leftarrow$ \CON{0}}
-  \COMMENT{initialize weights and bias}
-\SETST{$\vec u$}{$\langle \CON{0}, \CON{0}, \dots \CON{0} \rangle$
-  \quad,\quad
-  \VAR{$\beta$} $\leftarrow$ \CON{0}}
-  \COMMENT{initialize cached weights and bias}
-\SETST{c}{\CON{1}}
-  \COMMENT{initialize example counter to one}
-\FOR{\VAR{iter} = \CON{1} \dots \VAR{MaxIter}}
-\FORALL{(\VAR{$\vx$},\VAR{$y$}) $\in$ \VAR{$\mat D$}}
-\IF{\VAR{$y$}$\left( \dotp{\VARm{\vw}}{\VARm{\vx}} + \VARm{b} \right) \leq \CON{0}$}
-\SETST{$\vw$}{\VAR{$\vw$} + \VAR{$y$} \VAR{$\vx$}}
-  \COMMENT{update weights}
-\SETST{$b$}{\VAR{$b$} + \VAR{$y$}}
-  \COMMENT{update bias}
-\SETST{$\vec u$}{\VAR{$\vec u$} + \VAR{$y$} \VAR{c} \VAR{$\vx$}}
-  \COMMENT{update cached weights}
-\SETST{$\beta$}{\VAR{$\beta$} + \VAR{$y$} \VAR{c}}
-  \COMMENT{update cached bias}
-\ENDIF
-\SETST{c}{\VAR{c} + \CON{1}}
-  \COMMENT{increment counter regardless of update}
-\ENDFOR
-\ENDFOR
-\RETURN \VAR{$\vw$} - $\frac 1 {\VAR{c}}$ \VAR{$\vec u$}, 
-        \VAR{$b$}   - $\frac 1 {\VAR{c}}$ \VAR{$\beta$}
-\COMMENT{return averaged weights and bias}
-}
-\end{frame}
-\begin{frame}
-  \frametitle{Improved Generalization: Voting and Averaging}
-\begin{itemize}
-\item 
-The computation unfolding is
-precisely the calculation of the averaged weights and bias.  
-\item The most
-\emph{natural} implementation would be to keep track of an averaged
-weight vector $\vec u$. 
-\item At the end of every example, you would
-increase $\vec u \leftarrow \vec u + \vw$ (and similarly for the
-bias). 
-\item However, such an implementation would require that you updated
-the averaged vector on \emph{every} example, rather than just on the
-examples that were incorrectly classified!  
-\item Since we hope that
-eventually the perceptron learns to do a good job, we would hope that
-it will not make updates on every example.  
-\end{itemize}
-\end{frame}
+%\begin{frame}
+%  \frametitle{Improved Generalization: Voting and Averaging}
+%\newalgorithm%
+%  {perc:avgperc}%
+%  {\FUN{AveragedPerceptronTrain}(\VAR{$\mat D$}, \VAR{MaxIter})}
+%  {
+%\SETST{$\vw$}{$\langle \CON{0}, \CON{0}, \dots \CON{0} \rangle$
+%  \quad,\quad
+%  \VAR{$b$} $\leftarrow$ \CON{0}}
+%  \COMMENT{initialize weights and bias}
+%\SETST{$\vec u$}{$\langle \CON{0}, \CON{0}, \dots \CON{0} \rangle$
+%  \quad,\quad
+%  \VAR{$\beta$} $\leftarrow$ \CON{0}}
+%  \COMMENT{initialize cached weights and bias}
+%\SETST{c}{\CON{1}}
+%  \COMMENT{initialize example counter to one}
+%\FOR{\VAR{iter} = \CON{1} \dots \VAR{MaxIter}}
+%\FORALL{(\VAR{$\vx$},\VAR{$y$}) $\in$ \VAR{$\mat D$}}
+%\IF{\VAR{$y$}$\left( \dotp{\VARm{\vw}}{\VARm{\vx}} + \VARm{b} \right) \leq \CON{0}$}
+%\SETST{$\vw$}{\VAR{$\vw$} + \VAR{$y$} \VAR{$\vx$}}
+%  \COMMENT{update weights}
+%\SETST{$b$}{\VAR{$b$} + \VAR{$y$}}
+%  \COMMENT{update bias}
+%\SETST{$\vec u$}{\VAR{$\vec u$} + \VAR{$y$} \VAR{c} \VAR{$\vx$}}
+%  \COMMENT{update cached weights}
+%\SETST{$\beta$}{\VAR{$\beta$} + \VAR{$y$} \VAR{c}}
+%  \COMMENT{update cached bias}
+%\ENDIF
+%\SETST{c}{\VAR{c} + \CON{1}}
+%  \COMMENT{increment counter regardless of update}
+%\ENDFOR
+%\ENDFOR
+%\RETURN \VAR{$\vw$} - $\frac 1 {\VAR{c}}$ \VAR{$\vec u$}, 
+%        \VAR{$b$}   - $\frac 1 {\VAR{c}}$ \VAR{$\beta$}
+%\COMMENT{return averaged weights and bias}
+%}
+%\end{frame}
+%\begin{frame}
+%  \frametitle{Improved Generalization: Voting and Averaging}
+%\begin{itemize}
+%\item 
+%The computation unfolding is
+%precisely the calculation of the averaged weights and bias.  
+%\item The most
+%\emph{natural} implementation would be to keep track of an averaged
+%weight vector $\vec u$. 
+%\item At the end of every example, you would
+%increase $\vec u \leftarrow \vec u + \vw$ (and similarly for the
+%bias). 
+%\item However, such an implementation would require that you updated
+%the averaged vector on \emph{every} example, rather than just on the
+%examples that were incorrectly classified!  
+%\item Since we hope that
+%eventually the perceptron learns to do a good job, we would hope that
+%it will not make updates on every example.  
+%\end{itemize}
+%\end{frame}
 \begin{frame}
   \frametitle{Improved Generalization: Voting and Averaging}
 \begin{itemize}
@@ -1219,13 +1220,15 @@ The ``XOR problem'' is so significant that it basically
 killed research in classifiers with linear decision boundaries for a
 decade or two.
 \item Two alternative
-approaches to taking key ideas from the perceptron and generating
+approaches taking key ideas from the perceptron and generating
 classifiers with non-linear decision boundaries
+\begin{enumerate}
 \item Combine multiple perceptrons in a single framework: this is the
 \concept{neural networks} approach 
 \item Find computationally efficient ways of doing
 feature mapping in a computationally and statistically efficient way:
 this is the \concept{kernels} approach
+\end{enumerate}
 \end{itemize}
 \end{frame}
 

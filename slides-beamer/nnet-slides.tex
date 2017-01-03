@@ -220,7 +220,7 @@ activations and the second layer of weights.
   \frametitle{Bio-inspired Multi-Layer Network}
 \begin{itemize}
 \item 
-The only major difference between is that the hidden units compute a \emph{non-linear}
+The only major difference  is that the hidden units compute a \emph{non-linear}
 function of their inputs.  
 \item 
 This is usually called the
@@ -259,7 +259,7 @@ A more popular link function is the \concept{hyperbolic tangent}
 function, $\tanh$. 
 \item Comparison between the sign function and the
 $\tanh$ function 
-\Figure{nnet:tanh}{picture of sign versus tanh}{0.4}
+\Figure{nnet:tanh}{picture of sign versus tanh}{0.3}
 \item It
 is a reasonable approximation to the sign function, but 
 is differentiable.%\sidenote{It's derivative is just
@@ -329,6 +329,7 @@ Small XOR data set:
   -1 & +1 & +1 & -1 \\
   -1 & +1 & -1 & +1
 \end{tabular}
+\item $x_0$ is a dummy feature used to take into account the bias.
 \item The classification rule is
 that $y=+1$ if an only if $x_1=x_2$, where the features are just $\pm
 1$.
@@ -349,7 +350,7 @@ an ``and'' function: $x_1 \land x_2$.
 these into a single prediction that mimics XOR. 
 \item  Once you have the
 first hidden unit activate for ``or'' and the second for ``and,'' you
-need only set the output weights as $-2$ and $+1$, respectively.
+need only set the output weights as $+1$ and $-2$, respectively.
 \end{itemize}
 \end{frame}
 
@@ -377,7 +378,6 @@ slightly below $+1$ for the other three examples.
 \begin{frame}
   \frametitle{Bio-inspired Multi-Layer Network}
 \begin{itemize}
-\item
 %\thinkaboutit{This shows how to create an ``or'' function.  How can
 %  you create an ``and'' function?}
 \item
@@ -610,7 +610,7 @@ small for hidden unit $i$, then this means that the output is not
 particularly sensitive to the activation of the $i$th hidden unit.
 \item 
 Thus, its gradient should be small.  If $v_i$ flips sign, the gradient
-at $\vw_i$ should also flip signs.
+at $\vw_i$ should also flip sign.
 \item  The name
 \concept{back-propagation} comes from the fact that you propagate
 gradients backward through the network, starting at the end.
@@ -705,7 +705,7 @@ will stay put.
 \begin{itemize}
 \item
 Furthermore, the gradient $w_{1,d}$ for the $d$th
-feature on the $i$th unit will be \emph{exactly} the same as the
+feature on the first unit will be \emph{exactly} the same as the
 gradient $w_{2,d}$ for the same feature on the second unit.  
 \item This
 means that the weight matrix, after a gradient step, will change in
@@ -751,6 +751,12 @@ structure.
 \item This phenomena is known as \concept{symmetric modes}
 (``mode'' referring to an optima) meaning that there are symmetries in
 the weight space. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Initialization and Convergence of Neural Networks}
+\begin{itemize}
 \item  It would be one thing if there were lots of modes
 and they were all symmetric: then finding one of them would be as good
 as finding any other.
@@ -954,7 +960,7 @@ opposite: it computes gradients top-down in the network.
 is to compute an \emph{error} for each node in the network.  
 \item The error
 at the output unit is the ``true error.''
-\item   For any input unit, the
+\item   For any hidden unit, the
 error is the amount of gradient that we see coming from our children
 (i.e., higher in the network).
 \item  These errors are computed backwards in
@@ -1096,7 +1102,7 @@ A second issue has to do with training deep models with
 back-propagation. 
 \item  As back-propagation works its way down
 through the model, the sizes of the gradients shrink.
-\item   If you are the
+\item   If you are at the
 beginning of a very deep network, changing one single weight is
 unlikely to have a significant effect on the output, since it has to
 go through so many other units before getting there. 
@@ -1227,12 +1233,12 @@ use back-propagation to \emph{learn} good Gaussian widths ($\ga$) and
 %  training point, centered at that point.  What bad thing might happen
 %  if you use back-propagation to estimate the $\ga$s and $\vec v$ on
 %  this data if you're not careful?  How could you be careful?}
-\item If you use \emph{fewer} hidden units than data point, you can think
- of this technique as a \concept{locally weighted linear model}.
-\item As with all neural networks,
- choosing the right number of hidden units (aka the
- \concept{architecture selection} problem) is one of the challenges
- in RBF network and locally weighted linear models.
+%\item If you use \emph{fewer} hidden units than data points, you can think
+% of this technique as a \concept{locally weighted linear model}.
+%\item As with all neural networks,
+% choosing the right number of hidden units (aka the
+% \concept{architecture selection} problem) is one of the challenges
+% in RBF network and locally weighted linear models.
 \end{itemize}
 \end{frame}
 
