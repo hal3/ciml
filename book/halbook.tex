@@ -310,6 +310,16 @@
   \ResetNextFigure{}
   }
 
+\newcommand{\FigureFull}[2]{%
+  \begin{figure}
+    \begin{centering}
+    \includegraphics[width=\textwidth]{figs/#1}
+    \caption{#2}
+    \label{fig:#1}
+    \end{centering}
+  \end{figure}
+  }
+
 \newcommand{\Table}[4]{%
   \begin{margintable}
     \begin{centering}
@@ -394,6 +404,7 @@
 \renewcommand{\partialof}[2]{\frac {\partial #1} {\partial #2}}
 
 \renewcommand{\xth}[1]{{}^{\textcolor{darkgrey}{\textsf{(#1)}}}}
+\newcommand{\xthm}[1]{{}^{\textcolor{darkgrey}{\textsf{($#1$)}}}}
 \renewcommand{\kth}{\xth{k}}
 \renewcommand{\Kth}{\xth{K}}
 \renewcommand{\kpth}{\xth{k-1}}
@@ -404,6 +415,7 @@
 \renewcommand{\pth}{p_{\vec\th}}
 
 \newcommand{\becauseof}[1]{&&& \textsf{\textcolor{darkred}{#1}}}
+\newcommand{\becauseoffull}[1]{&\textsf{\textcolor{darkred}{#1}} \nonumber}
 
 % ALGORITHMIC STUFF
 
@@ -569,8 +581,10 @@
 \newtheorem{theorem}{Theorem}
 \newtheorem{definition}{Definitions}
 
+
 %%% Local Variables: 
 %%% mode: latex
 %%% TeX-master: "courseml"
 %%% End: 
+
 

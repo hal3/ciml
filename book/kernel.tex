@@ -1,6 +1,6 @@
 \chapter{Kernel Methods} \label{sec:kernel}
 
-\chapterquote{}{}
+\chapterquote{Many who have had an opportunity of knowing any more about mathematics confuse it with arithmetic, and consider it an arid science. In reality, however, it is a science which requires a great amount of imagination.}{Sofia~Kovalevskaya}
 
 \begin{learningobjectives}
 \item Explain how kernels generalize both feature combinations and
@@ -70,7 +70,7 @@ need quadratically many training examples in order to avoid
 overfitting.
 
 This chapter is all about dealing with the \emph{computational} issue.
-It will turn out in Chapter~\ref{chap:thy} that you can also deal with
+It will turn out in Chapter~\ref{sec:thy} that you can also deal with
 the statistical issue: for now, you can just hope that regularization
 will be sufficient to attenuate overfitting.
 
@@ -138,16 +138,16 @@ activation (line 4) and the second is in updating the weights (line
 6).  The goal is to remove the explicit dependence of this algorithm
 on $\phi$ and on the weight vector.
 
-\begin{mathreview}{Spans and null spaces}
-  reminder: if $\cU = \{ \vec u_i \}_i$ is a set of vectors in $\R^D$, then
-  the span of $\cU$ is the set of vectors that can be written as
+\begin{mathreview}{Spans}
+  If $\cU = \{ \vec u_i \}_{i=1}^I$ is a set of vectors in $\R^D$, then
+  the \concept{span} of $\cU$ is the set of vectors that can be written as
   linear combinations of $\vec u_i$s; namely: $\textit{span}(\cU) = \{
   \sum_i a_i \vec u_i : a_1 \in \R, \dots, a_I \in \R \}$.
-
-  the null space of $\cU$ is everything that's left: $\R^D \without
-  \textit{span}(\cU)$.
-
-  TODO pictures
+  If all of the $\vec u_i$s are linearly independent, then the dimension
+  of $\textit{span}(\cU)$ is $I$; in particular, if there are $D$-many
+  linearly independent vectors then they span $\R^D$.
+%  the null space of $\cU$ is everything that's left: $\R^D \without
+%  \textit{span}(\cU)$.
 \end{mathreview}
 
 To do so, you can observe that at any point in the algorithm, the
@@ -231,7 +231,7 @@ computational complexity.)
 \section{Kernelized K-means}
 
 For a complete change of pace, consider the $K$-means algorithm from
-Section~\ref{sec:knn:means}.  This algorithm is for \emph{clustering}
+Section~\ref{sec:knn}.  This algorithm is for \emph{clustering}
 where there is no notion of ``training labels.''  Instead, you want to
 partition the data into coherent clusters.  For data in $\R^D$, it
 involves randomly initializing $K$-many cluster means $\vec\mu\oth,
@@ -412,7 +412,7 @@ in analysis (particularly, integration by parts), but otherwise not
 difficult.  Again, the proof is provided in the appendix.
 
 So far, you have seen two bsaic classes of kernels: polynomial kernels
-($K(\vx,vz) = (1 + \dotp{\vx}{\vz})^d$), which includes the linear
+($K(\vx,\vz) = (1 + \dotp{\vx}{\vz})^d$), which includes the linear
 kernel ($K(\vx,\vz) = \dotp{\vx}{\vz}$) and RBF kernels ($K(\vx,\vz) =
 \exp[-\ga \norm{\vx-\vz}^2]$).  The former have a direct connection to
 feature expansion; the latter to RBF networks.  You also know how to
@@ -788,6 +788,12 @@ labels.
 This algorithm is, in some ways, even easier to kernelize than the
 perceptron.  The optimal solution has a closed form, and 
 \end{comment}
+
+\section{Further Reading}
+
+TODO further reading
+
+
 
 % http://www.ics.uci.edu/~welling/classnotes/papers_class/Kernel-Ridge.pdf
 % http://crsouza.blogspot.com/2010/03/kernel-functions-for-machine-learning.html#exponential

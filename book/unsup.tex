@@ -1,6 +1,6 @@
 \chapter{Unsupervised Learning} \label{sec:unsup}
 
-\chapterquote{}{}
+\chapterquote{[My father] advised me to sit every few months in my reading chair for an entire evening, close my eyes and try to think of new problems to solve. I took his advice very seriously and have been glad ever since that he did.}{Luis~Walter~Alvarez}
 
 \begin{learningobjectives}
 \item Explain the difference between linear and non-linear
@@ -270,6 +270,9 @@ while retaining the ``important'' characteristics of the data.  Since
 this is an unsupervised setting, the notion of important
 characteristics is difficult to define.
 
+\TODOFigure{unsup:pcadata}{Data in two dimensions}
+\TODOFigure{unsup:pcadata2}{Projection of that data down to one dimension by PCA}
+
 Consider the dataset in Figure~\ref{fig:unsup:pcadata}, which lives in
 high dimensions (two) and you want to reduce to low dimensions (one).
 In the case of linear dimensionality reduction, the only thing you can
@@ -316,7 +319,7 @@ is important: if not, $\vec u$ would simply stretch to have infinite
 length to maximize the objective.
 
 \begin{mathreview}{Eigenvalues and eigenvectors}
-  the usual...
+  todo the usual...
 \end{mathreview}
 
 It is now helpful to write the collection of datapoints $\vx_n$ as a
@@ -325,7 +328,7 @@ multiply it by $\vec u$, which has dimensions $D \times 1$, you end up
 with a $N \times 1$ vector whose values are exactly the values $\vec
 p$.  The objective in Eq~\eqref{opt:unsup:pcaone} is then just the
 squared norm of $\vec p$.  This simplifies
-Eq~\eqref{eq:opt:unsup:pcaone} to:
+Eq~\eqref{opt:unsup:pcaone} to:
 %
 \optimizemaxoneline{unsup:pageant}{\vec u}{
   \norm{ \mat X \vec u }^2
@@ -400,7 +403,7 @@ sample covariance between features $i$ and $j$.
 
 This leads to the technique of \concept{principle components
   analysis}, or \concept{PCA}.  For completeness, the is depicted in
-Algorithm~\ref{alt:unsup:pca}.  The important thing to note is that
+Algorithm~\ref{alg:unsup:pca}.  The important thing to note is that
 the eigenanalysis only gives you the projection directions.  It does
 not give you the embedded data.  To embed a data point $\vx$ you need
 to compute its embedding as $\langle \dotp{\vx}{\vec u_1},
@@ -459,30 +462,37 @@ squared distances to original data points (for PCA).  In particular,
 for BIC you get the reconstruction error plus $K \log D$; for AIC, you
 get the reconstruction error plus $2 K D$.
 
+\section{Autoencoders}
+
+TODO
+
+\section{Further Reading}
+
+TODO
 
 
 
-\section{Manifolds and Graphs}
+% \section{Manifolds and Graphs}
 
-what is a manifold?
+% what is a manifold?
 
-graph construction
+% graph construction
 
-\section{Non-linear Dimensionality Reduction}
+% \section{Non-linear Dimensionality Reduction}
 
-isomap
+% isomap
 
-lle
+% lle
 
-mvu
+% mvu
 
-mds?
+% mds?
 
-\section{Non-linear Clustering: Spectral Methods}
+% \section{Non-linear Clustering: Spectral Methods}
 
-what is a spectrum
+% what is a spectrum
 
-spectral clustering
+% spectral clustering
 
 \begin{comment}
 - pca

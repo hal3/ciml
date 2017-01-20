@@ -16,7 +16,8 @@
 
 \usepackage{amsthm}
 \usepackage{xcolor}
-\usepackage{wrapfig}
+%\usepackage{wrapfig}
+\usepackage{picins}
 \usepackage{soul}
 \usepackage{lipsum}
 \usepackage{booktabs}
@@ -82,10 +83,11 @@
 \tableofcontents
 %\listoffigures
 %\listoftables
-%\cleardoublepage
+\cleardoublepage
 \include{intro}
 \mainmatter
 \include{dt}
+\include{formal}
 \include{knn}
 \include{perc}
 \include{prac}
@@ -100,16 +102,17 @@
 \include{opt}
 \include{unsup}
 \include{em}
-\include{semi}
-\include{gm}
-\include{online}
+% NOT WRITTEN \include{semi}
+% NOT WRITTEN \include{gm}
+% NOT WRITTEN \include{online}
 \include{srl}
-\include{bayes}
+\include{imit}
+% NOT WRITTEN \include{bayes}
 
 \appendix
 \backmatter
 \include{data}
-\include{not}
+% NOT WRITTEN \include{not}
 
 \bibliographystyle{plainnat}
 \bibliography{bibfile}

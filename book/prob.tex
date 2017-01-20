@@ -1,6 +1,6 @@
 \chapter{Probabilistic Modeling} \label{sec:prob}
 
-\chapterquote{}{}
+\chapterquote{The world is noisy and messy. You need to deal with the noise and uncertainty.}{Daphne~Koller}
 
 \begin{learningobjectives}
 \item Define the generative story for a naive Bayes classifier.
@@ -35,64 +35,13 @@ open doors to other learning problems.
 
 \section{Classification by Density Estimation}
 
-
-\begin{mathreview}{Rules of probability}
-  chain rule, marginalization and Bayes' rule
-\end{mathreview}
-
-Our underlying assumption for the majority of this book is that
-learning problems are characterized by some unknown probability
-distribution $\cD$ over input/output pairs $(x,y) \in \cX \times \cY$.
-Suppose that someone \emph{told} you what $\cD$ was.  In particular,
-they gave you a Python function \FUN{computeD} that took two inputs,
-$x$ and $y$, and returned the probability of that $x,y$ pair under
-$\cD$.  If you had access to such a function, classification becomes
-simple.  We can define the \concept{Bayes optimal classifier} as the
-classifier that, for any test input $\hat x$, simply returns the $\hat
-y$ that maximizes \FUN{computeD}$(\hat x, \hat y)$, or, more formally:
+Recall from Chapter~\ref{sec:formal} that if we had access to the underlying probability distribution $\cD$, then we could form a Bayes optimal classifier as:
 %
-\begin{equation} \label{eq:prob:bayesopt}
+\begin{equation} \label{eq:prob:bayesopt2}
   f\xth{BO}(\hat x) = \arg\max_{\hat y \in \cY} \cD(\hat x, \hat y)
 \end{equation}
 %
-This classifier is optimal in one specific sense: of \emph{all
-  possible} classifiers, it achieves the smallest zero/one error.
-
-\begin{theorem}[Bayes Optimal Classifier] \label{thm:prob:bayesopt}
-  The Bayes Optimal Classifier $f\xth{BO}$ achieves minimal zero/one
-  error of any deterministic classifier.
-\end{theorem}
-
-This theorem assumes that you are comparing against
-\emph{deterministic} classifiers.  You can actually prove a stronger
-result that $f\xth{BO}$ is optimal for randomized classifiers as well,
-but the proof is a bit messier.  However, the intuition is the same:
-for a given $x$, $f\xth{BO}$ chooses the label with highest
-probability, thus \emph{minimizing} the probability that it makes an
-error.
-
-\begin{myproof}{\ref{thm:prob:bayesopt}}
-  Consider some other classifier $g$ that claims to be better than
-  $f$.  Then, there must be some $x$ on which $g(x) \neq f(x)$.  Fix
-  such an $x$.  Now, the probability that $f$ makes an error on this
-  particular $x$ is $1 - \cD(x, f\xth{BO}(x))$ and the probability
-  that $g$ makes an error on this $x$ is $1 - \cD(x, g(x))$.  But
-  $f\xth{BO}$ was chosen in such a way to \emph{maximize} $\cD(x,
-  f\xth{BO}(x))$, so this \emph{must} be greater than $\cD(x, g(x))$.
-  Thus, the probability that $f$ errs on this particular $x$ is
-  smaller than the probability that $g$ errs on it.  This applies to
-  any $x$ for which $f(x) \neq g(x)$ and therefore $f$ achieves
-  smaller zero/one error than any $g$.
-\end{myproof}
-
-The \concept{Bayes error rate} (or \concept{Bayes optimal error rate})
-is the error rate of the Bayes optimal classifier.  It is the best
-error rate you can ever hope to achieve on this classification problem
-(under zero/one loss).
-
-The take-home message is that if someone gave you access to the data
-distribution, forming an \emph{optimal} classifier would be trivial.
-Unfortunately, no one gave you this distribution, but this analysis
+Unfortunately, no one gave you this distribution, but the optimality of this approach
 suggests that good way to build a classifier is to try to
 \emph{estimate} $\cD$.  In other words, you try to learn a
 distribution $\hat \cD$, which you hope to very similar to $\cD$, and
@@ -117,6 +66,99 @@ assumption that all the training data is drawn from the same
 distribution $\cD$ leads to the \concept{i.i.d. assumption} or
 \concept{independently and identically distributed} assumption.  This
 is a key assumption in almost all of machine learning.
+
+\begin{mathreview}{Rules of probability}
+  A probability distribution $p$ specifies the likelihood of an event $e$, where $p(e) \in [0,1]$.
+  It's often convenient to think of events as ``configurations of the world'', so $p(e)$ says ``how likely is it that the world is in configuration $e$.''
+  Often world configurations are built up of smaller pieces, for instance you might say ``$e$ = the configuration in which it is rainy, windy and cold.''
+  Formally, we might write this as ``$e = \{ \text{Weather}=\text{rainy}, \text{Wind}=\text{windy}, \text{Temperature}=\text{cold} \}$'', where we've used a convention that \concept{random variable}s (like Temperature) are capitalized and their instantiations (like cold) are lower case.
+  Considering this event, we want to evaluate $p(\text{Weather}=\text{rainy}, \text{Wind}=\text{windy}, \text{Temperature}=\text{cold})$, or more generally $p(A=a, B=b, C=c)$ for some random variables $A$, $B$ and $C$, and some instantiations of those random variables $a$, $b$ and $c$ respectively.
+  ~\\~\\
+  There are a few standard rules of probability that we will use regularly:
+  ~\\~\\
+  \concept{sum-to-one}: if you sum over all possible configurations of the world, $p$ sums to one: $\sum_e p(E=e) = 1$.\\
+  \concept{marginalization}: you can sum out one random variable to remove it from the world: $\sum_a p(A=a, B=b) = p(B=b)$.\\
+  \concept{chain rule}: if a world configuration consists of two or more random variables, you can evaluate the likelihood of the world one step at a time: $p(A=a, B=b) = p(A=a) p(B=b \| A=a)$. Events are unordered, so you can also get $p(A=a, B=b) = p(B=b) p(A=a \| B=b)$.\\
+  \concept{Bayes rule}: combining the two chain rule equalities and dividing, we can relate a conditional probability in one direction with that in the other direction: $p(A=a \| B=b) = p(A=a) p(B=b \| A=a) / p(B=b)$.
+\end{mathreview}
+
+% Our underlying assumption for the majority of this book is that
+% learning problems are characterized by some unknown probability
+% distribution $\cD$ over input/output pairs $(x,y) \in \cX \times \cY$.
+% Suppose that someone \emph{told} you what $\cD$ was.  In particular,
+% they gave you a Python function \FUN{computeD} that took two inputs,
+% $x$ and $y$, and returned the probability of that $x,y$ pair under
+% $\cD$.  If you had access to such a function, classification becomes
+% simple.  We can define the \concept{Bayes optimal classifier} as the
+% classifier that, for any test input $\hat x$, simply returns the $\hat
+% y$ that maximizes \FUN{computeD}$(\hat x, \hat y)$, or, more formally:
+% %
+% \begin{equation} \label{eq:prob:bayesopt}
+%   f\xth{BO}(\hat x) = \arg\max_{\hat y \in \cY} \cD(\hat x, \hat y)
+% \end{equation}
+% %
+% This classifier is optimal in one specific sense: of \emph{all
+%   possible} classifiers, it achieves the smallest zero/one error.
+
+% \begin{theorem}[Bayes Optimal Classifier] \label{thm:prob:bayesopt}
+%   The Bayes Optimal Classifier $f\xth{BO}$ achieves minimal zero/one
+%   error of any deterministic classifier.
+% \end{theorem}
+
+% This theorem assumes that you are comparing against
+% \emph{deterministic} classifiers.  You can actually prove a stronger
+% result that $f\xth{BO}$ is optimal for randomized classifiers as well,
+% but the proof is a bit messier.  However, the intuition is the same:
+% for a given $x$, $f\xth{BO}$ chooses the label with highest
+% probability, thus \emph{minimizing} the probability that it makes an
+% error.
+
+% \begin{myproof}{\ref{thm:prob:bayesopt}}
+%   Consider some other classifier $g$ that claims to be better than
+%   $f$.  Then, there must be some $x$ on which $g(x) \neq f(x)$.  Fix
+%   such an $x$.  Now, the probability that $f$ makes an error on this
+%   particular $x$ is $1 - \cD(x, f\xth{BO}(x))$ and the probability
+%   that $g$ makes an error on this $x$ is $1 - \cD(x, g(x))$.  But
+%   $f\xth{BO}$ was chosen in such a way to \emph{maximize} $\cD(x,
+%   f\xth{BO}(x))$, so this \emph{must} be greater than $\cD(x, g(x))$.
+%   Thus, the probability that $f$ errs on this particular $x$ is
+%   smaller than the probability that $g$ errs on it.  This applies to
+%   any $x$ for which $f(x) \neq g(x)$ and therefore $f$ achieves
+%   smaller zero/one error than any $g$.
+% \end{myproof}
+
+% The \concept{Bayes error rate} (or \concept{Bayes optimal error rate})
+% is the error rate of the Bayes optimal classifier.  It is the best
+% error rate you can ever hope to achieve on this classification problem
+% (under zero/one loss).
+
+% The take-home message is that if someone gave you access to the data
+% distribution, forming an \emph{optimal} classifier would be trivial.
+% Unfortunately, no one gave you this distribution, but this analysis
+% suggests that good way to build a classifier is to try to
+% \emph{estimate} $\cD$.  In other words, you try to learn a
+% distribution $\hat \cD$, which you hope to very similar to $\cD$, and
+% then use this distribution for classification.  Just as in the
+% preceding chapters, you can try to form your estimate of $\cD$ based
+% on a finite training set.
+
+% The most direct way that you can attempt to construct such a
+% probability distribution is to select a \emph{family} of parametric
+% distributions.  For instance, a Gaussian (or Normal) distribution is
+% parametric: it's parameters are its mean and covariance.  The job of
+% learning is then to infer which parameters are ``best'' as far as the
+% observed training data is concerned, as well as whatever inductive
+% bias you bring.  A key assumption that you will need to make is that
+% the training data you have access to is drawn \concept{independently}
+% from $\cD$.  In particular, as you draw examples $(x_1,y_1) \sim \cD$
+% then $(x_2,y_2) \sim \cD$ and so on, the $n$th draw $(x_n,y_n)$ is
+% drawn from $\cD$ and \emph{does not} otherwise depend on the previous
+% $n-1$ samples.  This assumption is usually false, but is also usually
+% sufficiently close to being true to be useful.  Together with the
+% assumption that all the training data is drawn from the same
+% distribution $\cD$ leads to the \concept{i.i.d. assumption} or
+% \concept{independently and identically distributed} assumption.  This
+% is a key assumption in almost all of machine learning.
 
 \section{Statistical Estimation}
 
@@ -227,7 +269,7 @@ it works.  In this case, the idea is as follows.  Think of $\la$ as an
 adversary: $\la$ is trying to maximize this function (you're trying to
 minimize it).  If you pick some parameters $\vec\th$ that actually
 satisfy the constraint, then the green term in
-Eq~\eqref{opt:prob:multinomial:lagrangian} goes to zero, and therefore
+Eq~\eqref{opt:prob:multinomial:lagrange} goes to zero, and therefore
 $\la$ does not matter: the adversary cannot do anything.  On the other
 hand, if the constraint is even \emph{slightly} unsatisfied, then
 $\la$ can tend toward $+\infty$ or $-\infty$ to blow up the objective.
@@ -235,7 +277,7 @@ So, in order to have a non-infinite objective value, the optimizer
 \emph{must} find values of $\vec\th$ that satisfy the constraint.
 
 If we solve the \emph{inner} optimization of
-Eq~\eqref{opt:prob:multinomial:lagrangian} by differentiating with
+Eq~\eqref{opt:prob:multinomial:lagrange} by differentiating with
 respect to $\th_1$, we get $x_1 / \th_1 = \la$, yielding $\th_1 = x_1
 / \la$.  In general, the solution is $\th_k = x_k / \la$.  Remembering
 that the goal of $\la$ is to enforce the sums-to-one constraint, we
@@ -379,8 +421,16 @@ distribution is a form of \concept{inductive bias} by which you can
 inject your knowledge of the problem into the learning algorithm.
 
 \begin{mathreview}{Common probability distributions}
-  remove people about discrete, bernoulli, binomial, multinomial and
-  gaussian distributions
+  There are a few common probability distributions that we use in this book.
+  The first is the Bernouilli distribution, which models binary outcomes (like coin flips).
+  A Bernouilli distribution, $\Ber(\th)$ is parameterized by a single scalar value $\th \in [0,1]$ that represents the probability of heads. The likelihood function is $\Ber(x \| \th) = \th^x (1-\th)^{1-x}$.
+  The generalization of the Bernouilli to more than two possible outcomes (like rolls of a die) is the Discrete distribution, $\Disc(\vec th)$. If the die has $K$ sides, then $\vec \th \in \R^K$ with all entries non-negative and $\sum_k \th_k = 1$. $\th_k$ is the probabability that the die comes up on side $k$. The likelihood function is $\Disc(x \| \vec\th) = \prod_k \th_k^{\Ind[x=k]}$.
+  The Binomial distribution is just like the Bernouilli distribution but for multiple flips of the rather than a single flip; it's likelihood is $\Bin(k \| n, \th) = n \choose k \th^k (1-\th)^{n-k}$, where $n$ is the number of flips and $k$ is the number of heads.
+  The Multinomial distribution extends the Discrete distribution also to multiple rolls; it's likelihood is $\Mult(\vec x \| n, \vec\th) = \frac {n!} {\prod_k x_k!} \prod_k \th_k^{x_k}$, where $n$ is the total number of rolls and $x_k$ is the number of times the die came up on side $k$ (so $\sum_k x_k = n$).
+  The preceding distributions are all discrete.
+  ~\\~\\
+  There are two common continuous distributions we need. The first is the Uniform distribution, $\Uni(a,b)$ which is uniform over the closed range $[a,b]$. It's density function is $\Uni(x \| a,b) = \frac 1 {b-a} \Ind[x \in [a,b]]$.
+  Finally, the Gaussian distribution is parameterized by a mean $\mu$ and variance $\si^2$ and has density $\Nor(x \| \mu,\si^2) = (2 \pi \si^2)^{-\frac 1 2} \exp\left[ - \frac 1 {2 \si^2} (x-\mu)^2\right]$.
 \end{mathreview}
 
 
@@ -401,8 +451,8 @@ p(y=-1,\vx)$, computed below:
 %
 \begin{align}
 \text{LLR}
-&= \log \left[ \th_0 \prod_d \th_{(+1),d}^{[x_d=1]} (1-\th_{(+1),d})^{[x_d=0]} \right]
- - \log \left[ (1-\th_0) \prod_d \th_{(-1),d}^{[x_d=1]} (1-\th_{(-1),d})^{[x_d=0]} \right]
+&= \log \left[ \th_0 \prod_d \th_{(+1),d}^{[x_d=1]} (1-\th_{(+1),d})^{[x_d=0]} \right] \nonumber\\
+&\qquad - \log \left[ (1-\th_0) \prod_d \th_{(-1),d}^{[x_d=1]} (1-\th_{(-1),d})^{[x_d=0]} \right]
    \becauseof{model assumptions} \\
 &= \log \th_0 - \log (1-\th_0)  + \sum_d [x_d=1] \left( \log \th_{(+1),d} - \log \th_{(-1),d} \right) \nonumber\\
 &\qquad+ \sum_d [x_d=0] \left( \log (1-\th_{(+1),d}) - \log (1-\th_{(-1),d}) \right)
@@ -425,8 +475,6 @@ b   = \sum_d \log \frac {1-\th_{(+1),d}} {1-\th_{(-1),d}}
 The result of the algebra is that the naive Bayes model has precisely
 the form of a linear model!  Thus, like perceptron and many of the
 other models you've previous studied, the decision boundary is linear.
-
-TODO: MBR
 
 % One advantage to working with probabilistic models is that the
 % \emph{same} model can be used to predict under a variety of loss
@@ -637,7 +685,7 @@ then transform this target into a value between zero and one, so that
 $-\infty$ maps to $0$ and $+\infty$ maps to $1$.  A function that does
 this is the logistic function\footnote{Also called the
   \concept{sigmoid function} because of it's ``S''-shape.}, defined
-below and plotted in Figure~\ref{fig:prob:logistic}:
+below and plotted in Figure~\ref{fig:prob:sigmoid}:
 %
 \Figure{prob:sigmoid}{sketch of logistic function}
 %
@@ -766,6 +814,10 @@ Gaussian prior on $\vw$.)
 %\section{Maximum Entropy Principle}
 %calculus of variations
 %derivation of logistic regression
+
+\section{Further Reading}
+
+TODO
 
 
 \begin{comment}

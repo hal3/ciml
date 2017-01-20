@@ -1,12 +1,6 @@
 \chapter{Learning Theory} \label{sec:thy}
 
-%\chapterquote{Given the choice between an algorithm that works and an
-%  algorithm that I can prove something about, I'll always choose the
-%  one that works.}{Anonymous Theorist}
-
-\chapterquote{For nothing ought to be posited without a reason given,
-  unless it is self-evident or known by experience or proved by the
-  authority of Sacred Scripture.}{William of Occam, c. 1320}
+\chapterquote{The Universe is under no obligation to make sense to you.}{Neil~deGrasse~Tyson}
 
 \begin{learningobjectives}
 \item Explain why inductive bias is necessary.
@@ -557,51 +551,55 @@ pick, you cannot win the game.
 
 
 
-VC
+% VC
 
-margins
+% margins
 
-small norms
+% small norms
 
-\section{Learning with Noise}
+% \section{Learning with Noise}
 
-\section{Agnostic Learning}
+% \section{Agnostic Learning}
 
-\section{Error versus Regret}
+% \section{Error versus Regret}
 
 
-Despite the fact that there's no way to get better than $20\%$ error
-on this distribution, it would be nice to say that you can still learn
-something from it.  For instance, the predictor that always guesses
-$y=x$ seems like the ``right'' thing to do.  Based on this
-observation, maybe we can rephrase the goal of learning as to find a
-function that does as well as the distribution allows.  In other
-words, on this data, you would hope to get $20\%$ error.  On some other
-distribution, you would hope to get $X\%$ error, where $X\%$ is the
-best you could do.
+% Despite the fact that there's no way to get better than $20\%$ error
+% on this distribution, it would be nice to say that you can still learn
+% something from it.  For instance, the predictor that always guesses
+% $y=x$ seems like the ``right'' thing to do.  Based on this
+% observation, maybe we can rephrase the goal of learning as to find a
+% function that does as well as the distribution allows.  In other
+% words, on this data, you would hope to get $20\%$ error.  On some other
+% distribution, you would hope to get $X\%$ error, where $X\%$ is the
+% best you could do.
 
-This notion of ``best you could do'' is sufficiently important that it
-has a name: the \concept{Bayes error rate}.  This is the error rate of
-the best possible classifier, the so-called \concept{Bayes optimal
-  classifier}.  If you knew the underlying distribution $\cD$, you
-could actually \emph{write down} the exact Bayes optimal classifier
-explicitly.  (This is why learning is uninteresting in the case that
-you know $\cD$.)  It simply has the form:
-%
-\begin{align}
-f^{\text{Bayes}}(\vx) &=
- \brack{ +1 & \txtif \cD(\vx,+1) > \cD(\vx,-1) \\
-         -1 & \text{otherwise}}
-\end{align}
-%
-The Bayes optimal error rate is the error rate that this
-(hypothetical) classifier achieves:
-%
-\begin{align}
-\ep^{\text{Bayes}} &=
-  \Ep_{(\vx,y) \sim \cD} \big[ y \neq f^{\text{Bayes}}(\vx) \big]
-\end{align}
+% This notion of ``best you could do'' is sufficiently important that it
+% has a name: the \concept{Bayes error rate}.  This is the error rate of
+% the best possible classifier, the so-called \concept{Bayes optimal
+%   classifier}.  If you knew the underlying distribution $\cD$, you
+% could actually \emph{write down} the exact Bayes optimal classifier
+% explicitly.  (This is why learning is uninteresting in the case that
+% you know $\cD$.)  It simply has the form:
+% %
+% \begin{align}
+% f^{\text{Bayes}}(\vx) &=
+%  \brack{ +1 & \txtif \cD(\vx,+1) > \cD(\vx,-1) \\
+%          -1 & \text{otherwise}}
+% \end{align}
+% %
+% The Bayes optimal error rate is the error rate that this
+% (hypothetical) classifier achieves:
+% %
+% \begin{align}
+% \ep^{\text{Bayes}} &=
+%   \Ep_{(\vx,y) \sim \cD} \big[ y \neq f^{\text{Bayes}}(\vx) \big]
+% \end{align}
 
+
+\section{Further Reading}
+
+TODO
 
 
 

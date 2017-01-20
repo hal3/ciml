@@ -1,6 +1,6 @@
 \chapter{Neural Networks} \label{sec:nnet}
 
-\chapterquote{}{}
+\chapterquote{TODO}{}
 
 \begin{learningobjectives}
 \item Explain the biological inspiration for multi-layer neural
@@ -213,9 +213,10 @@ the number of hidden units in your network.
 The number of units is both a form of inductive bias and a form of
 regularization.  In both view, the number of hidden units controls how
 complex your function will be.  Lots of hidden units $\Rightarrow$
-very complicated function.  Figure~\ref{fig:nnet:units} shows training
-and test error for neural networks trained with different numbers of
-hidden units.  As the number increases, training performance continues
+very complicated function.  %Figure~\ref{fig:nnet:units} shows training
+%and test error for neural networks trained with different numbers of
+%hidden units.  
+As the number increases, training performance continues
 to get better.  But at some point, test performance gets worse because
 the network has overfit the data.
 
@@ -388,7 +389,7 @@ them together.
 
 Based on what you know about linear models, you might be tempted to
 initialize all the weights in a neural network to zero.  You might
-also have noticed that in Algorithm~\ref{al:nnet:twolayertrain}, this
+also have noticed that in Algorithm~\ref{alg:nnet:twolayertrain}, this
 is not what's done: they're initialized to small random values.  The
 question is why?
 
@@ -718,6 +719,10 @@ use back-propagation to \emph{learn} good Gaussian widths ($\ga$) and
 % choosing the right number of hidden units (aka the
 % \concept{architecture selection} problem) is one of the challenges
 % in RBF network and locally weighted linear models.
+
+\section{Further Reading}
+
+TODO further reading
 
 
 \begin{comment}

@@ -1,6 +1,6 @@
 \chapter{The Perceptron} \label{sec:perc}
 
-\chapterquote{}{}
+\chapterquote{Algebra is nothing more than geometry, in words; geometry is nothing more than algebra, in pictures.}{Sophie~Germain}
 
 
 \begin{learningobjectives}
@@ -60,7 +60,7 @@ However, our goal isn't to build a brain, but to simply be
 learning algorithm as a \emph{single} neuron.  It receives input from
 $D$-many other neurons, one for each input feature.  The strength of
 these inputs are the feature values.  This is shown schematically in
-Figure~\ref{fig:perc:aneuron}.  Each incoming connection has a weight
+Figure~\ref{fig:perc:neuron}.  Each incoming connection has a weight
 and the neuron simply sums up all the weighted inputs.  Based on this
 sum, it decides whether to ``fire'' or not.  Firing is interpreted as
 being a positive example and not firing is interpreted as being a
@@ -108,10 +108,6 @@ parameterized by $D$-many weights, $w_1, w_2, \dots, w_D$, and a
 single scalar bias value $b$.
 
 \section{Error-Driven Updating: The Perceptron Algorithm}
-
-\begin{vignette}{The History of the Perceptron}
-todo
-\end{vignette}
 
 The \concept{perceptron} is a classic learning algorithm for the
 neural model of learning.  Like $K$-nearest neighbors, it is one of
@@ -271,11 +267,25 @@ as fast.
 \section{Geometric Intrepretation}
 
 \begin{mathreview}{Dot Products}
-  dot products, definition, perpendicular, normalization and
-  projections... think about basis vectors for projections.  quadratic
-  rule on vectors.  also that dot products onto unit vectors are
-  maximized when they point in the same direction so a*a >= a*b blah
-  blah blah.
+  \parpic[r][t]{\includegraphics[width=1.5in]{figs/perc_dotprojection}}
+  Given two vectors $\vec u$ and $\vec v$ their dot product $\dotp{\vec u}{\vec v}$ is $\sum_d u_d v_d$.
+  The dot product grows large and positive when $\vec u$ and $\vec v$ point in same direction, grows
+  %\begin{wrapfigure}{r}{2in}
+  %  \vspace{-3em}
+  %  \includegraphics[width=2in]{figs/perc_dotprojection}.
+  %\end{wrapfigure}
+  large and negative when $\vec u$ and $\vec v$ point in opposite directions, and is zero when their are perpendicular.
+  A useful geometric interpretation of dot products is \concept{projection}.
+  Suppose $\norm{\vec u} = 1$, so that $\vec u$ is a \concept{unit vector}.
+  We can think of any other vector $\vec v$ as consisting of two components: (a) a component in the direction of $\vec u$ and (b) a component that's perpendicular to $\vec u$.
+  This is depicted geometrically to the right:
+  Here, $\vec u = \langle 0.8, 0.6 \rangle$ and $\vec v = \langle 0.37, 0.73 \rangle$.
+  We can think of $\vec v$ as the sum of two vectors, $\vec a$ and $\vec b$, where
+  $\vec a$ is parallel to $\vec u$ and $\vec b$ is perpendicular.
+  The length of $\vec b$ is exactly $\dotp{\vec u}{\vec v} = 0.734$, which is why you can think of
+  dot products as projections: the dot product between $\vec u$ and $\vec v$ is the ``projection of $\vec v$ onto $\vec u$.''
+%u=(0.8,0.6) --> (240,180) by *300
+%v=(0.37,0.73) --> (110,220) by *300
 \end{mathreview}
 
 A question you should be asking yourself by now is: what does the
@@ -298,6 +308,7 @@ they are \concept{perpendicular}.  Thus, if we think of the weights as
 a vector $\vw$, then the decision boundary is simply the plane
 perpendicular to $\vw$.
 
+\MoveNextFigure{-1cm}
 \Figure{perc:geom}{picture of data points with hyperplane and weight vector}
 
 This is shown pictorially in Figure~\ref{fig:perc:geom}.  Here, the
@@ -315,12 +326,13 @@ a test point falls on, now how far it is from that plane.  For this
 reason, it is common to work with \koncept{normalized}{normalize}
 weight vectors, $\vw$, that have length one; i.e., $\norm{\vw} = 1$.
 
-\thinkaboutit{If I give you an arbitrary non-zero weight vector $\vw$,
+\thinkaboutit{If I give you a non-zero weight vector $\vw$,
   how do I compute a weight vector $\vw'$ that points in the same
   direction but has a norm of one?}
 
-\Figure{perc:proj}{same picture as before, but with projections onto
-  weight vector; TODO: then, below, those points along a
+\MoveNextFigure{-2cm}
+\Figure{perc:proj}{The same picture as before, but with projections onto
+  weight vector; then, below, those points along a
   one-dimensional axis with zero marked.}
 
 The geometric intuition can help us even more when we realize that
@@ -341,7 +353,7 @@ this threshold.  Now, after the projection is computed, $b$ is added
 to get the overall activation.  The projection \emph{plus} $b$ is then
 compared against zero.
 
-%\TODOFigure{perc:bias}{perceptron picture with bias}
+\TODOFigure{perc:bias}{perceptron picture with bias}
 
 Thus, from a geometric perspective, the role of the bias is to
 \emph{shift} the decision boundary away from the origin, in the
@@ -374,7 +386,27 @@ that this training example is now correctly classified.
 
 \section{Interpreting Perceptron Weights}
 
-TODO
+You may find yourself having run the perceptron, learned a really awesome classifier, and then wondering ``what the heck is this classifier doing?''
+You might ask this question because you're curious to learn something about the underlying data.
+You might ask this question because you want to make sure that the perceptron is learning ``the right thing.''
+You might ask this question because you want to remove a bunch of features that aren't very useful because they're expensive to compute or take a lot of storage.
+
+The perceptron learns a classifier of the form $\vx \mapsto \sign\left( \sum_d w_d x_d + b \right)$.
+A reasonable question to ask is: how sensitive is the final classification to \emph{small changes} in some particular feature.
+We can answer this question by taking a derivative.
+If we arbitrarily take the $7$th feature we can compute $\frac \partial {\partial x_7} \left( \sum_d w_d x_d + b \right) = w_7$.
+This says: the rate at which the activation changes as a function of the $7$th feature is exactly $w_7$.
+This gives rise to a useful heuristic for interpreting perceptron weights:
+\textbf{sort all the weights from largest (positive) to largest (negative), and take the top ten and bottom ten}.
+The top ten are the features that the perceptron is most sensitive to for making positive predictions.
+The bottom ten are the features that the perceptron is most sensitive to for making negative predictions.
+
+This heuristic is useful, especially when the inputs $\vx$ consist entirely of binary values (like a bag of words representation).
+The heuristic is less useful when the range of the individual features varies significantly.
+The issue is that if you have one feat $x_5$ that's either $0$ or $1$, and another feature $x_7$ that's either $0$ or $100$, but $w_5 = w_7$, it's reasonable to say that $w_7$ is more important because it is likely to have a much larger influence on the final prediction.
+The easiest way to compensate for this is simply to scale your features ahead of time:
+this is another reason why feature scaling is a useful preprocessing step.
+
 
 \section{Perceptron Convergence and Linear Separability}
 
@@ -434,8 +466,9 @@ quickly for easy learning problems than for hard learning problems.
 This certainly fits intuition.  The question is how to \emph{define}
 ``easy'' and ``hard'' in a meaningful way.  One way to make this
 definition is through the notion of \concept{margin}.  If I give you a
-data set and hyperplane that separates it (like that shown in
-Figure~\ref{fig:perc:margin}) then the \emph{margin} is the distance
+data set and hyperplane that separates it% (like that shown in
+%Figure~\ref{fig:perc:margin}) 
+then the \emph{margin} is the distance
 between the hyperplane and the nearest point.  Intuitively, problems
 with large margins should be easy (there's lots of ``wiggle room'' to
 find a separating hyperplane); and problems with small margins should
@@ -489,9 +522,6 @@ $\ga^{-2}$.  More formally:
   most $\frac 1 {\ga^2}$ updates.
 \end{theorem}
 
-todo: comment on norm of w and norm of x  also some picture about
-maximum margins.
-
 The proof of this theorem is elementary, in the sense that it does not
 use any fancy tricks: it's all just algebra.  The \emph{idea} behind
 the proof is as follows.  If the data is linearly separable with
@@ -543,13 +573,13 @@ between them has to be shrinking.  The rest is algebra.
   because it's getting exceptionally long.  To do this, we compute the
   norm of $\vw\kth$:
   \begin{align}
-    \norm{\vw\kth}^2
+    & \norm{\vw\kth}^2 \nonumber\\
     &= \norm{\vw\kpth + y \vx}^2
-         \becauseof{definition of $\vw\kth$} \\
+         \becauseof{def. of $\vw\kth$} \\
     &= \norm{\vw\kpth}^2 + y^2 \norm{\vx}^2 + 2 y \dotp{\vw\kpth}{\vx}
-         \becauseof{quadratic rule on vectors} \\
+         \becauseof{quadratic rule} \\
     &\leq \norm{\vw\kpth}^2 + 1 + 0
-         \becauseof{assumption on $\norm{\vx}$ and $a < 0$}
+         \becauseof{assumption and $a < 0$}
   \end{align}
   Thus, the squared norm of $\vw\kth$ increases by at most one every
   update.  \textcolor{darkblue}{Therefore: $\norm{\vw\kth}^2 \leq k$.}
@@ -591,7 +621,7 @@ particular, the proof makes use of the maximum margin separator.  But
 the perceptron is not guaranteed to \emph{find} this maximum margin
 separator.  The data may be separable with margin $0.9$ and the
 perceptron might still find a separating hyperplane with a margin of
-only $0.000001$.  Later (in Chapter~\ref{todo}), we will see
+only $0.000001$.  Later (in Chapter~\ref{sec:loss}), we will see
 algorithms that explicitly try to find the maximum margin solution.
 
 \thinkaboutit{Why does the perceptron convergence bound not contradict
@@ -744,21 +774,21 @@ Algorithm~\ref{alg:perc:avgperc} achieves this.
   from Eq~\eqref{eq:perc:avg} as a telescoping sum, derive the
   computation from Algorithm~\ref{alg:perc:avgperc}.}
 
-\TODOFigure{perc:avgperc}{train/test performance of vanilla versus
-  averaged perceptron to show early stopping}
+%\TODOFigure{perc:avgperc}{train/test performance of vanilla versus
+%  averaged perceptron to show early stopping}
 
 The averaged perceptron is almost always better than the perceptron,
 in the sense that it generalizes better to test data.  However, that
 does not free you from having to do \concept{early stopping}.  It
-will, eventually, overfit.  Figure~\ref{fig:perc:avgperc} shows the
-performance of the vanilla perceptron and the averaged perceptron on
-the same data set, with both training and test performance.  As you
-can see, the averaged perceptron \emph{does} generalize better.  But
-it also does begin to overfit eventually.
+will, eventually, overfit.  
+%Figure~\ref{fig:perc:avgperc} shows the
+%performance of the vanilla perceptron and the averaged perceptron on
+%the same data set, with both training and test performance.  As you
+%can see, the averaged perceptron \emph{does} generalize better.  But
+%it also does begin to overfit eventually.
 
 \section{Limitations of the Perceptron}
 
-\Figure{perc:xor}{picture of xor problem}
 
 Although the perceptron is very useful, it is fundamentally limited in
 a way that neither decision trees nor KNN are.  Its limitation is that
@@ -769,6 +799,8 @@ Figure~\ref{fig:perc:xor}.  It consists of four data points, each at a
 corner of the unit square.  The labels for these points are the same,
 along the diagonals.  You can try, but you will not be able to find a
 linear decision boundary that perfectly separates these data points.
+
+\Figure{perc:xor}{picture of xor problem}
 
 One question you might ask is: do XOR-like problems exist in the real
 world?  Unfortunately for the perceptron, the answer is yes.  Consider
@@ -837,6 +869,10 @@ this is the \concept{kernels} approach (see Chapter~\ref{sec:kernel}).
 
 % In practice, there is little reason to \emph{actually} perform this
 % mapping.  It is more interesting from a theoretical perspective.  
+
+\section{Further Reading}
+
+TODO further reading
 
 
 \begin{comment}

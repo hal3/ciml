@@ -1,7 +1,7 @@
 
 \chapter{Beyond Binary Classification} \label{sec:complex}
 
-\chapterquote{}{}
+\chapterquote{Different general classification methods can give different, but equally plausible, classifications, so you need an application context to choose among them.}{Karen~Sp\"arck-Jones}
 
 \begin{learningobjectives}
 \item Represent complex prediction problems in a formal learning
@@ -11,7 +11,6 @@
   reductions from multiclass classification to binary classification.
 \item Recognize the difference between regression and ordinal
   regression.
-\item Implement stacking as a method of collective classification.
 \end{learningobjectives}
 
 \dependencies{}
@@ -21,9 +20,7 @@ very simple form of prediction: predicting bits.  In the real world,
 however, we often need to predict much more complex objects.  You may
 need to categorize a document into one of several categories: sports,
 entertainment, news, politics, etc.  You may need to rank web pages or
-ads based on relevance to a query.  You may need to simultaneously
-classify a collection of objects, such as web pages, that have
-important information in the links between them.  These problems are
+ads based on relevance to a query.  These problems are
 all commonly encountered, yet fundamentally more complex than binary
 classification.
 
@@ -36,7 +33,7 @@ reuse knowledge, rather than having to build new learning models and
 algorithms from scratch.
 
 
-\section{Learning with Imbalanced Data}
+\section{Learning with Imbalanced Data} \label{sec:imbalanced}
 
 Your boss tells you to build a classifier that can identify fraudulent
 transactions in credit card histories.  Fortunately, most transactions
@@ -86,6 +83,7 @@ problem.
 \learningproblem{Binary Classification}{
 \item An input space $\cX$
 \item An unknown distribution $\cD$ over $\cX \times \{ -1, +1 \}$
+\item A training set $D$ sampled from $\cD$
 }{A function $f$ minimizing: $\Ep_{(\vx,y) \sim \cD} \big[ f(\vx) \neq y \big]$}
 
 As in all the binary classification examples you've seen, you have
@@ -102,6 +100,7 @@ $\al$-times as important as the negative class.
 \learningproblem{$\al$-Weighted Binary Classification}{
 \item An input space $\cX$
 \item An unknown distribution $\cD$ over $\cX \times \{ -1, +1 \}$
+\item A training set $D$ sampled from $\cD$
 }{A function $f$ minimizing: $\Ep_{(\vx,y) \sim \cD} \Big[ \al^{y=1} \big[f(\vx) \neq y\big] \Big]$}
 
 The objects given to you in weighted binary classification are
@@ -129,11 +128,11 @@ into a good algorithm for solving the \lprob{$\al$-Weighted Binary
 \ENDWHILE
 }
 
-%\newalgorithm{complex:subsampletest}
-%  {\FUN{SubsampleTest}(\FUN{$f^{\text{binary}}$}, \VAR{$\hat\vx$})}
-%  {
-%\RETURN \FUN{$f^{\text{binary}}$}(\VAR{$\hat\vx$})
-%}
+\newalgorithm{complex:subsampletest}
+  {\FUN{SubsampleTest}(\FUN{$f^{\text{binary}}$}, \VAR{$\hat\vx$})}
+  {
+\RETURN \FUN{$f^{\text{binary}}$}(\VAR{$\hat\vx$})
+}
 
 In order to do this, you need to define a \emph{transformation} that
 maps a concrete weighted problem into a concrete unweighted problem.
@@ -262,6 +261,7 @@ classes to choose from.
 \learningproblem{Multiclass Classification}{
 \item An input space $\cX$ and number of classes $K$
 \item An unknown distribution $\cD$ over $\cX \times [K]$
+\item A training set $D$ sampled from $\cD$
 }{A function $f$ minimizing: $\Ep_{(\vx,y) \sim \cD} \big[f(\vx) \neq y\big]$}
 
 Note that this is \emph{identical} to binary classification, except
@@ -625,6 +625,7 @@ definitions, we can properly define the ranking problem.
 \learningproblem{$\om$-Ranking}{
 \item An input space $\cX$
 \item An unknown distribution $\cD$ over $\cX \times \Si_M$
+\item A training set $D$ sampled from $\cD$
 }{A function $f : \cX \fto \Si_M$ minimizing:
 \begin{equation} \label{eq:complex:rank}
   \Ep_{(\vx,\si) \sim \cD} \left[
@@ -756,196 +757,198 @@ it achieves a better error bound, shown below:
   $\ep$ in the bipartite case.
 \end{theorem}
 
+\section{Further Reading}
+
+TODO further reading
 
 
 
-\section{Collective Classification}
 
-\Figure{complex:face}{example face finding image and pixel mask}
+% \section{Collective Classification}
 
-You are writing new software for a digital camera that does face
-identification.  However, instead of simply finding a bounding box
-around faces in an image, you must predict where a face is \emph{at
-  the pixel level.}  So your input is an image (say, $100\times 100$
-pixels: this is a really low resolution camera!) and your output is a
-set of $100\times 100$ binary predictions about each pixel.  You are
-given a large collection of training examples.  An example
-input/output pair is shown in Figure~\ref{fig:complex:face}.
+% \Figure{complex:face}{example face finding image and pixel mask}
 
-Your first attempt might be to train a binary classifier to predict
-whether pixel $(i,j)$ is part of a face or not.  You might feed in
-features to this classifier about the RGB values of pixel $(i,j)$ as
-well as pixels in a window arround that.  For instance, pixels in the
-region $\{(i+k,j+l) : k \in [-5,5], l \in [-5,5]\}$.
+% You are writing new software for a digital camera that does face
+% identification.  However, instead of simply finding a bounding box
+% around faces in an image, you must predict where a face is \emph{at
+%   the pixel level.}  So your input is an image (say, $100\times 100$
+% pixels: this is a really low resolution camera!) and your output is a
+% set of $100\times 100$ binary predictions about each pixel.  You are
+% given a large collection of training examples.  An example
+% input/output pair is shown in Figure~\ref{fig:complex:face}.
 
-\Figure{complex:facebad}{bad pixel mask for previous image}
+% Your first attempt might be to train a binary classifier to predict
+% whether pixel $(i,j)$ is part of a face or not.  You might feed in
+% features to this classifier about the RGB values of pixel $(i,j)$ as
+% well as pixels in a window arround that.  For instance, pixels in the
+% region $\{(i+k,j+l) : k \in [-5,5], l \in [-5,5]\}$.
 
-You run your classifier and notice that it predicts weird things, like
-what you see in Figure~\ref{fig:complex:facebad}.  You then realize
-that predicting each pixel independently is a bad idea!  If pixel
-$(i,j)$ is part of a face, then this significantly increases the
-chances that pixel $(i+1,j)$ is also part of a face.  (And similarly
-for other pixels.)  This is a \concept{collective classification}
-problem because you are trying to predict multiple, correlated objects
-at the same time.
+% \Figure{complex:facebad}{bad pixel mask for previous image}
 
-\thinkaboutit{Similar problems come up all the time.  Cast the
-  following as collective classification problems: web page
-  categorization; labeling words in a sentence as noun, verb,
-  adjective, etc.; finding genes in DNA sequences; predicting the
-  stock market.}
+% You run your classifier and notice that it predicts weird things, like
+% what you see in Figure~\ref{fig:complex:facebad}.  You then realize
+% that predicting each pixel independently is a bad idea!  If pixel
+% $(i,j)$ is part of a face, then this significantly increases the
+% chances that pixel $(i+1,j)$ is also part of a face.  (And similarly
+% for other pixels.)  This is a \concept{collective classification}
+% problem because you are trying to predict multiple, correlated objects
+% at the same time.
 
-The most general way to formulate these problems is as (undirected)
-\concept{graph} prediction problems.  Our input now takes the form of
-a graph, where the vertices are input/output pairs and the edges
-represent the correlations among the outputs.  (Note that edges do not
-need to express correlations among the inputs: these can simply be
-encoded on the nodes themselves.)  For example, in the face
-identification case, each pixel would correspond to a vertex in the
-graph.  For the vertex that corresponds to pixel $(5,10)$, the input
-would be whatever set of features we want about that pixel (including
-features about neighboring pixels).  There would be edges between that
-vertex and (for instance) vertices $(4,10)$, $(6,10)$, $(5,9)$ and
-$(5,11)$.  If we are predicting one of $K$ classes at each vertex,
-then we are given a graph whose vertices are labeled by pairs $(\vx,k)
-\in \cX \times [K]$.  We will write $\cG(\cX\times[K])$ to denote the
-set of all such graphs.  A graph in this set is denoted as $G=(V,E)$
-with vertices $V$ and edges $E$.  Our goal is a function $f$ that
-takes as input a graph from $\cG(\cX)$ and predicts a label from $[K]$
-for each of its vertices.
+% \thinkaboutit{Similar problems come up all the time.  Cast the
+%   following as collective classification problems: web page
+%   categorization; labeling words in a sentence as noun, verb,
+%   adjective, etc.; finding genes in DNA sequences; predicting the
+%   stock market.}
 
-\thinkaboutit{Formulate the example problems above as graph prediction
-  problems.}
+% The most general way to formulate these problems is as (undirected)
+% \concept{graph} prediction problems.  Our input now takes the form of
+% a graph, where the vertices are input/output pairs and the edges
+% represent the correlations among the outputs.  (Note that edges do not
+% need to express correlations among the inputs: these can simply be
+% encoded on the nodes themselves.)  For example, in the face
+% identification case, each pixel would correspond to a vertex in the
+% graph.  For the vertex that corresponds to pixel $(5,10)$, the input
+% would be whatever set of features we want about that pixel (including
+% features about neighboring pixels).  There would be edges between that
+% vertex and (for instance) vertices $(4,10)$, $(6,10)$, $(5,9)$ and
+% $(5,11)$.  If we are predicting one of $K$ classes at each vertex,
+% then we are given a graph whose vertices are labeled by pairs $(\vx,k)
+% \in \cX \times [K]$.  We will write $\cG(\cX\times[K])$ to denote the
+% set of all such graphs.  A graph in this set is denoted as $G=(V,E)$
+% with vertices $V$ and edges $E$.  Our goal is a function $f$ that
+% takes as input a graph from $\cG(\cX)$ and predicts a label from $[K]$
+% for each of its vertices.
 
-\learningproblem{Collective Classification}{
-\item An input space $\cX$ and number of classes $K$
-\item An unknown distribution $\cD$ over $\cG(\cX\times[K])$
-}{A function $f : \cG(\cX) \fto \cG([K])$ minimizing: 
-$\Ep_{(V,E) \sim \cD} \left[
-  \sum_{v \in V} \big[ \hat y_v \neq y_v \big]
-  \right]$, where $y_v$ is the label associated with vertex $v$ in $G$
-  and $\hat y_v$ is the label predicted by $f(G)$.}
+% \thinkaboutit{Formulate the example problems above as graph prediction
+%   problems.}
 
-In collective classification, you would like to be able to use the
-labels of neighboring vertices to help predict the label of a given
-vertex.  For instance, you might want to add features to the prediction
-of a given vertex based on the labels of each neighbor.  At training
-time, this is easy: you get to see the true labels of each neighbor.
-However, at test time, it is much more difficult: you are, yourself,
-predicting the labels of each neighbor.
+% \learningproblem{Collective Classification}{
+% \item An input space $\cX$ and number of classes $K$
+% \item An unknown distribution $\cD$ over $\cG(\cX\times[K])$
+% }{A function $f : \cG(\cX) \fto \cG([K])$ minimizing: 
+% $\Ep_{(V,E) \sim \cD} \left[
+%   \sum_{v \in V} \big[ \hat y_v \neq y_v \big]
+%   \right]$, where $y_v$ is the label associated with vertex $v$ in $G$
+%   and $\hat y_v$ is the label predicted by $f(G)$.}
 
-This presents a chicken and egg problem.  You are trying to predict a
-collection of labels.  But the prediction of each label depends on the
-prediction of other labels.  If you remember from before, a general
-solution to this problem is iteration: you can begin with some
-guesses, and then try to improve these guesses over time.
-\sidenote{Alternatively, the fact that we're using a graph might
-  scream to you ``dynamic programming.''  Rest assured that you can do
-  this too: skip forward to Chapter~\ref{sec:srl} for lots more detail
-  here!}
+% In collective classification, you would like to be able to use the
+% labels of neighboring vertices to help predict the label of a given
+% vertex.  For instance, you might want to add features to the prediction
+% of a given vertex based on the labels of each neighbor.  At training
+% time, this is easy: you get to see the true labels of each neighbor.
+% However, at test time, it is much more difficult: you are, yourself,
+% predicting the labels of each neighbor.
 
-\Figure{complex:stacking}{a charicature of how stacking works}
+% This presents a chicken and egg problem.  You are trying to predict a
+% collection of labels.  But the prediction of each label depends on the
+% prediction of other labels.  If you remember from before, a general
+% solution to this problem is iteration: you can begin with some
+% guesses, and then try to improve these guesses over time.
+% \sidenote{Alternatively, the fact that we're using a graph might
+%   scream to you ``dynamic programming.''  Rest assured that you can do
+%   this too: skip forward to Chapter~\ref{sec:srl} for lots more detail
+%   here!}
 
-This is the idea of \concept{stacking} for solving collective
-classification (see Figure~\ref{fig:complex:stacking}).  You can train
-$5$ classifiers.  The first classifier \emph{just} predicts the value
-of each pixel independently, like in Figure~\ref{fig:complex:facebad}.
-This doesn't use any of the graph structure at all.  In the second
-level, you can repeat the classification.  However, you can use the
-outputs from the first level as initial guesses of labels.  In
-general, for the $K$th level in the stack, you can use the inputs
-(pixel values) as well as the predictions for all of the $K-1$
-previous levels of the stack.  This means training $K$-many binary
-classifiers based on different feature sets.
+% \Figure{complex:stacking}{a charicature of how stacking works}
 
-\newalgorithm{complex:stacktrain}
-  {\FUN{StackTrain}(\VAR{$\cD^{\text{cc}}$}, \VAR{K}, \FUN{MulticlassTrain})}
-  {
-\SETST{$\mat D^{\text{mc}}$}{\emptylist}
-  \COMMENT{our generated multiclass data}
-\SETST{$\hat Y_{k,n,v}$}{\CON{0}, $\forall k \in [K], n \in [N], v \in G_n$}
-  \COMMENT{initialize predictions for all levels}
-\FOR{\VAR{k} = \CON{1} \TO \VAR{K}}
-\FOR{\VAR{n} = \CON{1} \TO \VAR{N}}
-\FORALL{\VAR{v} $\in G_n$}
-\SETST{$(\vx,y)$}{features and label for node \VAR{v}}
-\SETST{$\vx$}{\VAR{$\vx$} \pushlist $\VARm{\hat Y_{l,n,u}}$, $\forall
-  \VARm{u} \in \cN(\VARm{u}), \forall \VAR{l} \in [\VAR{k}-\CON{1}]$}
-\COMMENT{add on features for}
-\STATE{}
-\COMMENT{neighboring nodes from lower levels in the stack}
-\SETST{$\mat D^{\text{mc}}$}{\VAR{$\mat D^{\text{mc}}$} \pushlist (\VAR{y}, \VAR{$\vx$})}
-\COMMENT{add to multiclass data}
-\ENDFOR    % for v
-\ENDFOR    % for n
-\SETST{$f_k$}{\FUN{MulticlassTrain}(\VAR{$\mat D^{\text{bin}}$})}
-\COMMENT{train $k$th level classifier}
-\FOR{\VAR{n} = \CON{1} \TO \VAR{N}}
-\SETST{$\hat Y_{k,n,v}$}{\FUN{StackTest}(\VAR{$f_1$}, \dots, \VAR{$f_k$}, \VAR{$G_n$})}
-\COMMENT{predict using $k$th level classifier}
-\ENDFOR    % for n
-\ENDFOR    % for k
-\RETURN \FUN{$f_1$}, \dots, \FUN{$f_K$}
-\COMMENT{return all classifiers}
-}
+% This is the idea of \concept{stacking} for solving collective
+% classification (see Figure~\ref{fig:complex:stacking}).  You can train
+% $5$ classifiers.  The first classifier \emph{just} predicts the value
+% of each pixel independently, like in Figure~\ref{fig:complex:facebad}.
+% This doesn't use any of the graph structure at all.  In the second
+% level, you can repeat the classification.  However, you can use the
+% outputs from the first level as initial guesses of labels.  In
+% general, for the $K$th level in the stack, you can use the inputs
+% (pixel values) as well as the predictions for all of the $K-1$
+% previous levels of the stack.  This means training $K$-many binary
+% classifiers based on different feature sets.
 
-\newalgorithm{complex:stacktest}
-  {\FUN{StackTest}(\FUN{$f_1$}, \dots, \FUN{$f_K$}, \VAR{$G$})}
-  {
-\SETST{$\hat Y_{k,v}$}{\CON{0}, $\forall k \in [K], v \in G$}
-  \COMMENT{initialize predictions for all levels}
-\FOR{\VAR{k} = \CON{1} \TO \VAR{K}}
-\FORALL{\VAR{v} $\in G$}
-\SETST{$\vx$}{features for node \VAR{v}}
-\SETST{$\vx$}{\VAR{$\vx$} \pushlist $\VARm{\hat Y_{l,u}}$, $\forall
-  \VARm{u} \in \cN(\VARm{u}), \forall \VAR{l} \in [\VAR{k}-\CON{1}]$}
-\COMMENT{add on features for}
-\STATE{}
-\COMMENT{neighboring nodes from lower levels in the stack}
-\SETST{$\hat Y_{k,v}$}{\FUN{$f_k$}(\VAR{$\vx$})}
-\COMMENT{predict according to $k$th level}
-\ENDFOR    % for v
-\ENDFOR    % for n
-\RETURN $\{ \VARm{\hat Y_{K,v}} : \VARm{v} \in \VARm{G}\}$
-\COMMENT{return predictions for every node from the last layer}
-}
+% \newalgorithm{complex:stacktrain}
+%   {\FUN{StackTrain}(\VAR{$\cD^{\text{cc}}$}, \VAR{K}, \FUN{MulticlassTrain})}
+%   {
+% \SETST{$\mat D^{\text{mc}}$}{\emptylist}
+%   \COMMENT{our generated multiclass data}
+% \SETST{$\hat Y_{k,n,v}$}{\CON{0}, $\forall k \in [K], n \in [N], v \in G_n$}
+%   \COMMENT{initialize predictions for all levels}
+% \FOR{\VAR{k} = \CON{1} \TO \VAR{K}}
+% \FOR{\VAR{n} = \CON{1} \TO \VAR{N}}
+% \FORALL{\VAR{v} $\in G_n$}
+% \SETST{$(\vx,y)$}{features and label for node \VAR{v}}
+% \SETST{$\vx$}{\VAR{$\vx$} \pushlist $\VARm{\hat Y_{l,n,u}}$, $\forall
+%   \VARm{u} \in \cN(\VARm{u}), \forall \VAR{l} \in [\VAR{k}-\CON{1}]$}
+% \COMMENT{add on features for}
+% \STATE{}
+% \COMMENT{neighboring nodes from lower levels in the stack}
+% \SETST{$\mat D^{\text{mc}}$}{\VAR{$\mat D^{\text{mc}}$} \pushlist (\VAR{y}, \VAR{$\vx$})}
+% \COMMENT{add to multiclass data}
+% \ENDFOR    % for v
+% \ENDFOR    % for n
+% \SETST{$f_k$}{\FUN{MulticlassTrain}(\VAR{$\mat D^{\text{bin}}$})}
+% \COMMENT{train $k$th level classifier}
+% \FOR{\VAR{n} = \CON{1} \TO \VAR{N}}
+% \SETST{$\hat Y_{k,n,v}$}{\FUN{StackTest}(\VAR{$f_1$}, \dots, \VAR{$f_k$}, \VAR{$G_n$})}
+% \COMMENT{predict using $k$th level classifier}
+% \ENDFOR    % for n
+% \ENDFOR    % for k
+% \RETURN \FUN{$f_1$}, \dots, \FUN{$f_K$}
+% \COMMENT{return all classifiers}
+% }
 
-The prediction technique for stacking is sketched in
-Algorithm~\ref{alg:complex:stacktest}.  This takes a list of $K$
-classifiers, corresponding to each level in the stack, and an input
-graph $G$.  The variable $\hat Y_{k,v}$ stores the prediction of
-classifier $k$ on vertex $v$ in the graph.  You first predict every
-node in the vertex using the first layer in the stack, and no
-neighboring information.  For the rest of the layers, you add on
-features to each node based on the predictions made by lower levels in
-the stack for neighboring nodes ($\cN(u)$ denotes the neighbors of
-$u$).
+% \newalgorithm{complex:stacktest}
+%   {\FUN{StackTest}(\FUN{$f_1$}, \dots, \FUN{$f_K$}, \VAR{$G$})}
+%   {
+% \SETST{$\hat Y_{k,v}$}{\CON{0}, $\forall k \in [K], v \in G$}
+%   \COMMENT{initialize predictions for all levels}
+% \FOR{\VAR{k} = \CON{1} \TO \VAR{K}}
+% \FORALL{\VAR{v} $\in G$}
+% \SETST{$\vx$}{features for node \VAR{v}}
+% \SETST{$\vx$}{\VAR{$\vx$} \pushlist $\VARm{\hat Y_{l,u}}$, $\forall
+%   \VARm{u} \in \cN(\VARm{u}), \forall \VAR{l} \in [\VAR{k}-\CON{1}]$}
+% \COMMENT{add on features for}
+% \STATE{}
+% \COMMENT{neighboring nodes from lower levels in the stack}
+% \SETST{$\hat Y_{k,v}$}{\FUN{$f_k$}(\VAR{$\vx$})}
+% \COMMENT{predict according to $k$th level}
+% \ENDFOR    % for v
+% \ENDFOR    % for n
+% \RETURN $\{ \VARm{\hat Y_{K,v}} : \VARm{v} \in \VARm{G}\}$
+% \COMMENT{return predictions for every node from the last layer}
+% }
 
-The training procedure follows a similar scheme, sketched in
-Algorithm~\ref{alg:complex:stacktrain}.  It largely follows the same
-schematic as the prediction algorithm, but with training fed in.
-After the classifier for the $k$ level has been trained, it is used to
-predict labels on every node in the graph.  These labels are used by
-later levels in the stack, as features.
+% The prediction technique for stacking is sketched in
+% Algorithm~\ref{alg:complex:stacktest}.  This takes a list of $K$
+% classifiers, corresponding to each level in the stack, and an input
+% graph $G$.  The variable $\hat Y_{k,v}$ stores the prediction of
+% classifier $k$ on vertex $v$ in the graph.  You first predict every
+% node in the vertex using the first layer in the stack, and no
+% neighboring information.  For the rest of the layers, you add on
+% features to each node based on the predictions made by lower levels in
+% the stack for neighboring nodes ($\cN(u)$ denotes the neighbors of
+% $u$).
 
-One thing to be aware of is that \FUN{MulticlassTrain} could
-conceivably overfit its training data.  For example, it is possible
-that the first layer might actually achieve $0\%$ error, in which case
-there is no reason to iterate.  But at test time, it will probably
-\emph{not} get $0\%$ error, so this is misleading.  There are (at
-least) two ways to address this issue.  The first is to use
-cross-validation during training, and to use the predictions obtained
-during cross-validation as the predictions from \concept{StackTest}.
-This is typically very safe, but somewhat expensive.  The alternative
-is to simply \emph{over-regularize} your training algorithm.  In
-particular, instead of trying to find hyperparameters that
-get the \emph{best} development data performance, try to find
-hyperparameters that make your \emph{training} performance
-approximately equal to your \emph{development} performance.  This will
-ensure that your predictions at the $k$th layer are indicative of how
-well the algorithm will actually do at test time.
+% The training procedure follows a similar scheme, sketched in
+% Algorithm~\ref{alg:complex:stacktrain}.  It largely follows the same
+% schematic as the prediction algorithm, but with training fed in.
+% After the classifier for the $k$ level has been trained, it is used to
+% predict labels on every node in the graph.  These labels are used by
+% later levels in the stack, as features.
 
-TODO: finish this discussion
+% One thing to be aware of is that \FUN{MulticlassTrain} could
+% conceivably overfit its training data.  For example, it is possible
+% that the first layer might actually achieve $0\%$ error, in which case
+% there is no reason to iterate.  But at test time, it will probably
+% \emph{not} get $0\%$ error, so this is misleading.  There are (at
+% least) two ways to address this issue.  The first is to use
+% cross-validation during training, and to use the predictions obtained
+% during cross-validation as the predictions from \concept{StackTest}.
+% This is typically very safe, but somewhat expensive.  The alternative
+% is to simply \emph{over-regularize} your training algorithm.  In
+% particular, instead of trying to find hyperparameters that
+% get the \emph{best} development data performance, try to find
+% hyperparameters that make your \emph{training} performance
+% approximately equal to your \emph{development} performance.  This will
+% ensure that your predictions at the $k$th layer are indicative of how
+% well the algorithm will actually do at test time.
 
 %%% Local Variables: 
 %%% mode: latex

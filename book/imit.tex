@@ -1,0 +1,408 @@
+\chapter{Imitation Learning} \label{sec:imit}
+
+\chapterquote{Programming is a skill best acquired by practice and example rather than from books.}{Alan~Turing}
+
+\begin{learningobjectives}
+\item Be able to formulate imitation learning problems.
+\item Understand the failure cases of simple classification approaches to imitation learning.
+\item Implement solutions to those problems based on either classification or dataset aggregation.
+\item Relate structured prediction and imitation learning.
+\end{learningobjectives}
+
+\dependencies{}
+
+\newthought{So far, we have largely considered machine learning problems} in which the goal of the learning algorithm is to make a \emph{single} prediction.
+In many real world problems, however, an algorithm must make a \emph{sequence} of decisions, with the world possibly changing during that sequence.
+Such problems are often called \concept{sequential decision making} problems.
+A straightforward example---which will be the running example for this chapter---is that of self-driving cars.
+We want to train a machine learning algorithm to drive a car.
+But driving a car is not a single prediction: it's a sequence of predictions over time.
+And as the machine is driving the car, the world around it is changing, often based on its own behavior.
+This creates complicated feedback loops, and one of the major challenges we will face is how to deal with these feedback loops.
+
+To make this discussion more concrete, let's consider the case of a self-driving car.
+And let's consider a very simplistic car, in which the only decision that has to be made is how to steer, and that's between one of three options: $\{ \text{left}, \text{right}, \text{none} \}$.
+In the imitation learning setting, we assume that we have access to an \concept{expert} or \concept{oracle} that already knows how to drive.
+We want to watch the expert driving, and learn to imitate their behavior.
+Hence: \concept{imitation learning} (sometimes called \concept{learning by demonstration} or \concept{programming by example}, in the sense that programs are learned, and not implemented).
+
+At each point in time $t = 1 \dots T$, the car recieves sensor information $\vx_t$ (for instance, a camera photo ahead of the car, or radar readings).
+It then has to take an action, $a_t$; in the case of the car, this is one of the three available steering actions.
+The car then suffers some loss $\ell_t$; this might be zero in the case that it's driving well, or large in the case that it crashes.
+The world then changes, moves to time step $t+1$, sensor readings $\vx_{t+1}$ are observed, action $a_{t+1}$ is taken, loss $\ell_{t+1}$ is suffered, and the process continues.
+
+The goal is to learn a function $f$ that maps from sensor readings $\vx_t$ to actions.
+Because of close connections to the field of \concept{reinforcement learning}, this function is typically called a \concept{policy}.
+The measure of success of a policy is: if we were to run this policy, how much total loss would be suffered.
+In particular, suppose that the \concept{trajectory} (denoted $\vec\tau$) of observation/action/reward triples encountered by your policy is:
+\begin{align}
+  \vec\tau &=
+  \vx_1~, \underbrace{a_1}_{=f(\vx_1)}, \ell_1~,~
+  \vx_2~, \underbrace{a_2}_{=f(\vx_2)}, \ell_2~,~
+  \dots~,~
+  \vx_T~, \underbrace{a_T}_{=f(\vx_T)}, \ell_T
+\end{align}
+The losses $\ell_t$ depend implicitly on the state of the world and the actions of the policy.
+The goal of $f$ is to minimize the expected loss $\Ep_{\vec\tau \sim f}\left[ \sum_{t=1}^T \ell_t \right]$, where the expectation is taken over all randomness in the world, and the sequence of actions taken is according to $f$.\footnote{It's completely okay for $f$ to look at more than just $\vx_t$ when making predictions; for instance, it might want to look at $\vx_{t-1}$, or $a_{t-1}$ and $a_{t-2}$. As long as it only references information from the \emph{past}, this is fine. For notational simplicity, we will assume that all of this relevant information is summarized in $\vx_t$.}
+
+\section{Imitation Learning by Classification}
+
+\newcommand{\vt}{\vec\tau}
+
+\Figure{imit_supervised}{A single expert trajectory in a self-driving car.}
+
+We will begin with a straightforward, but brittle, approach to imitation learning.
+We assume access to a set of \emph{training trajectories} taken by an expert.
+For example, consider a self-driving car, like that in Figure~\ref{fig:imit_supervised}.
+A single trajectory $\vt$ consists of a sequence of observations (what is seen from the car's sensors) and a sequence of actions (what action did the expect take at that point in time).
+The idea in imitation learning by classification is to learn a classifier that attempts to mimic the expert's action based on the observations at that time.
+
+In particular, we have $\vt_1, \vt_2, \dots, \vt_N$.
+Each of the $N$ trajectories comprises a sequence of $T$-many observation/action/loss triples, where the action is the action taken by the expert.
+$T$, the length of the trajectory is typically called the \concept{time horizon} (or just \concept{horizon}).
+For instance, we may ask an expert human driver to drive $N=20$ different routes, and record the observations and actions that driver saw and took during those routes.
+These are our training trajectories.
+We assume for simplicity that each of these trajectories is of fixed length $T$, though this is mostly for notational convenience.
+
+\newalgorithm%
+  {imit:supertrain}%
+  {\FUN{SupervisedImitationTrain}(\VARm{\cA}, $\VARm{\vt_1, \vt_2, \dots, \vt_N}$)}
+  {
+    \SETST{$D$}{$\big\langle
+                   (\VARm{\vx}, \VARm{a})
+                   ~:~ \forall n
+                   ~,~ \forall (\VARm{\vx}, \VARm{a}, \VARm{\ell}) \in \VARm{\vt_n} \big\rangle$}
+                 \COMMENT{collect all observation/action pairs}
+    \RETURN $\VARm{\cA}(\VARm{D})$
+    \COMMENT{train multiclass classifier on D}
+  }
+
+\newalgorithm%
+  {imit:supertest}%
+  {\FUN{SupervisedImitationTest}(\VARm{f})}
+  {
+    \FOR{\VAR{t} = \CON{1} \dots \VAR{T}}
+      \SETST{$\vx_t$}{current observation}
+      \SETST{$a_t$}{$\VARm{f}(\VARm{\vx_t})$}
+      \COMMENT{ask policy to choose an action}
+      \STATE take action $\VARm{a_t}$
+      \SETST{$\ell_t$}{observe instantaneous loss}
+    \ENDFOR
+    \RETURN $\sum_{t=1}^T \VARm{\ell_t}$
+    \COMMENT{return total loss}
+  }
+
+
+The most straightforward thing we can do is convert this expert data into a big multiclass classification problem.
+We take our favorite multiclass classification algorithm, and use it to learn a mapping from $\vx$ to $a$.
+The data on which it is trained is the set of all observation/action pairs visited during any of the $N$ trajectories.
+In total, this would be $NT$ examples.
+This approach is summarized in Algorithm~\ref{alg:imit:supertrain} for training and Algorithm~\ref{alg:imit:supertest} for prediction.
+
+How well does this approach work?
+
+The first question is: how good is the expert?
+If we learn to mimic an expert, but the expert is no good, we lose.
+In general, it also seems unrealistic to believe this algorithm should be able to \emph{improve} on the expert.
+Similarly, if our multiclass classification algorithm $\cA$ is crummy, we also lose.
+So part of the question ``how well does this work'' is the more basic question of: what are we even trying to measure?
+
+There is a nice theorem\mycite{ross} that gives an upper bound on the loss suffered by the SupervisedIL algorithm (Algorithm~\ref{alg:imit:supertrain}) as a function of (a) the quality of the expert, and (b) the error rate of the learned classifier.
+To be clear, we need to distinguish between the loss of the policy when run for $T$ steps to form a full trajectory, and the error rate of the learned classifier, which is just it's average multiclass classification error.
+The theorem states, roughly, that the loss of the learned \emph{policy} is at most the loss of the expert plus $T^2$ times the error rate of the classifier.
+
+\begin{theorem}[Loss of SupervisedIL]
+  Suppose that one runs Algorithm~\ref{alg:imit:supertrain} using a multiclass classifier that optimizes the 0-1 loss (or an upperbound thereof).
+  Let $\ep$ be the error rate of the underlying classifier (in expectation) and assume that all instantaneous losses are in the range $[0, \ell\xth{max}]$.
+  Let $f$ be the learned policy; then:
+  \begin{align}
+    \underbrace{\Ep_{\vt \sim f}\left[\sum_t \ell_t\right]}_{\text{loss of learned policy}}
+    & \leq
+    \underbrace{\Ep_{\vt \sim \text{expert}}\left[\sum_t \ell_t\right]}_{\text{loss of expert}}
+      + \ell\xth{max} T^2 \ep
+  \end{align}
+\end{theorem}
+
+Intuitively, this bound on the loss is about a factor of $T$ away from what we might hope for.
+In particular, the multiclass classifier makes errors on an $\ep$ fraction of it's actions, measured by zero/one loss.
+In the worst case, this will lead to a loss of $\ell\xth{max}\ep$ for a single step.
+Summing all these errors over the entire trajectory would lead to a loss on the order of $\ell\xth{max}T\ep$, which is a factor $T$ better than this theorem provides.
+A natural question (addressed in the next section) is whether this is analysis is tight.
+A related question (addressed in the section after that) is whether we can do better.
+Before getting there, though, it's worth highlighting that an extra factor of $T$ is \emph{really bad.} It can cause even very small multiclass error rates to blow up; in particular, if $\ep \geq 1/T$, we lose, and $T$ can be in the hundreds or more.
+
+\section{Failure Analysis}
+
+The biggest single issue with the supervised learning approach to imitation learning is that it cannot learn to recover from failures.
+That is: it has only been trained based on expert trajectories.
+This means that the only training data it has seen is that of an expert driver.
+If it \emph{ever} veers from that state distribution, it may have no idea how to recover.
+As a concrete example, perhaps the expert driver never ever gets themselves into a state where they are directly facing a wall.
+Moreover, the expert driver probably tends to drive forward more than backward.
+If the imperfect learner manages to make a few errors and get stuck next to a wall, it's likely to resort to the general ``drive forward'' rule and stay there forever.
+This is the problem of \concept{compounding error}; 
+and yes, it does happen in practice.
+
+It turns out that it's possible to construct an imitation learning problem on which the $T^2$ compounding error is unavoidable.
+Consider the following somewhat artificial problem.
+At time $t=1$ you're shown a picture of either a zero or a one.
+You have two possible actions: press a button marked ``zero'' or press a button marked ``one.''
+The ``correct'' thing to do at $t=1$ is to press the button that corresponds to the image you've been shown.
+Pressing the correct button leads to $\ell_1=0$; the incorrect leads to $\ell_1=1$.
+Now, at time $t=2$ you are shown another image, again of a zero or one.
+The correct thing to do in this time step is the xor of (a) the number written on the picture you see right now, and (b) the correct answer from the previous time step.
+This holds in general for $t>1$.
+
+There are two important things about this construction.
+The first is that the expert can easily get zero loss.
+The second is that once the learned policy makes a single mistake, this can cause it to make \emph{all} future decisions incorrectly.
+(At least until it ``luckily'' makes another ``mistake'' to get it back on track.)
+
+Based on this construction, you can show the following theorem\mycite{kaariainen}.
+
+\begin{theorem}[Lower Bound for SupervisedIL]
+  There exist imitation learning problems on which Algorithm~\ref{alg:imit:supertrain} is able to achieve small classification error $\ep \in [0,1/T]$ under an optimal expert, but for which the test loss is lower bounded as:
+  \begin{align}
+    \underbrace{\Ep_{\vt \sim f}\left[\sum_t \ell_t\right]}_{\text{loss of learned policy}}
+    & \geq
+    \frac {T + 1} 2 - \frac 1 {4\ep} \Big[ 1 - (1-2\ep)^{T+1} \Big]
+  \end{align}
+  which is bounded by $T^2 \ep$ and, for small $\ep$, grows like $T^2 \ep$.
+\end{theorem}
+
+Up to constants, this gives matching upper and lower bounds for the loss of a policy learned by supervised imitation learning that is pretty far (a factor of $T$) from what we might hope for.
+
+\section{Dataset Aggregation}
+
+Supervised imitation learning fails because once it gets ``off the expert path,'' things can go really badly.
+Ideally, we might want to train our policy to deal with \emph{any} possible situation it could encounter.
+Unfortunately, this is unrealistic: we cannot hope to be able to train on every possible configuration of the world; and if we could, we wouldn't really need to learn anyway, we could just memorize.
+So we want to train $f$ on a subset of world configurations, but using ``configurations visited by the expert'' fails because $f$ cannot learn to recover from its own errors.
+Somehow what we'd like to do is train $f$ to do well on the configurations that it, itself, encounters!
+
+This is a classic chicken-and-egg problem.
+We want a policy $f$ that does well in a bunch of world configurations.
+What set of configurations?
+The configurations that $f$ encounters!
+A very classic approach to solving chicken-and-egg problems is iteration.
+Start with some policy $f$.
+Run $f$ and see what configurations is visits.
+Train a new $f$ to do well there.
+Repeat.
+
+This is exactly what the Dataset Aggregation algorithm (``Dagger'') does.
+Continuing with the self-driving car analogy, we first let a human expert drive a car for a while, and learn an initial policy $f_0$ by running standard supervised imitation learning (Algorithm~\ref{alg:imit:supertrain}) on the trajectories visited by the human.
+We then do something unusual.
+We put the human expert in the car, and record their actions, but the car behaves not according to the expert's behavior, but according to $f_0$.
+That is, $f_0$ is in control of the car, and the expert is trying to steer, but the car is ignoring them\footnote{This is possibly terrifying for the expert!} and simply recording their actions as training data.
+This is shown in Figure~\ref{fig:imit_dagger}.
+
+\Figure{imit_dagger}{In DAgger, the trajectory (red) is generated according to the previously learned policy, $f_0$, but the gold standard actions are given by the expert.}
+
+Based on trajectories generated by $f_0$ but actions given by the expert, we generate a new dataset that contains information about how to recover from the errors of $f_0$.
+We now will train a new policy, $f_1$.
+Because we don't want $f_1$ to ``forget'' what $f_0$ already knows, $f_1$ is trained on the union of the initial expert-only trajectories together with the new trajectories generated by $f_0$.
+We repeat this process a number of times $\text{MaxIter}$, yielding Algorithm~\ref{alg:imit:dagger}.
+
+\newalgorithm%
+  {imit:dagger}%
+  {\FUN{DaggerTrain}(\VARm{\cA}, \VARm{$\text{MaxIter}$}, \VARm{N}, $\VARm{\text{expert}}$)}
+  {
+    \SETST{$\langle \vt\xth{0}_n \rangle_{n=1}^N$}{run the expert $\VARm{N}$ many times}
+    \SETST{$D_0$}{$\big\langle
+                     (\VARm{\vx}, \VARm{a})
+                     ~:~ \forall n
+                     ~,~ \forall (\VARm{\vx}, \VARm{a}, \VARm{\ell}) \in \VARm{\vt\xth{0}_n} \big\rangle$}
+                 \COMMENT{collect all pairs (same as supervised)}
+    \SETST{$f_0$}{$\VARm{\cA}(\VARm{D_0})$}
+    \COMMENT{train initial policy (multiclass classifier) on $D_0$}
+    \FOR{\VAR{i} = \CON{1} \dots \VAR{MaxIter}}
+      \SETST{$\langle \vt\xth{i}_n \rangle_{n=1}^N$}{run policy $\VARm{f_{i-1}}$ $N$-many times}
+      \COMMENT{trajectories by $f_{i-1}$}
+      \SETST{$D_i$}{$\big\langle
+                     (\VARm{\vx}, \VARm{\text{expert}}(\VARm{\vx}))
+                     ~:~ \forall n
+                     ~,~ \forall (\VARm{\vx}, \VARm{a}, \VARm{\ell}) \in \VARm{\vt\xth{i}_n} \big\rangle$}
+                   \COMMENT{collect data set}\\
+                   \COMMENT{observations $\vx$ visited by $f_{i-1}$}\\
+                   \COMMENT{but actions according to the expert}
+      \SETST{$f_i$}{$\VARm{\cA}\left( \bigcup_{j=0}^i \VARm{D_j} \right)$}
+                   \COMMENT{train policy $f_i$ on union of all data so far}
+    \ENDFOR
+    \RETURN $\left\langle \VARm{f_0}, \VARm{f_1}, \dots, \VARm{f_{\text{MaxIter}}} \right\rangle$
+    \COMMENT{return collection of all learned policies}
+  }
+
+This algorithm returns the list of \emph{all} policies generated during its run.
+A very practical question is: which one should you use?
+There are essentially two choices. The first choice is just to use the final policy learned.
+The problem with this approach is that Dagger can be somewhat unstable in practice, and policies do not monotonically improve.
+A safer alternative (as we'll see by theory below) is to test all of them on some held-out ``development'' tasks, and pick the one that does best there.
+This requires a bit more computation, but is a much better approach in general.
+
+One major difference in \emph{requirements} between Dagger (Algorithm~\ref{alg:imit:dagger}) and SupervisedIL (Algorithm~\ref{alg:imit:supertrain}) is the requirement of interaction with the expert.
+In SupervisedIL, you only need access to a bunch of trajectories taken by the expert, \emph{passively}.
+In Dagger, you need access to them expert themselves, so you can ask questions like ``if you saw configuration $\vx$, what would you do?''
+This puts \emph{much} more demand on the expert.
+
+Another question that arises is: what should $N$, the number of trajectories generated in each round, be?
+In practice, the initial $N$ should probably be reasonably large, so that the initial policy $f_0$ is pretty good.
+The number of trajectories generated by iteration subsequently can be much smaller, perhaps even just one.
+
+Intuitively, Dagger should be less sensitive to compounding error than SupervisedIL, precisely because it gets trained on observations that it is likely to see at test time.
+This is formalized in the following theorem:
+
+\begin{theorem}[Loss of Dagger]
+  Suppose that one runs Algorithm~\ref{alg:imit:dagger} using a multiclass classifier that optimizes the 0-1 loss (or an upperbound thereof).
+  Let $\ep$ be the error rate of the underlying classifier (in expectation) and assume that all instantaneous losses are in the range $[0, \ell\xth{max}]$.
+  Let $f$ be the learned policy; then:
+  \begin{align}
+    \underbrace{\Ep_{\vt \sim f}\left[\sum_t \ell_t\right]}_{\text{loss of learned policy}}
+    & \leq
+    \underbrace{\Ep_{\vt \sim \text{expert}}\left[\sum_t \ell_t\right]}_{\text{loss of expert}}
+      + \ell\xth{max} T \ep
+      + O\left( \frac {\ell\xth{max} T \log T} {\text{MaxIter}} \right)
+  \end{align}
+  Furthermore, if the loss function is strongly convex in $f$, and $\text{MaxIter}$ is $\tilde O(T/\ep)$, then:
+  \begin{align}
+    \underbrace{\Ep_{\vt \sim f}\left[\sum_t \ell_t\right]}_{\text{loss of learned policy}}
+    & \leq
+    \underbrace{\Ep_{\vt \sim \text{expert}}\left[\sum_t \ell_t\right]}_{\text{loss of expert}}
+      + \ell\xth{max} T \ep
+      + O(\ep)
+  \end{align}
+\end{theorem}
+
+Both of these results show that, assuming $\text{MaxIter}$ is large enough, the loss of the learned policy $f$ (here, taken to be the best on of all the $\text{MaxIter}$ policies learned) grows like $T\ep$, which is what we hope for.
+Note that the final term in the first bound gets small so long as $\text{MaxIter}$ is at least $T \log T$.
+
+\section{Expensive Algorithms as Experts}
+
+Because of the strong requirement on the expert in Dagger (i.e., that you need to be able to query it many times during training), one of the most substantial use cases for Dagger is to learn to (quickly) imitate otherwise slow algorithms.
+Here are two prototypical examples:
+\begin{enumerate}
+\item Game playing. When a game (like chess or minecraft) can be run in simulation, you can often explicitly compute a semi-optimal expert behavior with brute-force search. But this search might be too computationally expensive to play in real time, so you can use it during training time, learning a fast policy that attempts to mimic the expensive search. This learned policy can then be applied at test time.
+
+\item Discrete optimizers. Many discrete optimization problems can be computationally expensive to run in real time; for instance, even shortest path search on a large graph can be too slow for real time use. We can compute shortest paths offline as ``training data'' and then use imitation learning to try to build shortest path optimizers that will run sufficiently efficiently in real time.
+\end{enumerate}
+
+Consider the game playing example, and for concreteness, suppose you are trying to learn to play solitaire (this is an easier example because it's a single player game).
+When running DaggerTrain (Algorithm~\ref{alg:imit:dagger} to learn a chess-playing policy, the algorithm will repeatedly ask for $\VARm{\text{expert}}(\VARm{\vx})$, where $\vx$ is the current state of the game.
+What should this function return?
+Ideally, it should return the/an action $a$ such that, if $a$ is taken, and then the rest of the game is played optimally, the player wins.
+Computing this exactly is going to be very difficult for anything except the simplest games, so we need to restort to an approxiamtion.
+
+\newalgorithm%
+  {imit:dldfs}%
+  {\FUN{DepthLimitedDFS}($\VARm{\vx}, \VARm{h}, \VARm{\text{MaxDepth}}$)}
+  {
+    \IF{$\VARm{\vx}$ is a terminal state or $\VARm{\text{MaxDepth}} \leq \CON{0}$}
+      \RETURN $(\bot, \VARm{h}(\VARm{\vx}))$
+      \COMMENT{if we cannot search deeper}\\
+      \COMMENT{return ``no action'' ($\bot$) and the current heuristic score}
+    \ELSE
+      \SETST{\text{BestAction}, \text{BestScore}}{$\bot$, \CON{$-\infty$}}
+      \COMMENT{keep track of best action \& its score}
+      \FORALL{actions \VARm{a} from \VARm{\vx}}
+        \SETST{(\_, \VARm{score})}{$\FUN{DepthLimitedDFS}(\VARm{\vx} \circ \VARm{a}, \VARm{h}, \VARm{\text{MaxDepth}}-\CON{1})$}
+        \COMMENT{get score}
+        \\\COMMENT{for action $a$, depth reduced by one by appending $a$ to $\vx$}
+        \IF{$\VARm{score} > \VARm{\text{BestScore}}$}
+          \SETST{\text{BestAction}, \text{BestScore}}{\VARm{a}, \VARm{$score$}}
+          \COMMENT{update tracked best action \& score}
+        \ENDIF
+      \ENDFOR
+    \ENDIF
+    \RETURN $(\text{BestAction}, \text{BestScore})$
+    \COMMENT{return best found action and its score}
+  }
+
+\TODOFigure{imit:dldfs}{Depth limited depth-first search}
+
+A common strategy is to run a depth-limited depth first search, starting at state $\vx$, and terminating after at most three of four moves (see Figure~\ref{fig:imit:dldfs}).
+This will generate a search tree.
+Unless you are very near the end of the game, none of the leaves of this tree will correspond to the end of the game.
+So you'll need some heuristic, $h$, for evaluating states that are non-terminals.
+You can propagate this heuristic score up to the root, and choose the action that looks best with this depth four search.
+This is not necessarily going to be the \emph{optimal} action, and there's a speed/accuracy trade-off for searching deeper, but this is typically effective.
+This approach summarized in Algorithm~\ref{alg:imit:dldfs}.
+
+
+\section{Structured Prediction via Imitation Learning}
+
+A final case where an expert can often be computed algorithmically arises when one solves structured prediction (see Chapter~\ref{sec:srl}) via imitation learning.
+It is clearest how this can work in the case of sequence labeling.
+Recall there that predicted outputs should be \emph{sequences} of labels.
+The running example from the earlier chapter was:
+%
+\begin{align}
+  \vx &= \text{`` monsters eat tasty bunnies ``} \\
+  \vy &= \text{~~~~~~noun~~verb~adj~~~~~noun}
+\end{align}
+%
+One can easily cast the prediction of $\vy$ as a sequential decision making problem, by treating the production of $\vy$ in a left-to-right manner.
+In this case, we have a time horizon $T=4$.
+We want to learn a policy $f$ that first predicts ``noun'' then ``verb'' then ``adj'' then ``noun'' on this input.
+
+Let's suppose that the input to $f$ consists of features extracted both from the input ($\vx)$ and the current predicted output prefix $\hat\vy$, denoted $\phi(\vx, \hat\vy)$.
+For instance, $\phi(\vx,\hat\vy)$ might represent a similar set of features to those use in Chapter~\ref{sec:srl}.
+It is perhaps easiest to think of $f$ as just a classifier:
+given some features of the input sentence $\vx$ (``monsters eat tasty bunnies''),
+and some features about previous predictions in the output prefix (so far, produced ``noun verb''),
+the goal of $f$ is to predict the tag for the next word (``tasty'') in this context.
+
+An important question is: what is the ``expert'' in this case?
+Intuitively, the expert should provide the correct next label, but what does this mean?
+That depends on the loss function being optimized.
+Under Hamming loss (sum zero/one loss over each individual prediction), the expert is straightforward.
+When the expert is asked to produce an action for the third word, the expert's response is \emph{always} ``adj'' (or whatever happens to be the correct label for the third word in the sentence it is currently training on).
+
+More generally, the expert gets to look at $\vx$, $\vy$ and a prefix $\hat\vy$ of the output.
+Note, \emph{importantly}, that the prefix \emph{might be wrong!}
+In particular, after the first iteration of Dagger, the prefix will be predicted by the learned policy, which may make mistakes!
+The expert also has some structured loss function $\ell$ that it is trying to minimize.
+Like in the previous section, the expert's goal is to choose the action that minimizes the long-term loss according to $\ell$ on this example.
+
+To be more formal, we need a bit of notation.
+Let $\text{best}(\ell, \vy, \hat\vy)$ denote the loss (according to $\ell$ and the ground truth $\vy$) of the best reachable output starting at $\hat\vy$.
+For instance, if $\vy$ is ``noun verb adj noun'' and $\hat\vy$ is ``noun noun'', and the loss is Hamming loss, then the best achievable output (predicting left-to-right) is ``noun noun adj noun'' which has a loss of $1$.
+Thus, $\text{best}$ for this situation is $1$.
+
+Given that notion of best, the expert is easy to define:
+~
+\begin{align}
+  \text{expert}(\ell, \vy, \hat\vy)
+  &= \argmin_a \text{best}(\ell, \vy, \hat\vy \circ a)
+\end{align}
+~
+Namely, it is the action that leads to the best possible completion \emph{after} taking that action. 
+So in the example above, the expert action is ``adj''.
+For some problems and some loss functions, computing the expert is easy.
+In particular, for sequence labeling under Hamming loss, it's trivial.
+In the case that you can compute the expert exactly, it is often called an \concept{oracle}.\footnote{Some literature calls it a ``dynamic oracle'', though the extra word is unnecessary.}
+For some other problems, exactly computing an oracle is computationally expensive or intractable.
+In those cases, one can often resort to depth limited depth-first-search (Algorithm~\ref{alg:imit:dldfs}) to compute an approximate oracle as an expert.
+
+To be very concrete, a typical implementation of Dagger applied to sequence labeling would go as follows.
+Each structured training example (a pair of sentence and tag-sequence) gives rise to one trajectory.
+At training time, a predict tag seqence is generated left-to-right, starting with the empty sequence.
+At any given time step, you are attempting to predict the label of the $t$th word in the input.
+You define a feature vector $\phi(\vx,\hat\vy)$, which will typically consist of: (a) the $t$th word, (b) left and right neighbors of the $t$th word, (c) the last few predictions in $\hat\vy$, and (d) anything else you can think of.
+\emph{In particular,} the features are \emph{not} limited to Markov style features, because we're not longer trying to do dynamic programming.
+The expert label for the $t$th word is just the corresponding label in the ground truth $\vy$.
+Given all this, one can run Dagger (Algorithm~\ref{alg:imit:dldfs}) exactly as specified.
+
+Moving to structured prediction problems other than sequence labeling problems is beyond the scope of this book. 
+The general framework is to cast your structured prediction problem as a sequential decision making problem.
+Once you've done that, you need to decide on features (this is the easy part) and an expert (this is often the harder part).
+However, once you've done so, there are generic libraries for ``compiling'' your specification down to code.
+
+\section{Further Reading}
+
+TODO further reading
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "courseml"
+%%% End: 

@@ -1,0 +1,348 @@
+\chapter{Bias and Fairness} \label{sec:bias}
+
+\chapterquote{Science and everyday life cannot\\and should not be separated.}{Rosalind~Franklin}
+
+\begin{learningobjectives}
+\item 
+\end{learningobjectives}
+
+\dependencies{\chref{sec:dt},\chref{sec:knn},\chref{sec:perc},\chref{sec:prac}}
+
+
+
+At the end of \chref{sec:dt}, you saw the ``Russian Tank'' example of a biased data set leading to a classifier that \emph{seemed} like it was doing well, but was really relying on some artifact of the data collection process.
+As machine learning algorithms have a greater and greater impact on the real world, it is crucially important to ensure that they are making decisions based on the ``right'' aspects of the input, rather than exploiting arbitrary idiosyncracies of a particular training set.
+
+For the rest of this chapter, we will consider two real world examples of bias issues that have had significant impact: the effect of gender in speech recognition systems and the effect of race in predicting criminal recidivism (i.e., will a convicted criminal commit further crimes if released).\footnote{See \href{http://www.autoblog.com/2011/05/31/women-voice-command-systems/}{Autoblog} and \href{http://www.propublica.org/article/machine-bias-risk-assessments-in-criminal-sentencing}{ProPublica} for press coverage of these two issues.} The gender issue is that early speech recognition systems in cars failed to recognized the voices of many people who were not men. The race issue is that a specific recidivism predictor based on standard learning algorithms was biased against minorities.
+
+\section{Train/Test Mismatch}
+
+One of the most common issues in bias is a mismatch between the training distribution and the testing distribution.
+In the running example of speech recognition failing to work on many non-men speakers, a large part of this happened because most of the training data on which the speech recognition system was trained was spoken by men.
+The learning algorithm learned---very well---how to recognize men's speech, but its accuracy dropped significantly when faced with a different distribution of test data.
+
+To understand why this happens, recall the Bayes Optimal classifier from Chapter~\ref{sec:formal}. This was the classifier than magically know the data distribution $\cD$, and then when presented with an example $x$ predicted $\argmax_y \cD(x,y)$. This was optimal, but \emph{only} because $\cD$ was the correct distribution. Even if one has access to the true distribution for male speakers, say $\cD\xth{male}$, the Bayes Optimal classifier under $\cD\xth{male}$ will generally \emph{not} be optimal under the distribution for any other gender.
+
+Another example occurs in sentiment analysis.
+It is common to train sentiment analysis systems on data collected from reviews: product reviews, restaurant reviews, movie reviews, etc.
+This data is convenient because it includes both text (the review itself) and also a rating (typically one to five stars).
+This yields a ``free'' dataset for training a model to predict rating given text.
+However, one should be wary when running such a sentiment classifier on text \emph{other than} the types of reviews it was trained on.
+One can easily imagine that a sentiment analyzer trained on movie reviews may not work so well when trying to detect sentiment in a politician's speech.
+Even moving between one type of product and another can fail wildly: ``very small'' typically expresses positive sentiment for USB drives, but not for hotel rooms.
+
+The issue of \concept{train/test mismatch} has been widely studied under many different names: \concept{covariate shift} (in statistics, the input features are called ``covariates''), \concept{sample selection bias} and \concept{domain adaptation} are the most common. We will refer to this problem simply as \concept{adaptation}. The adaptation challenge is: given training data from one ``old'' distribution, learn a classifier that does a good job on \emph{another} related, but different, ``new'' distribution.
+
+It's important to recognize that in general, adaptation is impossible.
+For example, even if the task remains the same (positive/negative sentiment), if the old distribution is text reviews and the new distribution is images of text reviews, it's hard to imagine that doing well on the old distribution says anything about the new.
+As a less extreme example, if the old distribution is movie reviews in English and the new distribution is movie reviews in Mandarin, it's unlikely that adaptation will be easy.
+
+These examples give rise to the tension in adaptation problems.
+\begin{enumerate}
+\item What does it mean for two distributions to be related?
+We might believe that ``reviews of DVDs'' and ``reviews of movies'' are ``highly related'' (though somewhat different: DVD reviews often discuss bonus features, quality, etc.); while ``reviews of hotels'' and ``reviews of political policies'' are ``less related.''
+But how can we formalize this?
+\item When two distributions \emph{are} related, how can we build models that effectively share information between them?
+\end{enumerate}
+
+\section{Unsupervised Adaptation}
+
+\newcommand{\Dold}{\textcolor{darkblue}{\cD^{\text{old}}}}
+\newcommand{\Dnew}{\textcolor{darkpurple}{\cD^{\text{new}}}}
+\newcommand{\Dbase}{\textcolor{darkergreen}{\cD^{\text{base}}}}
+
+The first type of adaptation we will cover is \concept{unsupervised adaptation}. The setting is the following. There are two distributions, $\Dold$ and $\Dnew$. We have \emph{labeled} training data from $\Dold$, say $(\vx_1, y_1), \dots, (\vx_N, y_N)$ totalling $N$ examples. We also have $M$ many \emph{unlabeled examples} from $\Dnew$: $\vz_1, \dots, \vz_M$. We assume that the examples live in the same space, $\R^D$. This is called \emph{unsupervised} adaptation because we do not have access to any labels in the new distribution.\footnote{Sometimes this is called \concept{semi-supervised adaptation} in the literature.}
+
+Our goal is to learn a classifier $f$ that achieves low expected loss \emph{under the new distribution, $\Dnew$}.
+The challenge is that we do not have access to any labeled data from $\Dnew$.
+As a warm-up, let's suppose that we have a black box machine learning algorithm $\cA$ that takes in \emph{weighted} examples and produces a classifier.
+At the very least, this can be achieved using either undersampling or oversampling (see Section~\ref{sec:imbalanced}).
+We're going to attempt to \emph{reweigh} the (old distribution) labeled examples based on how similar they are to the new distribution.
+This is justified using the \concept{importance sampling} trick for switching expectations:
+~
+\begin{align}
+&\text{test loss} \\
+&= \Ep_{(\vx,y) \sim \Dnew}\left[ \ell(y, f(\vx)) \right] \becauseof{definition} \\
+&= \sum_{(\vx,y)} \Dnew(\vx,y) \ell(y, f(\vx)) \becauseof{expand expectation} \\
+&= \sum_{(\vx,y)} \Dnew(\vx,y) \frac {\Dold(\vx,y)} {\Dold(\vx,y)} \ell(y, f(\vx)) \becauseof{times one} \\
+&= \sum_{(\vx,y)} \Dold(\vx,y) \frac {\Dnew(\vx,y)} {\Dold(\vx,y)} \ell(y, f(\vx)) \becauseof{rearrange} \\
+&= \Ep_{(\vx,y) \sim \Dold}\left[ \frac {\Dnew(\vx,y)} {\Dold(\vx,y)} \ell(y, f(\vx)) \right] \becauseof{definition}
+\end{align}
+
+What we have achieved here is rewriting the test loss, which is an expectation over $\Dnew$, as an expectation over $\Dold$ instead.\footnote{In this example, we assumed a discrete distribution; if the distributions are continuous, the sums are simply replaced with integrals.}
+This is useful because we have access to labeled examples from $\Dold$ but not $\Dnew$.
+The implicit suggested algorithm by this analysis to to train a classifier using our learning algorithm $\cA$, but where each training example $(\vx_n, y_n)$ is weighted according to the ratio $\Dnew(\vx_n,y_n) / \Dold(\vx_n,y_n)$.
+Intuitively, this makes sense: the classifier is being told to pay more attention to training examples that have high probability under the new distribution, and less attention to training that have low probability under the new distribution.
+
+The problem with this approach is that we do not have access to $\Dnew$ or $\Dold$, so we cannot compute this ratio and therefore cannot run this algorithm.
+One approach to this problem is to try to explicitly estimate these distributions, a task known as \concept{density estimation}.
+This is an \emph{incredibly} difficult problem; far harder than the original adaptation problem.
+
+A solution to this problem is to try to estimate the \emph{ratio} directly, rather than separately estimating the two probability distributions\mycite{bickel}.
+The key idea is to think of the adaptation as follows.
+All examples are drawn according to some fixed base distribution $\Dbase$.
+Some of these are selected to go into the new distribution, and some of them are selected to go into the old distribution.
+The mechanism for deciding which ones are kept and which are thrown out is governed by a \emph{selection variable}, which we call $s$.
+The choice of selection-or-not, $s$, is based \emph{only} on the input example $\vx$ and not on it's label.\thinkaboutit{What could go wrong if $s$ got to look at the label, too?}
+In particular, we define:
+~
+\begin{align}
+\Dold(\vx,y) &\varpropto \Dbase(\vx,y) p(s=1 \| \vx) \\
+\Dnew(\vx,y) &\varpropto \Dbase(\vx,y) p(s=0 \| \vx)
+\end{align}
+~
+That is, the probability of drawing some pair $(\vx,y)$ in the old distribution is proportional to the probability of first drawing that example according to the base distribution, and then the probability of selecting that particular example into the old distribution.
+If we can successfully estimate $p(s=1 \| \vx)$, then the ratio that we sought, then we can compute the importance ratio as:
+~
+\begin{align}
+\frac {\Dnew(\vx,y)} {\Dold(\vx,y)}
+&= \frac { \frac 1 {Z^{\text{new}}} \Dbase(\vx,y) p(s=0 \| \vx) }
+         { \frac 1 {Z^{\text{old}}} \Dbase(\vx,y) p(s=1 \| \vx) }
+  \becauseof{definition} \\
+&= \frac { \frac 1 {Z^{\text{new}}} p(s=0 \| \vx) }
+         { \frac 1 {Z^{\text{old}}} p(s=1 \| \vx) }
+  \becauseof{cancel base} \\
+&= Z \frac { p(s=0 \| \vx) } { p(s=1 \| \vx) }
+  \becauseof{consolidate} \\
+&= Z \frac { 1 - p(s=1 \| \vx) } { p(s=1 \| \vx) }
+  \becauseof{binary selection} \\
+&= Z \left[ \frac 1 {p(s=1 \| \vx)} - 1 \right]
+  \becauseof{rearrange}
+\end{align}
+~
+This means that if we can estimate the selection probability $p(s=1\|\vx)$, we're done.
+We can therefore use $1 / p(s=1 \| \vx_n) - 1$ as an example weight on example $(\vx_n, y_n)$ when feeding these examples into our learning algorithm $\cA$.\thinkaboutit{As a check: make sure that these weights are always non-negative. Furthermore, why is it okay to ignore the $Z$ factor?}
+
+The remaining question is how to estimate $p(s=1 \| \vx_n)$.
+Recall that $s=1$ denotes the case that $\vx$ is selected into the old distribution and $s=0$ denotes the case that $\vx$ is selected into the new distribution.
+This means that predicting $s$ is \emph{exactly} a binary classification problem, where the ``positive'' class is the set of $N$ examples from the old distribution and the ``negative'' class is the set of $M$ examples from the new distribution.
+
+\newalgorithm%
+  {bias:importance}%
+  {\FUN{SelectionAdaptation}(\VAR{$\langle (\vx_n,y_n) \rangle_{n=1}^N$}, \VAR{$\langle \vz_m \rangle_{m=1}^M$}, \VAR{$\cA$})}
+  {
+    \SETST{$D^{\text{dist}}$}{$\left\langle (\VARm{\vx_n},+1) \right\rangle_{n=1}^N \bigcup \left\langle (\VARm{\vz_m},-1) \right\rangle_{m=1}^M$} \COMMENT{assemble data for distinguishing}
+\\
+    \COMMENT{between old and new distributions}
+    \SETST{$\hat p$}{train logistic regression on $D^{\text{dist}}$}
+    \SETST{$D^{\text{weighted}}$}{$\left\langle (\VARm{\vx_n}, \VARm{y_n}, \frac 1 {\VARm{\hat p}(\VARm{\vx_n})} - 1) \right\rangle_{n=1}^N$}
+    \COMMENT{assemble weight classification}
+    \\ \COMMENT{data using selector}
+    \RETURN{\VAR{$\cA$}(\VAR{$D^{\text{weighted}}$})} \COMMENT{train classifier}
+  }
+
+This analysis gives rise to Algorithm~\ref{alg:bias:importance}, which consists of essentially two steps. The first is to train a logistic regression classifier\footnote{The use of logistic regression is arbitrary: it need only be a classification algorithm that can produce probabilities.} to distinguish between old and new distributions. The second is to use that classifier to produce weights on the labeled examples from the old distribution and then train whatever learning algorithm you wish on that.
+
+In terms of the questions posed at the beginning of this chapter, this approach to adaptation measures \emph{nearness} of the two distributions by the degree to which the selection probability is constant. In particular, if the selection probability is independent of $\vx$, then the two distributions are identical. If the selection probabilities vary sigificantly as $\vx$ changes, then the two distributions are considered very different. \textbf{More generally, if it is \emph{easy} to train a classifier to distinguish between the old and new distributions, then they are very different.}
+
+In the case of speech recognition failing as a function of gender, a core issue is that speech from men was massively over-represented in the training data but not the test data.
+When the selection logistic regression is trained, it is likely to say ``old'' on speech from men and ``new'' on other speakers, thereby \emph{downweighting} the significance of male speakers and \emph{upweighting} the significance of speakers of other genders on the final learned model. This would (hopefully) address many of the issues confounding that system.\thinkaboutit{Make up percentages for fraction of speakers who are male in the old and new distributions; estimate (you'll have to make some assumptions) what the importance weights would look like in this case.}
+
+\section{Supervised Adaptation}
+
+Unsupervised adaptation is very challenging because we never get to see try labels in the new distribution.
+In many ways, unsupervised adaptation attempts to \emph{guard against} bad things happening.
+That is, if an old distribution training example looks very unlike the new distribution, it (and consequently it's features) are downweighted so much as to be ignored.
+In supervised adaptation, we can hope for more: we can hope to actually do \emph{better} on the new distribution than the old because we have labeled data there.
+
+\newcommand{\vxold}{\vx^{\textcolor{darkgrey}{\textsf{(old)}}}}
+\newcommand{\vxnew}{\vx^{\textcolor{darkgrey}{\textsf{(new)}}}}
+\newcommand{\yold}{y^{\textcolor{darkgrey}{\textsf{(old)}}}}
+\newcommand{\ynew}{y^{\textcolor{darkgrey}{\textsf{(new)}}}}
+
+The typical setup is similar to the unsupervised case. There are two distributions, $\Dold$ and $\Dnew$, and our goal is to learn a classifier that does well in expectation on $\Dnew$. However, now we have labeled data from both distributions: $N$ labeled examples from $\Dold$ and $M$ labeled examples from $\Dnew$. Call them $\langle \vxold_n, \yold_n \rangle_{n=1}^N$ from $\Dold$ and $\langle \vxnew_m, \ynew_m \rangle_{m=1}^M$ from $\Dnew$. Again, suppose that both $\vxold_n$ and $\vxnew_m$ both live in $\R^D$.
+
+One way of answer the question of ``how do we share information between the two distributions'' is to say: when the distributions agree on the value of a feature, let them share it, but when they disagree, allow them to learn separately. For instance, in a sentiment analysis task, $\Dold$ might be reviews of electronics and $\Dnew$ might be reviews of hotel rooms. In both cases, if the review contains the word ``awesome'' then it's probably a positive review, regardless of which distribution we're in. We would want to \emph{share} this information across distributions. On the other hand, ``small'' might be positive in electronics and negative in hotels, and we would like the learning algorithm to be able to learn separate information for that feature.
+
+A very straightforward way to accomplish this is the \concept{feature augmentation} approach\mycite{daume}. This is a simple preprocessing step after which one can apply any learning algorithm. The idea is to create three versions of every feature: one that's shared (for words like ``awesome''), one that's old-distribution-specific and one that's new-distribution-specific. The mapping is:
+~
+\begin{alignat}{6}
+&&& \text{shared} && \text{old-only} && \text{new-only} \nonumber \\
+\vxold_n &\mapsto \Big\langle && ~~\vxold_n\quad &,~& \vxold_n                                       &,~& \underbrace{0, 0, \dots, 0}_{D\text{-many}} &~~& \Big\rangle \\
+\vxnew_m &\mapsto \Big\langle && ~~\vxnew_m\quad &,~& \underbrace{0, 0, \dots, 0}_{D\text{-many}}\quad &,~& \vxnew_m                                  &~~& \Big\rangle
+\end{alignat}
+
+Once you've applied this transformation, you can take the union of the (transformed) old and new labeled examples and feed the entire set into your favorite classification algorithm.
+That classification algorithm can then choose to share strength between the two distributions by using the ``shared'' features, if possible;
+or, if not, it can learn distribution-specific properties on the old-only or new-only parts.
+This is summarized in Algorithm~\ref{alg:bias:easyadapt}.
+
+\newalgorithm%
+  {bias:easyadapt}%
+  {\FUN{EasyAdapt}(\VAR{$\langle (\vxold_n,\yold_n) \rangle_{n=1}^N$}, \VAR{$\langle (\vxnew_m, \ynew_m) \rangle_{m=1}^M$}, \VAR{$\cA$})}
+  {
+    \SETST{$D$}{$\left\langle ( \langle \VARm{\vxold_n}, \VARm{\vxold_n}, \vec 0 \rangle, \VARm{\yold_n} ) \right\rangle_{\VARm{n}=1}^{\VARm{N}} 
+                  \bigcup
+                 \left\langle ( \langle \VARm{\vxnew_m}, \vec 0, \VARm{\vxnew_m} \rangle, \VARm{\ynew_m} ) \right\rangle_{\VARm{m}=1}^{\VARm{M}} $}
+    \COMMENT{union} \\ \COMMENT{of transformed data}
+    \RETURN{\VAR{$\cA$}(\VAR{$D$})} \COMMENT{train classifier}
+  }
+
+Note that this algorithm can be \emph{combined} with the instance weighting (unsupervised) learning algorithm. In this case, the logistic regression separator should be trained on the \emph{untransformed} data, and then weights can be used exactly as in Algorithm~\ref{alg:bias:importance}.\thinkaboutit{Why is it crucial that the separator be trained on the untransformed data?} This is particularly useful if you have access to \emph{way} more old distribution data than new distribution data, and you don't want the old distribution data to ``wash out'' the new distribution data.
+
+Although this approach is general, it is most effective when the two distributions are ``not too close but not too far'':
+\begin{itemize}
+\item If the distributions are too far, and there's little information to share, you're probably better off throwing out the old distribution data and training just on the (untransformed) new distribution data.
+\item If the distributions are too close, then you might as well just take the union of the (untransformed) old and new distribution data, and training on that.
+\end{itemize}
+In general, the interplay between how far the distributions are and how much new distribution data you have is complex, and you should always try ``old only'' and ``new only'' and ``simple union'' as baselines.
+
+\section{Fairness and Data Bias}
+
+Almost any data set in existence is biased in some way, in the sense that it captures an imperfect view of the world.
+The degree to which this bias is obvious can vary greatly:
+\begin{itemize}
+\item There might be obvious bias in the labeling. For instance, in criminology, learning to predict sentence lengths by predicting the sentences assigned by judges will simply learn to reproduce whatever bias already exists in judicial sentencing.
+\item There might be sample selection bias, as discussed early. In the same criminology example, the only people for which we have training data are those that have already been arrested, charged with and convicted of a crime; these processes are inherantly biased, and so any model learned on this data may exhibit similar biases.
+\item The task itself might be biased because the designers had blindspots. An intelligent billboard that predicts the gender of the person walking toward it so as to show ``better'' advertisements may be trained as a binary classifier between male/female and thereby excludes anyone who does not fall in the gender binary. A similar example holds for a classifier that predicts political affiliation in the US as Democrat/Republican, when in fact there are far more possibilities.
+\item There might be bias in the features or model structure. Machine translation systems often exhibit incorrect gender stereotypes\footnote{For instance, many languages have verbal marking that agrees with the gender of the subject. In such cases, ``the doctor treats \dots'' puts masculine markers on the translation of ``treats'' but ``the nurse treats \dots'' uses feminine markers.} because the relevant context, which would tell them the correct gender, is not encoded in the feature representation. Alone, or coupled with biased data, this leads to errors.
+\item The loss function may favor certain types of errors over others. You've already seen such an example: using zero/one loss on a highly imbalanced class problem will often lead to a learned model that ignores the minority class entirely.
+\item A deployed system creates feedback loops when it begins to consume it's own output as new input. For instance, once a spam filter is in place, spammers will adjust their strategies, leading to distribution shift in the inputs. Or a car guidance system for predicting which roads are likely to be unoccupied may find those roads now occupied by other cars that it directed there.
+\end{itemize}
+These are all difficult questions, none of which has easy answers.
+Nonetheless, it's important to be aware of how our systems may fail, especially as they take over more and more of our lives.
+Most computing, engineering and mathematical societies (like the ACM, IEEE, BCS, etc.) have codes of ethics, all of which include a statement about avoiding harm; the following is taken from the ACM code\footnote{\href{https://www.acm.org/about-acm/acm-code-of-ethics-and-professional-conduct}{ACM Code of Ethics}}:
+\begin{quote}
+  To minimize the possibility of indirectly harming others, computing professionals must minimize malfunctions by following generally accepted standards for system design and testing. Furthermore, it is often necessary to assess the social consequences of systems to project the likelihood of any serious harm to others.
+\end{quote}
+
+In addition to ethical questions, there are often related \emph{legal} questions.
+For example, US law prohibits discrimination by race and gender (among other ``protected attributes'') in processes like hiring and housing.
+The current legal mechanism for measuring discimination is \concept{disparate impact} and the \concept{80\% rule}.
+Informally, the 80\% rule says that your rate of hiring women (for instance) must be at least 80\% of your rate of hiring men.
+Formally, the rule states:
+\begin{align}
+                    \Pr(y = +1 \| \text{G} \neq \text{male}) 
+& \leq 0.8 ~\times~ \Pr(y = +1 \| \text{G} =    \text{male}) 
+\end{align}
+Of course, gender/male can be replaced with any other protected attribute.
+
+One non-solution to the disparate impact problem is to simply throw out protected attributes from your dataset.
+Importantly, yet unfortunately, this is \textbf{not} sufficient.
+Many other features often correlate strongly with gender, race, and other demographic information, and just because you've removed \emph{explicit} encodings of these factors does not imply that a model trained as such would satisfy the 80\% rule.
+A natural question to ask is: can we build machine learning algorithms that have high accuracy but simultaneously avoid disparate impact?
+
+Disparate impact is an imperfect measure of (un)fairness, and there are alternatives, each with it's own pros and cons\mycite{friedler,hardt}.
+All of these rely on predefined categories of protected attributes, and a natural question is where these come from if not governmental regulation.
+Regardless of the measure you choose, the most important thing to keep in mind is that just because something comes from data, or is algorithmically implemented, does not mean it's fair.
+
+
+\section{How Badly can it Go?}
+
+To help better understand how badly things can go when the distribution over inputs changes, it's worth thinking about how to analyze this situation formally.
+Suppose we have two distributions $\Dold$ and $\Dnew$, and let's assume that the only thing that's different about these is the distribution they put on the inputs $\cX$ and not the outputs $\cY$.
+(We will return later to the usefulness of this assumption.)
+That is: $\Dold(\vx,y) = \Dold(\vx) \cD(y \| \vx)$ and $\Dnew(\vx,y) = \Dnew(\vx) \cD(y \| \vx)$, where $\cD(y \| \vx)$ is shared between them.
+
+Let's say that you've learned a classifier $f$ that does really well on $\Dold$ and achieves some \emph{test error} of $\ep\xth{old}$.
+That is:
+%
+\begin{align}
+  \ep\xth{old} &= \Ep_{\substack{\vx \sim \Dold\\y \sim \cD(\cdot \| \vx)}}\big[ \Ind[f(\vx) \neq y] \big]
+\end{align}
+%
+The question is: how badly can $f$ do on the new distribution?
+
+We can calculate this directly. 
+%
+\begin{align}
+  & \ep\xth{new} \nonumber \\
+  &= \Ep_{\substack{\vx \sim \Dnew\\y \sim \cD(\cdot \| \vx)}}\big[ \Ind[f(\vx) \neq y] \big] \\
+  &= \int_\cX \int_\cY \Dnew(\vx) \cD(y \| \vx) \Ind[f(\vx) \neq y] \ud y \ud \vx \becauseof{def. of $\Ep$} \\
+  &= \int_\cX \left( \Dnew(\vx) - \Dold(\vx) + \Dold(\vx) \right)\times \nonumber\\
+& \qquad \int_\cY \cD(y \| \vx) \Ind[f(\vx) \neq y] \ud y \ud \vx  \becauseof{add zero} \\
+  &= \ep\xth{old} + \nonumber\\
+  &\qquad \int_\cX \left( \Dnew(\vx) - \Dold(\vx)\right) \times \nonumber\\
+  &\qquad\int_\cY \cD(y \| \vx) \Ind[f(\vx) \neq y] \ud y \ud \vx  \becauseof{def. $\ep^{\textsf{old}}$} \\
+&\leq \ep\xth{old} + \int_\cX \ab{\Dnew(\vx) - \Dold(\vx)} \Big( 1 \Big) \ud \vx  \becauseof{worst case $\int_\cY$} \\
+  &= \ep\xth{old} + 2 \ab{\Dnew - \Dold}_{\text{Var}} \becauseof{def. $\ab{\cdot}_{\text{Var}}$}
+\end{align}
+%
+Here, $\ab{\cdot}_{\text{Var}}$ is the \concept{total variation distance} (or \concept{variational distance}) between two probability distributions, defined as:
+%
+\begin{align}
+  \ab{P - Q}_{\text{Var}}
+  &= \sup_{e} \ab{P(e) - Q(e)}
+  = \frac 1 2 \int_\cX \ab{P(\vx) - Q(\vx)} \ud \vx
+\end{align}
+%
+Is a standard measure of dissimilarity between probability distributions. In particular, the variational distance is the largest difference in probability that $P$ and $Q$ assign to the same event (in this case, the event is an example $\vx$).
+
+The bound tells us that we might not be able to hope for very good error on the new distribution, even if we have very good error on the old distribution, when $\Dold$ and $\Dnew$ are very different (assign very different probabilities to the same event).
+Of course, this is an \emph{upper bound}, and possibly a very loose one.
+
+The second observation is that we barely used the assumption that $\Dnew$ and $\Dold$ share the same label distribution $\cD(y \| \vx)$ in the above analysis. (In fact, as an exercise, repeat the analysis \emph{without} this assumption. It will still go through.)
+In general, this assumption buys us very little.
+In an extreme case, $\Dnew$ and $\Dold$ can essentially ``encode'' which distribution a given $\vx$ came from in one of the features.
+Once the origin distribution is completely encoded in a feature, then $\cD(y \| \vx)$ could look at the encoding, and completely flip the label based on which distribution it's from.
+How could $\Dnew$ and $\Dold$ encode the distribution?
+One way would be to set the 29th decimal digit of feature 1 to an odd value in the old distribution and an even value in the new distribution.
+This tiny change will be essentially imperceptible if one looks at the data, but would give $\cD(y \| \vx)$ enough power to make our lives miserable.
+
+If we want a way out of this dilemma, we need more technology.
+The core idea is that if we're learning a function $f$ from some hypothesis class $\cF$, and this hypothesis class isn't rich enough to peek at the 29th decimal digit of feature 1, then perhaps things are not as bad as they could be.
+This motivates the idea of looking at a measure of distance between probability distributions that \emph{depends on the hypothesis class}.
+A popular measure is the \concept{$d_\cA$-distance} or the \concept{discrepancy}.
+The discrepancy measure distances between probability distributions based on how much two function $f$ and $f'$ in the hypothesis class can disagree on their labels.
+Let:
+%
+\begin{align}
+  \ep_P(f,f')
+  &= \Ep_{\vx \sim P} \Big[ \Ind[ f(\vx) \neq f'(\vx) ] \Big]
+\end{align}
+%
+You can think of $\ep_P(f,f')$ as the \emph{error} of $f'$ when the ground truth is given by $f$, where the error is taken with repsect to examples drawn from $P$.
+Given a hypothesis class $\cF$, the discrepancy between $P$ and $Q$ is defined as:
+%
+\begin{align}
+  d_\cA(P,Q)
+  &= \max_{f,f' \in \cF} \ab{ \ep_P(f,f') - \ep_Q(f,f') }
+\end{align}
+%
+The discrepancy very much has the flavor of a classifier: if you think of $f$ as providing the ground truth labeling, then the discrepancy is large whenever there exists a function $f'$ that agrees strongly with $f$ on distribution $P$ but \emph{disagrees} strongly with $f$ on $Q$.
+This feels natural: if all functions behave similarly on $P$ and $Q$, then the discrepancy will be small, and we also expect to be able to generalize across these two distributions easily.
+
+One very attractive property of the discrepancy is that you can estimate it from finite \emph{unlabeled} samples from $\Dold$ and $\Dnew$.
+Although not obvious at first, the discrepancy is very closely related to a quantity we saw earlier in unsupervised adaptation: a classifier that distinguishes between $\Dold$ and $\Dnew$.
+In fact, the discrepancy is precisely twice the \emph{accuracy} of the best classifier from $\cH$ at separating $\Dold$ from $\Dnew$.
+
+How does this work in practice?
+Exactly as in the section on unsupervised adaptation, we train a classifier to distinguish between $\Dold$ and $\Dnew$.
+It needn't be a probabilistic classifier; any binary classifier is fine.
+This classifier, the ``domain separator,'' will have some (heldout) accuracy, call it $\textit{acc}$.
+The discrepancy is then exactly $d_\cA = 2 (\textit{acc} - 0.5)$.
+
+Intuitively the accuracy of the domain separator is a natural measure of how different the two distributions are.
+If the two distributions are identical, you shouldn't expect to get very good accuracy at separating them.
+In particular, you expect the accuracy to be around 0.5, which puts the discrepancy at zero.
+On the other hand, if the two distributions are really far apart, separation is easy, and you expect an accuracy of about $1$, yielding a discrepancy also of about $1$.
+
+One can, in fact, prove a generalization bound---generalizing from finite samples from $\Dold$ to expected loss on $\Dnew$---based on the discrepancy\mycite{bendavid}.
+%
+\begin{theorem}[Unsupervised Adaptation Bound] \label{thm:bias:adapt}
+  Given a fixed representation and a fixed hypothesis space $\cF$, let $f \in \cF$ and let $\ep\xth{best} = \min_{f^* \in \cF} \frac 1 2 \left[ \ep\xth{old}(f^*) + \ep\xth{new}(f^*) \right]$, then, for all $f \in \cF$:
+%
+\begin{align}
+  \underbrace{\ep\xth{new}(f)}_{\textrm{error on } \Dnew}
+  &\leq 
+    \underbrace{\ep\xth{old}(f)}_{\textrm{error on } \Dold} +
+    \underbrace{\ep\xth{best}}_{\textrm{minimal avg error}} +
+    \underbrace{d_\cA(\Dold,\Dnew)}_{\textrm{distance}}
+\end{align}
+\end{theorem}
+%
+In this bound, $\ep\xth{best}$ denotes the error rate of the best possible classifier from $\cF$, where the error rate is measured as the \emph{average} error rate on $\Dnew$ and $\Dold$; this term ensures that at least some good classifier exists that does well on both distributions.
+
+The main practical use of this result is that it suggests a way to look for representations that are good for adaptation: on the one hand, we should try to get our training error (on $\Dold$) as low as possible; on the other hand, we want to make sure that it is \emph{hard} to distinguish between $\Dold$ and $\Dnew$ in this representation.
+
+%As a final note, this bound can be combined with standard generalization bounds from Chapter~\ref{sec:thy} that bound the expected performance of $f$ on the old distribution as the sum of its empirical error on the training set plus a generalization term that depends on the VC dimension of the hypothesis class.
+
+\section{Further Reading}
+
+TODO further reading
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "courseml"
+%%% End: 

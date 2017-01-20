@@ -1,6 +1,6 @@
 \chapter{Ensemble Methods} \label{sec:ens}
 
-\chapterquote{}{}
+\chapterquote{This is the central illusion in life: that randomness is a risk, that it is a bad thing\dots}{Nassim~Nicholas~Taleb}
 
 \begin{learningobjectives}
 \item Implement bagging and explain how it reduces variance in a
@@ -43,8 +43,6 @@ same data set, you will always get the same tree back.  In order to
 get an effect out of voting multiple classifiers, they need to
 differ.  There are two primary ways to get variability.  You can
 either change the learning algorithm or change the data set.
-
-%TODO: need to talk about bias/variance before this point
 
 Building an emsemble by training different classifiers is the most
 straightforward approach.  As in single-model learning, you are given
@@ -92,8 +90,6 @@ these pieces individually.  Unfortunately, this means that each
 decision tree is trained on only a very small part of the entire
 data set and is likely to perform poorly.
 
-%TODO: be sure iid is defined
-
 \Figure{ens:resample}{picture of sampling with replacement}
 
 A better solution is to use \concept{bootstrap resampling}.  This is a
@@ -135,7 +131,7 @@ alternative approach to regularization.  That is, even if each of the
 learned classifiers $f_1, \dots, f_M$ are individually overfit, they
 are likely to be overfit to different things.  Through voting, you are
 able to overcome a significant portion of this overfitting.
-Figure~\ref{ens:overfitting} shows this effect by comparing
+Figure~\ref{fig:ens:overfitting} shows this effect by comparing
 regularization via hyperparameters to regularization via bagging.
 
 \section{Boosting Weak Learners}
@@ -168,7 +164,6 @@ framework for taking a weak learning algorithm $\cW$ and turning it
 into a strong learning algorithm.  The particular boosting algorithm
 discussed here is \concept{AdaBoost}, short for ``adaptive boosting
 algorithm.''  AdaBoost is famous because it was one of the first
-%TODO: fix this: it's not entirely true
 \emph{practical} boosting algorithms: it runs in polynomial time and
 does not require you to define a large number of hyperparameters.  It
 gets its name from the latter benefit: it automatically \emph{adapts}
@@ -376,6 +371,10 @@ data).  If you have enough trees, the random ones will wash out as
 noise, and only the good trees will have an effect on the final
 classification.
 
+
+\section{Further Reading}
+
+TODO further reading
 
 
 

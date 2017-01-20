@@ -5,7 +5,7 @@
 
 \chapter{Expectation Maximization} \label{sec:em}
 
-\chapterquote{}{}
+\chapterquote{A hen is only an egg's way of making another egg.}{Samuel~Butler}
 
 \begin{learningobjectives}
 \item Explain the relationship between parameters and hidden
@@ -35,6 +35,165 @@ solving problems just like this is the \concept{expectation
   maximization} family.  In this chapter, you will derive expectation
 maximization (EM) algorithms for clustering and dimensionality reduction,
 and then see why EM works.
+
+\section{Grading an Exam without an Answer Key}
+
+Alice's machine learning professor Carlos gives out an exam that consists of 50 true/false questions.
+Alice's class of 100 students takes the exam and Carlos goes to grade their solutions.
+If Carlos made an answer key, this would be easy: he would just count the fraction of correctly answered questions each student got, and that would be their score.
+But, like many professors, Carlos was really busy and didn't have time to make an answer key.
+Can he still grade the exam?
+
+There are two insights that suggest that he might be able to.
+Suppose he know ahead of time that Alice was an awesome student, and is basically guaranteed to get 100\% on the exam.
+In that case, Carlos can simply use Alice's answers as the ground truth.
+More generally, if Carlos assumes that \emph{on average} students are better than random guessing, he can hope that the majority answer for each question is likely to be correct.
+Combining this with the previous insight, when doing the ``voting'', he might want to pay more attention to the answers of the better students.
+
+To be a bit more pedantic, suppose there are $N=100$ students and $M=50$ questions.
+Each student $n$ has a score $s_n$, between $0$ and $1$ that denotes how well they do on the exam.
+The score is what we really want to compute.
+For each question $m$ and each student $n$, the student has provided an answer $a_{n,m}$, which is either zero or one.
+There is also an unknown ground truth answer for each question $m$, which we'll call $t_m$, which is also either zero or one.
+
+As a starting point, let's consider a simple heuristic and then complexify it.
+The heuristic is the ``majority vote'' heuristic and works as follows.
+First, we estimate $t_m$ as the most common answer for question $m$:
+$t_m = \argmax_t \sum_n \Ind[a_{n,m} = t]$.
+Once we have a guess for each true answer, we estimate each students' score as how many answers they produced that match this guessed key:
+$s_n = \frac 1 M \sum_m \Ind[a_{n,m} = t_m]$.
+
+Once we have these scores, however, we might want to trust some of the students more than others.
+In particular, answers from students with high scores are perhaps more likely to be correct, so we can \emph{recompute} the ground truth, according to weighted votes.
+The weight of the votes will be precisely the score the corresponding each student:
+%
+\begin{align}
+  t_m = \argmax_t \sum_n s_n \Ind[a_{n,m} = t]
+\end{align}
+%
+You can recognize this as a \emph{chicken and egg problem}. If you knew the student's scores, you could estimate an answer key. If you had an answer key, you could compute student scores.
+A very common strategy in computer science for dealing with such chicken and egg problems is to iterate.
+Take a guess at the first, compute the second, recompute the first, and so on.
+
+In order to develop this idea formally, we have to case the problem in terms of a probabilistic model with a generative story.
+The generative story we'll use is:
+%
+\begin{enumerate}
+  \item \textcolor{darkpurple}{For each question $m$, choose a true answer $t_m \sim \Ber(0.5)$}
+  \item \textcolor{darkblue}{For each student $n$, choose a score $s_n \sim \Uni(0,1)$}
+  \item \textcolor{darkred}{For each question $m$ and each student $n$, choose an answer\\ $a_{n,m} \sim \Ber(s_n)^{t_m}  \Ber(1-s_n)^{1-t_m}$}
+\end{enumerate}
+~
+In the first step, we generate the true answers independently by flipping a fair coin.
+In the second step, each students' overall score is determined to be a uniform random number between zero and one.
+The tricky step is step three, where each students' answer is generated for each question.
+Consider student $n$ answering question $m$, and suppose that $s_n = 0.9$.
+If $t_m = 1$, then $a_{n,m}$ should be 1 (i.e., correct) 90\% of the time;
+this can be accomplished by drawing the answer from $\Ber(0.9)$.
+On the other hand, if $t_m = 0$, then $a_{n,m}$ should 1 (i.e., incorrect) 10\% of the time;
+this can be accomplished by drawing the answer from $\Ber(0.1)$.
+The exponent in step 3 selects which of two Bernoulli distributions to draw from, and then implements this rule.
+
+This can be translated into the following likelihood:
+~
+\begin{align}
+  &p(\vec a, \vec t, \vec s) \nonumber\\
+  &=      \textcolor{darkpurple}{\left[ \prod_m 0.5^{t_m} 0.5^{1-t_m} \right]} \times
+            \textcolor{darkblue}{\left[ \prod_n 1 \right]} \nonumber\\
+  &\qquad \times    \textcolor{darkred}{\left[ \prod_n\prod_m 
+    s_n^{a_{n,m}t_m}
+    (1-s_n)^{(1-a_{n,m})t_m} \right.} \nonumber\\
+  &\qquad\qquad\textcolor{darkred}{\left. s_n^{(1-a_{n,m})(1-t_m)}
+    (1-s_n)^{a_{n,m}(1-t_m)}
+    \right]} \\
+ &= \textcolor{darkpurple}{0.5^M}
+   \textcolor{darkred}{
+\prod_n\prod_m 
+    s_n^{a_{n,m}t_m}
+    (1-s_n)^{(1-a_{n,m})t_m}
+   s_n^{(1-a_{n,m})(1-t_m)}
+    (1-s_n)^{a_{n,m}(1-t_m)}
+   }
+\end{align}
+
+Suppose we knew the true lables $\vec t$. We can take the log of this likelihood and differentiate it with respect to the score $s_n$ of some student (note: we can drop the $0.5^M$ term because it is just a constant):
+~
+\begin{align}
+\log p(\vec a, \vec t, \vec s)
+&= \sum_n \sum_m \Big[
+     a_{n,m}t_m \log s_n
+ +   (1-a_{n,m})(1-t_m) \log (s_n) \nonumber \\
+&+   (1-a_{n,m})t_m \log (1-s_n)
+ +   a_{n,m}(1-t_m) \log (1-s_n) \Big]\\
+\frac {\partial \log p(\vec a, \vec t, \vec s)} {\partial s_n}
+&= \sum_m \Big[
+     \frac {a_{n,m} t_m + (1-a_{n,m}) (1-t_m)} {s_n}
+   - \frac {(1-a_{n,m}) t_m + a_{n,m} (1-t_m)} {1-s_n} \Big]
+\end{align}
+%
+The derivative has the form $\frac A {s_n} - \frac B {1-s_n}$. If we set this equal to zero and
+solve for $s_n$, we get an optimum of $s_n = \frac A {A+B}$. In this case:
+%
+\begin{align}
+  A &= \sum_m \big[ a_{n,m} t_m + (1-a_{n,m}) (1-t_m) \big]\\
+  B &= \sum_m \big[ (1-a_{n,m}) t_m + a_{n,m} (1-t_m) \big]\\
+A+B &= \sum_m \big[ 1 \big] = M
+\end{align}
+%
+Putting this together, we get:
+%
+\begin{align}
+  s_n &= \frac 1 M \sum_m \big[ a_{n,m} t_m + (1-a_{n,m}) (1-t_m) \big] 
+\end{align}
+%
+In the case of known $t$s, this matches exactly what we had in the heuristic.
+
+However, we do not know $t$, so instead of using the ``true'' values of $t$, we're going to use their \emph{expectations}.
+In particular, we will compute $s_n$ by maximizing its likelihood under the \emph{expected} values of $t$, hence the name \concept{expectation maximization}.
+%
+If we are going to compute expectations of $t$, we have to say: expectations according to which probability distribution?
+We will use the distribution $p(t_m \| \vec a, \vec s)$.
+Let $\tilde t_m$ denote $\Ep_{t_m \sim p(t_m \| \vec a, \vec s)}[t_m]$.
+Because $t_m$ is a binary variable, its expectation is equal to it's probability;
+namely: $\tilde t_m = p(t_m \| \vec a, \vec s)$.
+
+How can we compute this?
+We will compute $C = p(t_m=1, \vec a, \vec s)$ and $D = p(t_m=0, \vec a, \vec s)$ and then compute $\tilde t_m = C / (C+D)$.
+The computation is straightforward:
+%
+\begin{align}
+  C &= 0.5 \prod_n s_n^{a_{n,m}} (1-s_n)^{1-a_{n,m}} 
+    &= 0.5 \prod_{\substack{n : \\ a_{n,m} = 1}} s_n \prod_{\substack{n : \\ a_{n,m} = 0}} (1-s_n) \\
+  D &= 0.5 \prod_n s_n^{1-a_{n,m}} (1-s_n)^{a_{n,m}}
+    &= 0.5 \prod_{\substack{n : \\ a_{n,m} = 1}} (1-s_n) \prod_{\substack{n : \\ a_{n,m} = 0}} s_n
+\end{align}
+%
+If you inspect the value of $C$, it is basically ``voting'' (in a product form, not a sum form) the scores of those students who agree that the answer is $1$ with one-minus-the-score of those students who do not.
+The value of $D$ is doing the reverse.
+This is a form of multiplicative voting, which has the effect that if a given student has a perfect score of $1.0$, their results will carry the vote completely.
+
+We now have a way to:
+\begin{enumerate}
+\item Compute expected ground truth values $\tilde t_m$, given scores.
+\item Optimize scores $s_n$ given expected ground truth values.
+\end{enumerate}
+The full solution is then to alternate between these two.
+You can start by initializing the ground truth values at the majority vote (this seems like a safe initialization).
+Given those, compute new scores.
+Given those new scores, compute new ground truth values.
+And repeat until tired.
+
+In the next two sections, we will consider a more complex unsupervised learning model for clustering,
+and then a generic mathematical framework for expectation maximization, which will answer questions like: will this process converge, and, if so, to what?
+
+% at + (1-a)(1-t) = at + 1 - a - t + at =  2at + 1 - a -t
+% (1-a)t + a(1-t) = t - at + a - at     = -2at + a + t
+% z/x - y/(1-x) = 0
+% <=> z/x = y/(1-x)
+% <=> (1-x) z = x y
+% <=> z - xz = xy
+% <=> z = x(z + y)
+% <=> x = z / (z+y)
 
 \section{Clustering with a Mixture of Gaussians}
 
@@ -298,22 +457,28 @@ hoping to maximize $\cL$ by instead maximizing a lower bound.  In
 order to ensure that an increase in the lower bound implies an
 increase in $\cL$, we need to ensure that $\cL(\mat X \| \vth) =
 \tilde\cL(\mat X \| \vth)$.  In words: $\tilde\cL$ should be a lower
-bound on $\cL$ that makes contact at the current point, $\vth$.  This
-is shown in Figure~\ref{fig:em:lb}, including a case where the lower
-bound does \emph{not} make contact, and thereby does not guarantee an
-increase in $\cL$ with an increase in $\tilde\cL$.
+bound on $\cL$ that makes contact at the current point, $\vth$.  
+%This
+%is shown in Figure~\ref{fig:em:lb}, including a case where the lower
+%bound does \emph{not} make contact, and thereby does not guarantee an
+%increase in $\cL$ with an increase in $\tilde\cL$.
 
-\section{EM versus Gradient Descent}
+% \section{EM versus Gradient Descent}
 
-computing gradients through marginals
+% computing gradients through marginals
 
-step size
+% step size
 
-\section{Dimensionality Reduction with Probabilistic PCA}
+% \section{Dimensionality Reduction with Probabilistic PCA}
 
-derivation
+% derivation
 
-advantages over pca
+% advantages over pca
+
+\section{Further Reading}
+
+TODO further reading
+
 
 \begin{comment}
    - Latent variable models (versus parameters)
@@ -325,3 +490,8 @@ advantages over pca
 \end{comment}
 
 
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "courseml"
+%%% End: 

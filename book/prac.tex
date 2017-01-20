@@ -4,7 +4,7 @@
 %\begin{textblock}{1}(15.4,\chapterlabel)\tikz\node [fill=darkergreen,text=white,draw,circle] (chnode) {\normalfont\sffamily\Huge\bfseries\scshape \chapterlabel~~~};\end{textblock}
 %\begin{textblock}{1}(-0.8,14)\tikz\node [fill=darkergreen,text=white,draw,circle] (chnode) {\normalfont\sffamily\Huge\bfseries\scshape ~~~\chapterlabel};\end{textblock}
 
-\chapterquote{In theory, there is no difference between theory and practice.\\But, in practice, there is.}{Jan~L.A.~van~de~Snepscheut}
+\chapterquote{A ship in port is safe, but that is not what ships are for.}{Grace~Hopper}
 
 \begin{learningobjectives}
 \item Translate between a problem description and a concrete learning
@@ -20,8 +20,6 @@
   you have seen so far.
 \item Apply several debugging techniques to learning algorithms.
 \end{learningobjectives}
-
-TODO: one to two examples per feature
 
 \dependencies{\chref{sec:dt},\chref{sec:knn},\chref{sec:perc}}
 
@@ -63,34 +61,44 @@ of some pixel in the image.  So perhaps feature 1 is the amount of red
 in pixel $(1,1)$; feature 2 is the amount of green in that pixel; and
 so on.  This is the \concept{pixel representation} of images.
 
-\TODOFigure{prac:imagepix}{object recognition in pixels}
+\Figure{prac_imagepix}{object recognition in pixels}
 
 One thing to keep in mind is that the pixel representation
 \emph{throws away} all locality information in the image.  Learning
 algorithms don't care about features: they only care about feature
 values.  So I can \emph{permute} all of the features, with no effect
 on the learning algorithm (so long as I apply the same permutation to
-all training and test examples).  Figure~\ref{fig:prac:imagepix} shows
+all training and test examples).  Figure~\ref{fig:prac_imagepix} shows
 some images whose pixels have been randomly permuted (in this case only
 the pixels are permuted, not the colors).  All of these objects are
 things that you've seen plenty of examples of; can you identify them?
 Should you expect a machine to be able to?
 
-\TODOFigure{prac:imagepatch}{object recognition in patches}
-\TODOFigure{prac:imageshape}{object recognition in shapes}
+\Figure{prac_imagepatch}{object recognition in patches}
+\Figure{prac_imageshape}{object recognition in shapes}
 
 An alternative representation of images is the \concept{patch
   representation}, where the unit of interest is a small rectangular
 block of an image, rather than a single pixel.  Again, permuting the
 patches has no effect on the classifier.
-Figure~\ref{fig:prac:imagepatch} shows the same images in patch
+Figure~\ref{fig:prac_imagepatch} shows the same images in patch
 representation.  Can you identify them?  A final representation is a
 \concept{shape representation}.  Here, we throw out all color and
 pixel information and simply provide a bounding polygon.
-Figure~\ref{fig:prac:imageshape} shows the same images in this
+Figure~\ref{fig:prac_imageshape} shows the same images in this
 representation.  Is this now enough to identify them?  (If not, you
-can find the answers at the end of this chapter.)
+can find the answers in Figure~\ref{fig:prac_imageimage} at the end of the chapter.)
 
+
+\Table{prac:bow}{Bag of (most frequent) words representation for the Decision Tree and KNN chapters of this book, after dropping high frequency words like ``the''.}{@{}p{2cm}@{}p{2cm}@{}}{
+    \hline
+data ~ learning ~ training ~ set ~ predict ~ feature ~ function ~ test ~ machine ~ loss ~ alice ~ tree ~ guess ~ features ~ algorithm &
+data ~ knn ~ dimensions ~ points ~ feature ~ figure ~ decision ~ features ~ point ~ fig ~ training ~ set ~ space ~ examples \\
+\hline
+}
+
+
+    
 \TODOFigure{prac:bow}{BOW repr of one positive and one negative review}
 
 In the context of \concept{text categorization} (for instance, the
@@ -100,8 +108,8 @@ each unique word that appears in a document.  For the feature
 \feat{happy}, the feature value is the number of times that the word
 ``happy'' appears in the document.  The bag of words (BOW)
 representation throws away all position information.
-Figure~\ref{fig:prac:bow} shows a BOW representation for two
-documents: one positive and one negative.  Can you tell which is
+Table~\ref{tab:prac:bow} shows a BOW representation for two chapters of this book.
+Can you tell which is
 which?
 
 \section{Irrelevant and Redundant Features}
@@ -114,10 +122,6 @@ the label $\Ep[f \| Y] = \Ep[f]$ might be irrelevant.  For instance,
 the presence of the word ``the'' might be largely irrelevant for
 predicting whether a course review is positive or negative.  
 
-\thinkaboutit{Is it possible to have a feature $f$ whose expectation
-  does not depend on the label, but is nevertheless still useful for
-  prediction?}
-
 A secondary issue is how well these algorithms deal with
 \concept{redundant features}.  Two features are redundant if they are
 highly correlated, regardless of whether they are correlated with the
@@ -127,14 +131,20 @@ red pixel at position $(21,93)$.  Both might be useful (e.g., for
 identifying fire hydrants), but because of how images are structured,
 these two features are likely to co-occur frequently.
 
+\thinkaboutit{Is it possible to have a feature $f$ whose expectation
+  does not depend on the label, but is nevertheless still useful for
+  prediction?}
+
+
 When thinking about robustness to irrelevant or redundant features, it
 is usually not worthwhile thinking of the case where one has $999$
 great features and $1$ bad feature.  The interesting case is when the
 bad features outnumber the good features, and often outnumber by a
-large degree.  For instance, perhaps the number of good features is
-something like $\log D$ out of a set of $D$ total features.  The
+large degree.  %For instance, perhaps the number of good features is
+%something like $\log D$ out of a set of $D$ total features.  
+The
 question is how robust are algorithms in this case.\sidenote{You might
-  think it's crazy to have so many irrelevant features, but the cases
+  think it's absurd to have so many irrelevant features, but the cases
   you've seen so far (bag of words, bag of pixels) are both reasonable
   examples of this!  How many words, out of the entire English
   vocabulary (roughly $10,000-100,000$ words), are actually useful for
@@ -170,11 +180,11 @@ label.  This is easy: the probability is $0.5^N$.  Now, we would also
 be confused if it exactly matched \emph{not} the label, which has the
 same probability.  So the chance that it looks perfectly correlated is
 $0.5^N + 0.5^N = 0.5^{N-1}$.  Thankfully, this shrinks down very small
-(e.g., $10^{-6}$) after only $21$ data points.
+(e.g., $10^{-6}$) after only $21$ data points, meaning that even with a very small training set, the chance that a random feature \emph{happens} to correlate exactly with the label is tiny.
 
 This makes us happy.  The problem is that we don't have one irrelevant
-feature: we have $D-\log D$ irrelevant features!  If we randomly pick
-two irrelevant feature values, each has the same probability of
+feature: we have many! If we randomly pick
+two irrelevant features, each has the same probability of
 perfectly correlating: $0.5^{N-1}$.  But since there are two and
 they're independent coins, the chance that \emph{either} correlates
 perfectly is $2 \times 0.5^{N-1} = 0.5^{N-2}$.  In general, if we have
@@ -187,9 +197,8 @@ examples.
 Unfortunately, the situation is actually worse than this.  In the
 above analysis we only considered the case of \emph{perfect}
 correlation.  We could also consider the case of \emph{partial}
-correlation, which would yield even higher probabilities.  (This is
-left as Exercise~\ref{ex:prac:dtbound} for those who want some
-practice with probabilistic analysis.)  Suffice it to say that even
+correlation, which would yield even higher probabilities.  
+Suffice it to say that even
 decision trees can become confused.
 
 \TODOFigure{prac:addirrel}{data from high dimensional warning, interpolated}
@@ -201,11 +210,12 @@ completely mess up KNN prediction.  In fact, as you saw, in high
 dimensional space, randomly distributed points all look approximately
 the same distance apart.  If we add lots and lots of randomly
 distributed features to a data set, then all distances still
-converge.  This is shown experimentally in
-Figure~\ref{fig:prac:addirrel}, where we start with the digit
-categorization data and continually add irrelevant, uniformly
-distributed features, and generate a histogram of distances.
-Eventually, all distances converge.
+converge.
+%  This is shown experimentally in
+%Figure~\ref{fig:prac:addirrel}, where we start with the digit
+%categorization data and continually add irrelevant, uniformly
+%distributed features, and generate a histogram of distances.
+%Eventually, all distances converge.
 
 In the case of the \concept{perceptron}, one can \emph{hope} that it
 might learn to assign zero weight to irrelevant features.  For
@@ -218,13 +228,6 @@ least, it should be small.
 \thinkaboutit{What happens with the perceptron with truly redundant
   features (i.e., one is literally a copy of the other)?}
 
-\TODOFigure{prac:noisy}{dt,knn,perc on increasing amounts of noise}
-
-To get a better practical sense of how sensitive these algorithms are
-to irrelevant features, Figure~\ref{fig:prac:noisy} shows the
-\emph{test} performance of the three algorithms with an increasing
-number of compltely noisy features.  In all cases, the hyperparameters
-were tuned on validation data.  TODO...
 
 \section{Feature Pruning and Normalization}
 
@@ -265,7 +268,24 @@ sometimes helps!) but eventually we prune away all the interesting
 words and performance suffers.
 
 \begin{mathreview}{Data Statistics: Means and Variances}
-  data mean, variance, moments, expectations, etc...
+  We often need to discuss various statistics of a data set.
+  Most often, it is enough to consider univariate (one-dimensional) data.
+  Suppose we have $N$ real valued numbers $z_1, z_2, \dots, z_N$.
+  The \concept{sample mean} (or just \concept{mean}) of these numbers is just their average value, or expected value: $\mu = \frac 1 N \sum_n z_n$.
+  The \concept{sample variance} (or just \concept{variance}) measures how much they vary around their mean: $\si^2 = \frac 1 {N-1} \sum_n (z_n - \mu)^2$, where $\mu$ is the sample mean.
+  
+~\\
+
+  The mean and variance have convenient interpretations in terms of prediction.
+  Suppose we wanted to choose a single constant value to ``predict'' the next $z$, and were minimizing squared error.
+  Call this constant value $a$.
+  Then $a = \argmin_{a \in \R} \frac 1 2 \sum_n (a - z_n)^2$. 
+  (Here, the $\frac 1 2$ is for convenience and does not change the answer.)
+  To solve for $a$, we can take derivatives and set to zero:
+    $\frac \partial {\partial a} \frac 1 2 \sum_n (a - z_n)^2
+     = \sum_n (a - z_n) = N a - \sum_n z_n$; therefore $N a = \sum_n z_n$ and $a = \mu$.
+  This means that the sample mean is the number that minimizes squared error to the sample.
+  Moreover, the variance is propotional to the squared error of that ``predictor.''
 \end{mathreview}
 
 \TODOFigure{prac:variance}{effect of pruning on vision}
@@ -284,13 +304,12 @@ features.
   features (e.g., millimeters versus centimeters).  Does this have an
   impact on variance-based feature pruning?}
 
-Once you have pruned away irrelevant features, it is often useful to
-\concept{normalize} the data so that it is consistent in some way.
-There are two basic types of normalization: \concept{feature
-  normalization} and \concept{example normalization}.  In feature
-normalization, you go through each feature and adjust it the same way
-across all examples.  In example normalization, each example is
-adjusted individually.
+It is often useful to \concept{normalize} the data so that it is
+consistent in some way.  There are two basic types of normalization:
+\concept{feature normalization} and \concept{example normalization}.
+In feature normalization, you go through each feature and adjust it
+the same way across all examples.  In example normalization, each
+example is adjusted individually.
 
 \TODOFigure{prac:transform}{picture of centering, scaling by variance and scaling by absolute value}
 
@@ -328,7 +347,7 @@ for scaling assume that the data is already centered.
 \text{Absolute Scaling:} && x_{n,d} &\leftarrow x_{n,d} / r_d \\
 &\textit{where:}
 & \mu_d &= \frac 1 N \sum_n x_{n,d} \\
-&& \si_d &= \sqrt{ \frac 1 N \sum_n (x_{n,d} - \mu_d)^2 } \\
+&& \si_d &= \sqrt{ \frac 1 {N-1} \sum_n (x_{n,d} - \mu_d)^2 } \\
 && r_d   &= \max_n \ab{x_{n,d}}
 \end{align}
 
@@ -461,7 +480,7 @@ log-transform achieves this.  Experimentally, you can see the
 difference in test performance between word count data and log-word
 count data in Figure~\ref{fig:prac:log}.  Here, the transformation is
 actually $x_d \mapsto \log_2(x_d + 1)$ to ensure that zeros remain
-zero and sparsity is retained.
+zero and sparsity is retained. In the case that feature values can also be negative, the slightly more complex mapping $x_d \mapsto \log_2(\ab{x_d}+1) \sign(x_d)$, where $\sign(x_d)$ denotes the sign of $x_d$.
 
 \section{Evaluating Model Performance}
 
@@ -681,7 +700,7 @@ as your final model to make predictions with, or you can train a
 selected by cross-validation.  If you have the time, the latter is
 probably a better options.
 
-\newalgorithm{alg:prac:loo}%
+\newalgorithm{prac:loo}%
   {\FUN{KNN-Train-LOO}(\VAR{$\mat D$})}
   {
 \SETST{err$_k$}{\CON{0}, $\forall 1 \leq \VARm{k} \leq \VARm{N}-\CON{1}$}
@@ -745,9 +764,9 @@ pixels (or words), which are drawn dependently.
 
 \section{Hypothesis Testing and Statistical Significance}
 
-\begin{vignette}{The Lady Drinking Tea}
-  story
-\end{vignette}
+%\begin{vignette}{The Lady Drinking Tea}
+%  story
+%\end{vignette}
 
 Suppose that you've presented a machine learning solution to your boss
 that achieves $7\%$ error on cross validation.  Your nemesis, Gabe,
@@ -936,22 +955,34 @@ or \dots).  Moreover, sometimes bugs lead to learning algorithms
 performing \emph{better} than they should: these are especially hard
 to catch (and always a bit disappointing when you do catch them).
 
-Obviously if you have a reference implementation, you can attempt to
-match its output.  Otherwise, there are two things you can do to try
-to help debug.  The first is to do everything in your power to get the
-learning algorithm to overfit.  If it cannot \emph{at least} overfit
-the training data, there's definitely something wrong.  The second is
-to feed it some tiny hand-specified two dimensional data set on which
-you \emph{know} what it should do and you can plot the output.
+In order to debug failing learning models, it is useful to revisit the notion of: where can error enter our system?
+In Chapter~\ref{sec:formal}, we considered a typical design process for machine learning in Figure~\ref{fig:formal_deployml}.
+Leaving off the top steps in that are not relevant to machine learning in particular, the basic steps that go into crafting a machine learning system are:
+collect data, choose features, choose model family, choose training data, train model, evaluate on test data.
+In each of these steps, things can go wrong.
+Below are some strategies for isolating the cause of error.
 
+\textbf{Is the problem with generalization to the test data?} We have talked a lot about training error versus test error. In general, it's unrealistic to expect to do \emph{better} on the test data than on the training data.
+Can your learning system do well on fitting the training data? If so, then the problem is in generalization (perhaps your model family is too complicated, you have too many features or not enough data). If not, then the problem is in representation (you probably need better features or better data).
+
+\textbf{Do you have train/test mismatch?} If you can fit the training data, but it doesn't generalize, it could be because there's something different about your test data. Try shuffling your training data and test data together and then randomly selecting a new test set. If you do well in that condition, then probably the test distribution is strange in some way. If reselecting the test data doesn't help, you have other generalization problems.
+
+\textbf{Is your learning algorithm implemented correctly?} This often means: is it optimizing what you think it's optimizing. Instead of measuring accuracy, try measuring whatever-quantity-your-algorithm-is-supposedly-optimizing (like log loss or hinge loss) and make sure that the optimizer is successfully minimizing this quantity. It is usually useful to hand-craft some datasets on which you know the desired behavior. 
+For instance, you could run KNN on the XOR data.  Or you
+could run perceptron on some easily linearly separable data (for
+instance positive points along the line $x_2 = x_1 + 1$ and negative
+points along the line $x_2 = x_1 - 1$).  Or a decision tree on nice
+axis-aligned data.
+Finally, can you compare against a reference implementation?
+
+\textbf{Do you have an adequate representation?} 
+If you cannot even fit the training data, you might not have a rich enough feature set.
 The easiest way to try to get a learning algorithm to overfit is to
 add a new feature to it.  You can call this feature the
-\feat{CheatingIsFun} feature\footnote{Note: cheating is actually
-  \emph{not} fun and you shouldn't do it!}.  The feature value
+\feat{CheatingIsFun} feature.  The feature value
 associated with this feature is $+1$ if this is a positive example and
 $-1$ (or zero) if this is a negative example.  In other words, this
 feature is a \emph{perfect} indicator of the class of this example.
-
 If you add the \feat{CheatingIsFun} feature and your algorithm does
 not get near $0\%$ training error, this could be because there are too
 many noisy features confusing it.  You could either remove a lot of
@@ -960,89 +991,107 @@ either $+100$ or $-100$ so that the algorithm \emph{really} looks at
 it.  If you do this and your algorithm still cannot overfit then you
 likely have a bug.  (Remember to remove the \feat{CheatingIsFun}
 feature from your final implementation!)
+If the \feat{CheatingIsFun} technique gets you near 0\% error, then you need to work on better feature design or pick another learning model (e.g., decision tree versus linear model). If not, you probably don't have enough data or have too many features; try removing as many features as possible.
 
-A second thing to try is to hand-craft a data set on which you know
-your algorithm should work.  This is also useful if you've managed to
-get your model to overfit and have simply noticed that it does not
-generalize.  For instance, you could run KNN on the XOR data.  Or you
-could run perceptron on some easily linearly separable data (for
-instance positive points along the line $x_2 = x_1 + 1$ and negative
-points along the line $x_2 = x_1 - 1$).  Or a decision tree on nice
-axis-aligned data.
-
-When debugging on hand-crafted data, remember whatever you know about
-the models you are considering.  For instance, you know that the
-perceptron should converge on linearly separable data, so try it on a
-linearly separable data set.  You know that decision trees should do
-well on data with only a few relevant features, so make your label
-some easy combination of features, such as $y = x_1 \lor (x_2 \land
-\lnot x_3)$.  You know that KNN should work well on data sets where
-the classes are well separated, so try such data sets.
-
-The most important thing to keep in mind is that a \emph{lot} goes in
-to getting good test set performance.  First, the model has to be
-right for the data.  So crafting your own data is helpful.  Second,
-the model has to fit the training data well, so try to get it to
-overfit.  Third, the model has to generalize, so make sure you tune
-hyperparameters well.
-
-\TODOFigure{prac:imageanswers}{object recognition answers}
-
-\begin{comment}
-\section{Human Knowledge is Everywhere}
-
-\TODOFigure{prac:boc}{BOC repr of one positive and one negative review}
-
-Alternatively, one can use bags of characters, a representation much
-like bag of pixels.  As you might expect, this is a terrible
-representation for most text categorization problems.  However,
-instead of using a ``bag of X'' representation, one can you a ``bag of
-(sequences of X)'' representation.  For example, we could have one
-feature for any pair of adjacent words\sidenote{This might help
-  recognize that ``real estate'' is different than ``real'' +
-  ``estate''.} or adjacent characters.  As these sequences grow
-longer, the size of the feature space grows, but we begin to see more
-meaningful units.  Figure~\ref{fig:prac:boseq} shows \emph{test
-  performance} for both bag of words and bag of characters, for
-different sequence lengths.  As you can see, once the character
-sequence length hits $5$, it performs roughly equally to bag of
-words (this is because most words are about $4$ characters long, plus
-a space).  As the sequence lengths grow, the models begin to overfit
-and performance drops.
-
-One can take this idea further.  Instead of sequences of characters,
-we can consider sequences of \emph{bits}.  
-
-\thinkaboutit{Can you think of a text categorization problem where bag
-  of characters might actually be a reasonable representation?}
-
-One issue in language is that words are often not the right level of
-granularity for classification.  For instance, ``real estate'' is very
-different than ``real'' + ``estate'', so in one sense a word is too
-small of a unit.  On the other hand, ``fortunate'' and ``fortunately''
-are really not very different, so a word can also be too large of a
-unit.  A possible way to address this is to either move ``up'' and
-consider \emph{sequences of words}, in addition to single words.
-Another possibility is to move ``down'' and consider \emph{sequences
-  of characters}.
-
-\TODOFigure{prac:boc}{BOC repr of one positive and one negative review
-  (negative first)}
-
-As an extreme example in text, one can use a bag of characters
-representation.  This is more analogous to the pixel representation in
-images.  Figure~\ref{fig:prac:boc} shows such a representation for a
-difference positive and negative document pair.  In this case it is
-near impossible to tell the difference!  (It turns out that the first
-one is negative.)
+\textbf{Do you have enough data?} Try training on 80\% of your training data and look at how much this hurts performance. If it hurts a lot, then getting more data is likely to help; if it only hurts a little, you might be data saturated.
 
 
 
-gzip example
+\section{Bias/Variance Trade-off}
 
-\end{comment}
+Because one of the key questions in machine learning is the question of representation, it is common to think about test error in terms of a decomposition into two terms. Let $f$ be the learned classifier, selected from a set $\cF$ of ``all possible classifiers using a fixed representation,'' then:
+~
+\begin{align}
+\text{error}(f)
+&= 
+\underbrace{\left[ \text{error}(f) - \min_{f^* \in \cF} \text{error}(f^*) \right]}_{\text{\concept{estimation error}}}
++
+\underbrace{\left[ \min_{f^* \in \cF} \text{error}(f) \right]}_{\text{\concept{approximation error}}}
+\end{align}
+~
+Here, the second term, the \concept{approximation error}, measures the quality of the model family\footnote{The ``model family'' (such as depth 20 decision trees, or linear classifiers) is often refered to as the \concept{hypothesis class}. The hypothesis class $\cF$ denotes the set of all possible classifiers we consider, such as all linear classifiers. An classifier $f \in \cF$ is sometimes called a \concept{hypothesis}, though we generally avoid this latter terminology here.}. One way of thinking of approximation error is: suppose someone gave me infinite data to train on---how well could I do with this representation?
+The first term, the \concept{estimation error}, measures how far the actual learned classifier $f$ is from the optimal classifier $f^*$. You can think of this term as measuring how much you have to pay for the fact that you \emph{don't} have infinite training data.
 
-TODO: answers to image questions
+Unfortunately, it is nearly impossible to \emph{compute} the estimation error and approxiation error, except in constructed cases.
+This doesn't make the decomposition useless.
+Decompositions like this are very useful for designing debugging strategies.
+For instance, the \text{CheatingIsFun} strategy is designed explicitly to ensure that the approximation error is zero, and therefore isolating all error into the estimation error.
+
+There is a fundamental trade-off between estimation error and approximation error.
+As you make your representation more complex, you make $\cF$ bigger.
+This will typically cause a decrease in approximation error, because you can now fit more functions.
+But you run a risk of increasing the estimation error, because you have added more parameters to fit, and you are likely to suffer from overfitting.
+
+The trade-off between estimation error and approximation error is often called the \concept{bias/variance trade-off}, where ``approximation error'' is ``bias'' and ``estimation error'' is ``variance.''
+To understand this connection, consider a very simple hypothesis class $\cF$ that only contains two functions: the always positive classifier (that returns $+1$ regardless of input) and the always negative classifier.
+Suppose you have a data generating distribution $\cD$ that is 60\% positive examples and 40\% negative examples.
+You draw a training set of $41$ examples.
+There's about a 90\% chance that the majority of these training examples will be positive, so on this impoverished hypothesis class $\cF$, there's a 90\% chance that it will learn the ``all positive'' classifier.
+That is: 90\% of the time, regardless of the training set, the learning algorithm learns the same thing.
+This is \emph{low variance} as a function of the random draw of the training set.
+On the other hand, the learned classifier is very insensitive to the input example (in this extreme case, it's completely insensitive): it is \emph{strongly biased} toward predicting $+1$ even if everything about the input contradicts this.
+
+
+\section{Further Reading}
+
+TODO
+
+\Figure{prac_imageimage}{object recognition with full information}
+
+
+% \section{Human Knowledge is Everywhere}
+
+% %\TODOFigure{prac:boc}{BOC repr of one positive and one negative review}
+
+% Alternatively, one can use bags of characters, a representation much
+% like bag of pixels.  As you might expect, this is a terrible
+% representation for most text categorization problems.  However,
+% instead of using a ``bag of X'' representation, one can you a ``bag of
+% (sequences of X)'' representation.  For example, we could have one
+% feature for any pair of adjacent words\sidenote{This might help
+%   recognize that ``real estate'' is different than ``real'' +
+%   ``estate''.} or adjacent characters.  As these sequences grow
+% longer, the size of the feature space grows, but we begin to see more
+% meaningful units.  Figure~\ref{fig:prac:boseq} shows \emph{test
+%   performance} for both bag of words and bag of characters, for
+% different sequence lengths.  As you can see, once the character
+% sequence length hits $5$, it performs roughly equally to bag of
+% words (this is because most words are about $4$ characters long, plus
+% a space).  As the sequence lengths grow, the models begin to overfit
+% and performance drops.
+
+% One can take this idea further.  Instead of sequences of characters,
+% we can consider sequences of \emph{bits}.  
+
+% \thinkaboutit{Can you think of a text categorization problem where bag
+%   of characters might actually be a reasonable representation?}
+
+% One issue in language is that words are often not the right level of
+% granularity for classification.  For instance, ``real estate'' is very
+% different than ``real'' + ``estate'', so in one sense a word is too
+% small of a unit.  On the other hand, ``fortunate'' and ``fortunately''
+% are really not very different, so a word can also be too large of a
+% unit.  A possible way to address this is to either move ``up'' and
+% consider \emph{sequences of words}, in addition to single words.
+% Another possibility is to move ``down'' and consider \emph{sequences
+%   of characters}.
+
+% %\TODOFigure{prac:boc}{BOC repr of one positive and one negative review
+% %  (negative first)}
+
+% As an extreme example in text, one can use a bag of characters
+% representation.  This is more analogous to the pixel representation in
+% images.  Figure~\ref{fig:prac:boc} shows such a representation for a
+% difference positive and negative document pair.  In this case it is
+% near impossible to tell the difference!  (It turns out that the first
+% one is negative.)
+
+
+
+% gzip example
+
+
+%TODO: answers to image questions
 
 
 %%% Local Variables: 
