@@ -55,7 +55,7 @@ that makes the \emph{fewest errors} on the training data.  We can
 write this down as a formal mathematics \concept{optimization problem}
 as follows:
 %
-\optimizeuc{loss:zeroone}{\vw,b}{\sum_n \Ind[y_n (\dotp{\vec w}{\vx_n}+b) > 0]}
+\optimizeuc{loss:zeroone}{\vw,b}{\sum_n \Ind[y_n (\dotp{\vec w}{\vx_n}+b) \leq 0]}
 %
 In this expression, you are optimizing over two variables, $\vw$ and
 $b$.  The \concept{objective function} is the thing you are trying to
@@ -110,7 +110,7 @@ $R(\vw,b)$.  This leads to the following, \concept{regularized
   objective}:
 %
 \optimizeuc{loss:zeroonereg}{\vw,b}{\sum_n \Ind[y_n (\dotp{\vec
-    w}{\vx_n}+b) > 0] + \la R(\vw,b)}
+    w}{\vx_n}+b) \leq 0] + \la R(\vw,b)}
 %
 In Eq~\eqref{opt:loss:zeroonereg}, we are now trying to optimize a
 \emph{trade-off} between a solution that gives low training error (the
