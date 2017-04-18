@@ -227,6 +227,27 @@ zero otherwise.
 \end{itemize}
 \end{frame}
 
+\begin{frame}
+  \frametitle{The Optimization Framework for Linear Models}
+\begin{itemize}
+\item \emph{Loss function}, $\ell(\cdot,\cdot)$: 
+it tells us how ``bad'' a system's prediction is in
+comparison to the truth.  In particular, if $y$ is the truth and $\hat
+y$ is the system's prediction, then $\ell(y,\hat y)$ is a measure of
+error.
+\item
+Examples of loss functions:
+
+\begin{description}
+\item[Regression:] \emph{squared loss} $\ell(y,\hat y) = (y - \hat
+  y)^2$\\ or \emph{absolute loss} $\ell(y,\hat y) = \ab{y - \hat y}$.
+
+\item[Classification:] \emph{zero/one loss} $\ell(y,\hat y)
+  = \brack{0 & \text{if } y = \hat y\\ 1 & \text{otherwise}}$
+
+\end{description}
+\end{itemize}
+\end{frame}
 
 \begin{frame}
   \frametitle{The Optimization Framework for Linear Models}
@@ -355,7 +376,7 @@ Why is optimizing zero/one loss so hard?
 \item One reason is that small changes to $\vw,b$ can have a large impact on
 the value of the objective function. 
 \item For instance, if there is a
-positive training example with $\dotp{\vw,\vx}+b = -0.0000001$, then
+positive training example with $\dotp{\vw}{\vx}+b = -0.0000001$, then
 adjusting $b$ upwards by $0.00000011$ will decrease your error rate by
 $1$. 
 \item But adjusting it upwards by $0.00000009$ will have no effect.
@@ -726,7 +747,7 @@ our learning problems will be framed as \emph{minimization} problems
 (trying to reach the bottom of a ditch, rather than the top of a
 hill).  
 \item Therefore, descent is the primary approach you will use.
-\item One of the major conditions for gradient ascent being able to find the
+\item One of the major conditions for gradient descent being able to find the
 true, \concept{global minimum}, of its objective function is
 convexity.  Without convexity, all is lost.
 \end{itemize}
@@ -1074,7 +1095,7 @@ given example $n$, the subgradient of hinge loss can be computed as:
 \end{frame}
 
 \begin{frame}
-  \frametitle{\concept{subgradient descent} for regularized hinge loss (with a
+  \frametitle{\concept{Subgradient descent} for regularized hinge loss (with a
 $2$-norm regularizer)}
 \newalgorithm%
   {loss:gdhinge}%
@@ -1570,7 +1591,7 @@ or the other by adjusting the bias $b$.
 \begin{frame}
   \frametitle{Support Vector Machines}
 \begin{itemize}
-\item The distance from any point $\vx$ to the decision surface is $\frac{\dotp{\vw}{\vx}+b}{\norm{\vw}}$.
+\item The distance from any point $\vx$ to the decision surface is $\frac{|\dotp{\vw}{\vx}+b|}{\norm{\vw}}$.
 \item 
 There is some positive example that that lies
 exactly $1$ unit from the hyperplane.  Call it $\vx^+$, so that
@@ -1582,24 +1603,27 @@ $\vx^-$, that lies exactly on the other side of the margin: for which
 $\dotp{\vw}{\vx^-}+b = -1$. 
 \end{itemize}
 \end{frame}
+%\begin{frame}
+%  \frametitle{Support Vector Machines}
+%\Figure{loss:marginsize}{copy of figure from p5 of cs544 svm tutorial}{0.28}
+%\begin{itemize}
+%\item We can measure the size of the margin by
+%looking at the difference between the lengths of projections of
+%$\vx^+$ and $\vx^-$ onto $\vw$.  
+%\end{itemize}
+%\end{frame}
 \begin{frame}
   \frametitle{Support Vector Machines}
-\Figure{loss:marginsize}{copy of figure from p5 of cs544 svm tutorial}{0.28}
 \begin{itemize}
 \item We can measure the size of the margin by
 looking at the difference between the lengths of projections of
-$\vx^+$ and $\vx^-$ onto the hyperplane.  
-\end{itemize}
-\end{frame}
-\begin{frame}
-  \frametitle{Support Vector Machines}
-\begin{itemize}
+$\vx^+$ and $\vx^-$ onto $\vw$.  
 \item 
 We can measure the distances as:
 %
 \begin{align}
-d^+ &= \frac 1 {\norm{\vw}} (\dotp{\vw}{\vx^+} + b) - 1 \\
-d^- &= - \frac 1 {\norm{\vw}}(\dotp{\vw}{\vx^-} - b) + 1
+d^+ &= \frac 1 {\norm{\vw}} (|\dotp{\vw}{\vx^+} + b|) \\
+d^- &=  \frac 1 {\norm{\vw}}(|\dotp{\vw}{\vx^-} + b|) 
 \end{align}
 %
 \end{itemize}
@@ -1612,11 +1636,11 @@ d^- &= - \frac 1 {\norm{\vw}}(\dotp{\vw}{\vx^-} - b) + 1
 \begin{align}
 \ga
 &= \frac 1 2 \left[ \textcolor{darkblue}{d^+} 
-                  - \textcolor{darkred}{d^-} \right] \\
+                  +\textcolor{darkred}{d^-} \right] \\
 &= \frac 1 2
    \left[
-   \textcolor{darkblue}{\frac 1 {\norm{\vw}} (\dotp{\vw}{\vx^+} + b) - 1}
- - \textcolor{darkred}{\frac 1 {\norm{\vw}} (\dotp{\vw}{\vx^-} - b) + 1}
+   \textcolor{darkblue}{\frac 1 {\norm{\vw}} (|\dotp{\vw}{\vx^+} + b|) }
+ + \textcolor{darkred}{\frac 1 {\norm{\vw}} (|\dotp{\vw}{\vx^-} +b|) }
    \right]
 %\\
 %&= \frac 1 2 \left[
@@ -1626,7 +1650,7 @@ d^- &= - \frac 1 {\norm{\vw}}(\dotp{\vw}{\vx^-} - b) + 1
 \\
 &= \frac 1 2 \left[
    \textcolor{darkblue}{\frac 1 {\norm{\vw}} (+1) }
- - \textcolor{darkred}{\frac 1 {\norm{\vw}} (-1) }
+ +\textcolor{darkred}{\frac 1 {\norm{\vw}} (+1) }
  \right]
 \\
 &= \frac 1 {\norm{\vw}}
@@ -1665,6 +1689,8 @@ plug in our new knowledge about margins:
   \xi_n \geq 0 & (\forall n)
 }
 %
+\item Here the margin is squared but the square is a monotonically increasing function
+of its argument
 \end{itemize}
 \end{frame}
 \begin{frame}
