@@ -247,11 +247,14 @@ example.  Otherwise it predicts a negative example.
 %\right.
 %$$
 $$\sign(x) := \begin{cases}
+-1 & \text{if } x \leq 0, \\
+1 & \text{if } x > 0. \end{cases}$$
+\item +1 indicates a positive class, -1 a negative class
+\item Note: in mathematics, usually
+$$\sign(x) := \begin{cases}
 -1 & \text{if } x < 0, \\
 0 & \text{if } x = 0, \\
 1 & \text{if } x > 0. \end{cases}$$
-(forget the case where $x=0$, it is very unlikely to get ``exactly'' 0)
-\item +1 indicates a positive class, -1 a negative class
 \end{itemize}
 
 \end{frame}
@@ -493,6 +496,16 @@ over the data only one time might lead to underfitting.
 \Figure{perc:early}{training and test error via early stopping}{0.45}
 \end{frame}
 
+\begin{frame}
+  \frametitle{Error-Driven Updating: The Perceptron Algorithm}
+\begin{itemize}
+\item
+Solution to overfitting: early stopping.  
+\item Aftert every pass, you check the
+performance of the current model on some held-out data, and stop
+optimizing when performance plateaus.
+\end{itemize}
+\end{frame}
 \begin{frame}
   \frametitle{Error-Driven Updating: The Perceptron Algorithm}
 \begin{itemize}
