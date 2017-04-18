@@ -457,7 +457,7 @@ feature expansions like the quadratic feature expansion from the
 introduction for ``free.''
 \item  For example, for exactly the same cost as
 the quadratic features, you can use a \concept{cubic feature map},
-computed as $\ddot{\phi(\vx)}{\phi(\vz)} = (1 + \dotp{\vx}{\vz})^3$,
+computed as $\dotp{\phi(\vx)}{\phi(\vz)} = (1 + \dotp{\vx}{\vz})^3$,
 which corresponds to three-way interactions between variables. 
 \item In general, you can do so for any polynomial degree $p$ at the same
 computational complexity.
@@ -523,10 +523,10 @@ z_n
 &= \arg\min_k \norm{\textcolor{darkblue}{\phi(\vx_n)} - \textcolor{darkred}{\sum_m \al\kth_m \phi(\vx_m)}}^2
    \becauseof{definition of $\vec\mu\kth$} \\
 &= \arg\min_k \norm{\textcolor{darkblue}{\phi(\vx_n)}}^2+ \norm{\textcolor{darkred}{\sum_m \al\kth_m \phi(\vx_m)}}^2
-   + \dotp{\textcolor{darkblue}{\phi(\vx_n)}}{\left[ \textcolor{darkred}{\sum_m \al\kth_m \phi(\vx_m)} \right]}
+   -2 \dotp{\textcolor{darkblue}{\phi(\vx_n)}}{\left[ \textcolor{darkred}{\sum_m \al\kth_m \phi(\vx_m)} \right]}
    \becauseof{expand quadratic term} \\
 &= \arg\min_k \textcolor{darkred}{\sum_m \sum_{m'} \al\kth_m \al\kth_{m'} \dotp{\phi(\vx_m)}{\phi(\vx_{m'})}}
-   + \textcolor{darkred}{\sum_m \al\kth_m} \dotp{\textcolor{darkred}{\phi(\vx_m)}}{\textcolor{darkblue}{\phi(\vx_n)}}
+   -2 \textcolor{darkred}{\sum_m \al\kth_m} \dotp{\textcolor{darkred}{\phi(\vx_m)}}{\textcolor{darkblue}{\phi(\vx_n)}}
    + \textit{const}
    \becauseof{linearity and constant}
 \end{align}
@@ -1320,7 +1320,7 @@ $\al_n$ is to ensure that $y_n (\dotp{\vw}{\vx_n}+b) - 1 + \xi_n \geq 0$.
 \item There is an
 important result in optimization theory, called the
 \concept{Karush-Kuhn-Tucker conditions} (or \concept{KKT conditions},
-for short) that states that at the optimum, the product of the
+for short), that states that at the optimum, the product of the
 Lagrange multiplier for a constraint, and the value of that
 constraint, will equal zero. 
 \end{itemize}
