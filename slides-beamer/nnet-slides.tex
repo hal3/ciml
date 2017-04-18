@@ -424,9 +424,10 @@ have $K$ hidden units, then the total number of parameters is
 $(D+2)K$.
 \item   The first $+1$ is from the bias, the second is from the
 second layer of weights.
-\item   Following on from the heuristic that you
+\item   Heuristic: you
 should have one to two examples for each parameter you are trying to
-estimate, this suggests a method for choosing the number of hidden
+estimate.
+\item Choose the number of hidden
 units as roughly $\lfloor \frac N D \rfloor$.  
 \end{itemize}
 \end{frame}
@@ -1032,7 +1033,7 @@ replacing each XOR with an AND, OR and NOT combination
 \begin{itemize}
 \item
 This shows that if you are allowed to be deep, you can construct a
-circuit with that computes parity using a number of hidden units that
+circuit  that computes parity using a number of hidden units that
 is linear in the dimensionality.
 \item   Can you do the same with shallow
 circuits?  The answer is no. 
@@ -1041,7 +1042,7 @@ complexity that parity requires exponentially many gates to compute in
 constant depth.  The formal theorem is below:
 \begin{theorem}[Parity Function Complexity] \label{thm:nnet:parity}
   Any circuit of depth $K < \log_2 D$ that computes the parity
-  function of $D$ input bits must contain $\cO{e^D}$ gates.
+  function of $D$ input bits must contain $\cO(e^D)$ gates.
 \end{theorem}
 \end{itemize}
 \end{frame}
