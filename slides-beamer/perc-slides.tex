@@ -221,7 +221,7 @@ negative example.
 \begin{itemize}
 \item
 Mathematically, an input vector $\vx = \langle x_1, x_2, \dots, x_D
-\rangle$ arrives. 
+\rangle\in \R^D$ arrives. 
 \item The neuron stores $D$-many weights, $w_1, w_2,
 \dots, w_D$.  
 \item The neuron computes the sum:
@@ -234,6 +234,39 @@ positive (i.e., $a > 0$) it predicts that this example is a positive
 example.  Otherwise it predicts a negative example.
 \end{itemize}
 \end{frame}
+
+\begin{frame}
+  \frametitle{Bio-inspired Learning}
+\begin{itemize}
+\item The prediction is $\sign(a)$ where $\sign$ is defined as
+%$$\sign( y) =\left{
+%\begin{array}{l}
+%+1 \mbox{ if } y > 0\\
+%-1 \mbox{ if } y < 0
+%\end{array}
+%\right.
+%$$
+$$\sign(x) := \begin{cases}
+-1 & \text{if } x < 0, \\
+0 & \text{if } x = 0, \\
+1 & \text{if } x > 0. \end{cases}$$
+(forget the case where $x=0$, it is very unlikely to get ``exactly'' 0)
+\item +1 indicates a positive class, -1 a negative class
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Bio-inspired Learning}
+\begin{itemize}
+\item Training set: \VAR{$\mat D$}=$\{(\vx_1,y_1),
+(\vx_2,y_2), \dots, (\vx_N,y_N)\}$
+\item $\vx_i\in \R^D$, $y_i\in \{+1,-1\}$ for $i=1,\ldots,N$
+\item $y_i=+1$: positive example, $y_i=-1$: negative example
+\end{itemize}
+
+\end{frame}
+
 \begin{frame}
   \frametitle{Bio-inspired Learning}
 \begin{itemize}
@@ -263,8 +296,8 @@ decrease.
 \item
 It is often convenient to have a non-zero \concept{threshold}. 
 \item In
-other words, we might want to predict positive if $a > \th$ for some
-value $\th$. 
+other words, we might want to predict positive if $a > \theta$ for some
+value $\theta$. 
 \item The way that is most convenient to achieve this is to
 introduce a \concept{bias} term into the neuron
 \item  Thus, we
@@ -272,6 +305,7 @@ compute:
 \begin{equation} \label{eq:perc:sumbias}
 a = \left[ \sum_{d=1}^D w_d x_d \right] + b
 \end{equation}
+and return $\sign(a)$
 %\thinkaboutit{If you wanted the activation threshold to be $a > \th$
   %instead of $a > 0$, what value would $b$ have to be?}
 \item
@@ -374,7 +408,7 @@ back around for a specified number of iterations.
 \item Line 6, when we check to see if we
 want to make an update or not.
 \item  Update if the
-current prediction (just \FUN{sign}(\VAR{a})) is incorrect. 
+current prediction (\FUN{sign}(\VAR{a})) is incorrect. 
 \item Multiply the true label $y$ by the activation $a$ and compare
 this against zero. 
 \item Since the label $y$ is either $+1$ or $-1$,  $ya$ is positive whenever $a$ and $y$ have
@@ -575,7 +609,7 @@ irrelevant from the perspective of classification.
 weight vector $\vw$ and replace it with $2 \vw$.  All activations are
 now doubled.  But their sign does not change. 
 \item All that matters is which side of the plane
-a test point falls on, now how far it is from that plane. 
+a test point falls on, not how far it is from that plane. 
 \item It is common to work with \koncept{normalized}{normalize}
 weight vectors, $\vw$, that have length one; i.e., $\norm{\vw} = 1$.
 
@@ -668,7 +702,7 @@ that this training example is now correctly classified.
   \frametitle{Perceptron Convergence and Linear Separability}
 \begin{itemize}
 \item
-The perceptron moves the decision boundary in the direction of the training
+The perceptron moves the weight vector in the direction of the training
 examples.  
 \item Does the
 perceptron converge?  If so, what does it converge to?  And how long
@@ -810,7 +844,7 @@ $\ga^{-2}$.  More formally:
   Suppose the perceptron algorithm is run on a linearly separable data
   set $\mat D$ with margin $\ga > 0$.  Assume that $\norm{\vx} \leq 1$
   for all $\vx \in \mat D$.  Then the algorithm will converge after at
-  most $\frac 1 {\ga^2}$ updates.
+  most $\frac 1 {\ga^2}$ weight updates.
 \end{theorem}
 
 %todo: comment on norm of w and norm of x  also some picture about
@@ -1141,7 +1175,7 @@ its decision boundaries can \emph{only} be linear.
 showing this limitation is through the XOR problem (XOR = exclusive
 or).  
 \end{itemize}
-\Figure{perc:xor}{picture of xor problem}{0.3}
+\Figure{perc:xor}{picture of xor problem}{0.25}
 \begin{itemize}
 \item You will not be able to find a
 linear decision boundary that perfectly separates these data points.
