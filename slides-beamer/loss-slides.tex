@@ -466,8 +466,11 @@ surrogate loss, you are also pushing down the real loss.
 \item
 Four common surrogate loss functions: \concept{hinge loss}, \concept{logistic loss},
 \concept{exponential loss} and \concept{squared loss}. 
-\Figure{loss:surrogate}{surrogate loss fns}{0.4}
+%\Figure{loss:surrogate}{surrogate loss fns}{0.4}
 \end{itemize}
+\begin{center}
+ \includegraphics[width=0.65\textwidth]{loss}
+\end{center}
 \end{frame}
 
 \begin{frame}
@@ -481,7 +484,7 @@ the predicted value $\hat y = \dotp{\vw}{\vx}+b$.
 \text{Hinge:}       && \ell\xth{hin}(y,\hat y) &= \max \{ 0, 1-y\hat y \}\\
 \text{Logistic:}    && \ell\xth{log}(y,\hat y) &= \frac 1 {\log2} \log\left( 1 + \exp[-y\hat y]\right)\\
 \text{Exponential:} && \ell\xth{exp}(y,\hat y) &= \exp[-y\hat y]\\
-\text{Squared:}     && \ell\xth{sqr}(y,\hat y) &= (y-\hat y)^2
+\text{Squared:}     && \ell\xth{sqr}(y,\hat y) &= (y-\hat y)^2=(1-y\hat y)^2
 \end{align}
 %
 \end{itemize}
@@ -618,7 +621,7 @@ this means that feature $d$ is not used at all in the classification
 decision.
 \item   If there are a large number of irrelevant features, you
 might want as many weights to go to zero as possible.  
-\item Alternative regularizer: $R\xth{cnt}(\vw,b) = \sum_d \Ind[x_d \neq
+\item Alternative regularizer: $R\xth{cnt}(\vw,b) = \sum_d \Ind[w_d \neq
 0]$.
 \end{itemize}
 \end{frame}

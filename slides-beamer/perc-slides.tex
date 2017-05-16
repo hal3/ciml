@@ -985,7 +985,7 @@ algorithms, you need to modify it a bit to get better generalization.
 \item Consider a data set with $10,000$ examples.  Suppose that
 after the first $100$ examples, the perceptron has learned a really
 good classifier. 
-\item It's so good that it goes over the next $9899$
+\item It's so good that it goes over the next $9999$
 examples without making \emph{any} updates.  
 \item It reaches the $10,000$th
 example and makes an error.  It updates.  
@@ -1062,7 +1062,7 @@ A much more practical alternative is the \concept{averaged
   \item  The idea is similar: you maintain a collection of
 weight vectors and survival times.  
 \item However, at test time, you predict
-according to the \emph{average} weight vector, rather than the
+according to the \emph{average} weight vector, rather than 
 voting. The prediction is:
 \begin{equation} \label{eq:perc:avg}
   \hat y = \sign \left(
@@ -1212,6 +1212,7 @@ features are: \feat{excellent}, \feat{terrible} and \feat{not}.
 \feat{terrible} feature is indicative of negative reviews.  
 \item In the
 presence of the \feat{not} feature, this categorization flips.
+\item \feat{class}=(\feat{excellent} EXOR \feat{not}) OR (NOT \feat{terrible} EXOR \feat{not})
 \end{itemize}
 \end{frame}
 
@@ -1248,7 +1249,7 @@ blow up to ${D \choose 2} = \cO(D^2)$ features through this
 \item  And there's no guarantee that pairs of
 features is enough. 
 \item We might need triples of features, and now we're
-up to ${D \choose 3} = \cO(D^2)$ features.  
+up to ${D \choose 3} = \cO(D^3)$ features.  
 \item These additional features
 will drastically increase computation and will often result in a
 stronger propensity to overfitting.
