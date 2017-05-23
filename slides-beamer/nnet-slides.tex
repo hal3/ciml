@@ -324,14 +324,14 @@ Small XOR data set:
 \begin{tabular}{r|rrr}
   $y$ & $x_0$ & $x_1$ & $x_2$ \\
   \hline
-  +1 & +1 & +1 & +1 \\
-  +1 & +1 & -1 & -1 \\
-  -1 & +1 & +1 & -1 \\
-  -1 & +1 & -1 & +1
+  -1 & +1 & +1 & +1 \\
+  -1 & +1 & -1 & -1 \\
+  +1 & +1 & +1 & -1 \\
+  +1 & +1 & -1 & +1
 \end{tabular}
 \item $x_0$ is a dummy feature used to take into account the bias.
 \item The classification rule is
-that $y=+1$ if an only if $x_1=x_2$, where the features are just $\pm
+that $y=+1$ if an only if $x_1=\neg x_2$, where the features are just $\pm
 1$.
 \end{itemize}
 \end{frame}
