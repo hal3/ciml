@@ -690,8 +690,8 @@ initialize all the weights in a neural network to zero.
 \item  In the algorithm they're initialized to small random values 
 because an initialization of $\mat W = \mat 0$ and $\vec
 v = \vec 0$ will lead to ``uninteresting'' solutions.  
-\item If you initialize the model in this way, it will eventually get stuck
-in a bad local optimum.  
+\item If you initialize the model in this way, it remains stuck
+in that situation, which is a bad local optimum.  
 \item On any
 example $\vx$, the activation $h_i$ of the hidden units will all be
 zero since $\mat W = \mat 0$. 
@@ -704,13 +704,32 @@ will stay put.
 \begin{frame}
   \frametitle{Initialization and Convergence of Neural Networks}
 \begin{itemize}
-\item
-Furthermore, the gradient $w_{1,d}$ for the $d$th
-feature on the first unit will be \emph{exactly} the same as the
+\item The gradient of the weights of the hidden units will also be zero
+\item So 
+all the weights will remain  zero through the whole algorithm, leading to 
+an uninteresting solution
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Initialization and Convergence of Neural Networks}
+\begin{itemize}
+\item Now suppose the weights $\vec v$ are initialized to the same nonzero value and the weights 
+vectors $\vec w_i$ are initialized
+so that $\vec w_i=\vec w_j$ for $i,j$ hidden units
+\item In this case the components of the gradient for $\vec v$ will all be the same 
+\item Similarly, the gradient for the $d$th
+feature on the first unit $w_{1,d}$ will be \emph{exactly} the same as the
 gradient $w_{2,d}$ for the same feature on the second unit.  
 \item This
 means that the weight matrix, after a gradient step, will change in
-\emph{exactly the same way} for every hidden unit.  
+\emph{exactly the same way} for every hidden unit. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Initialization and Convergence of Neural Networks}
+\begin{itemize} 
 \item Thinking through
 this example for iterations $2\dots$, the values of the hidden units
 will \emph{always} be exactly the same, which means that the weights
