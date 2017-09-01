@@ -73,7 +73,7 @@ error rate you can ever hope to achieve on this classification problem
 %
 The take-home message is that if someone gave you access to the data
 distribution, forming an \emph{optimal} classifier would be trivial.
-Unfortunately, no one gave you this distribution, so we need to 
+Unfortunately, no one gave you this distribution, so we need to
 figure out ways of learning the mapping from $x$ to $y$ given only access to a training set \emph{sampled from} $\cD$, rather than $\cD$ itself.
 
 % Unfortunately, no one gave you this distribution, but this analysis
@@ -134,15 +134,15 @@ of solutions are we more likely to prefer?  Two thirds of people seem
 to have an inductive bias in favor of bird/non-bird, and one third
 seem to have an inductive bias in favor of fly/no-fly.
 
-\thinkaboutit{It is also possible that the correct classification on
-  the test data is ABAB.  This corresponds to the bias ``is the
-  background in focus.''  Somehow no one seems to come up with this
-  classification rule.}
-
 Throughout this book you will learn about several approaches to
 machine learning.  The decision tree model is the first such
 approach.  These approaches differ primarily in the sort of inductive
 bias that they exhibit.
+
+\thinkaboutit{It is also possible that the correct classification on
+	the test data is ABAB.  This corresponds to the bias ``is the
+	background in focus.''  Somehow no one seems to come up with this
+	classification rule.}
 
 Consider a variant of the decision tree learning algorithm.  In this
 variant, we will not allow the trees to grow beyond some pre-defined
@@ -251,7 +251,7 @@ each row in this data is unique, we can guarantee that any leaf in a
 full decision tree will have either $0$ or $1$ examples assigned to it
 ($20$ of the leaves will have one example; the rest will have none).
 For the leaves corresponding to training points, the full decision
-tree will always make the correct prediction.  
+tree will always make the correct prediction.
 Given this, the training error, $\hat \ep$, is $0/20 = 0\%$.
 
 Of course our goal is \emph{not} to build a model that gets $0\%$
@@ -544,7 +544,7 @@ We're now ready to (8) select a specific subset of data to use as training data:
 
 The important thing about this sequence of steps is that \emph{in any one, things can go wrong.} That is, between any two rows of this table, we are \emph{necessarily} accumulating some additional error against our original real world goal of increasing revenue. For example, in step 5, we decided on a representation that left out many possible variables we could have logged, like time of day or season of year. By leaving out those variables, we set an explicit upper bound on how well our learned system can do.
 
-It is often an effective strategy to run an \concept{oracle experiment}. In an oracle experiment, we assume that everything below some line can be solved perfectly, and measure how much impact that will have on a higher line. As an extreme example, before embarking on a machine learning approach to the ad display problem, we should measure something like: if our classifier were \emph{perfect}, how much more money would we make? If the number is not very high, perhaps there is some better for our time.
+It is often an effective strategy to run an \concept{oracle experiment}. In an oracle experiment, we assume that everything below some line can be solved perfectly, and measure how much impact that will have on a higher line. As an extreme example, before embarking on a machine learning approach to the ad display problem, we should measure something like: if our classifier were \emph{perfect}, how much more money would we make? If the number is not very high, perhaps there is some better use of our time.
 
 Finally, although this sequence is denoted linearly, the entire process is highly interactive in practice. A large part of ``debugging'' machine learning (covered more extensively in Chapter~\ref{sec:prac} involves trying to figure out where in this sequence the biggest losses are and fixing that step. In general, it is often useful to \emph{build the stupidest thing that could possibly work}, then look at how well it's doing, and decide if and where to fix it.
 
@@ -554,7 +554,7 @@ Finally, although this sequence is denoted linearly, the entire process is highl
 TODO further reading
 
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "courseml"
-%%% End: 
+%%% End:

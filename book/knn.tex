@@ -47,7 +47,7 @@ To a machine, the \concept{features} themselves have no meaning.  Only
 the \concept{feature values}, and how they vary across examples, mean
 something to the machine.  From this perspective, you can think about
 an example as being represented by a \concept{feature vector}
-consisting of one ``dimension'' for each feature, where each dimenion
+consisting of one ``dimension'' for each feature, where each dimension
 is simply some real value.
 
 Consider a review that said ``excellent'' three times, had one
@@ -170,9 +170,6 @@ d(\vec a, \vec b) = \left[ \sum_{d=1}^D (a_d - b_d)^2 \right]^{\frac 1 2}
 \thinkaboutit{Verify that $d$ from Eq~\eqref{eq:euclidean} gives the
   same result ($4.24$) for the previous computation.}
 
-\Figure{knn_classifyit}{A figure showing an easy NN classification
-  problem where the test point is a ? and should be negative.}
-
 Now that you have access to distances between examples, you can start
 thinking about what it means to learn again.  Consider
 Figure~\ref{fig:knn_classifyit}.  We have a collection of training
@@ -186,7 +183,7 @@ believe that the label for an example should be similar to the label
 of nearby points.  This is an example of a new form of
 \concept{inductive bias}.
 
-The \concept{nearest neighbor} classifier is build upon this insight.
+The \concept{nearest neighbor} classifier is built upon this insight.
 In comparison to decision trees, the algorithm is ridiculously
 simple.  At training time, we simply store the entire training set.
 At test time, we get a test example $\hat\vx$.  To predict its label,
@@ -196,11 +193,14 @@ In particular, we find the training example $\vx$ that
 it has a corresponding label, $y$.  We predict that the label of
 $\hat\vx$ is also $y$.
 
+\Figure{knn_classifyit}{A figure showing an easy NN classification
+	problem where the test point is a ? and should be negative.}
+
 Despite its simplicity, this nearest neighbor classifier is incredibly
 effective.  (Some might say \emph{frustratingly} effective.)  However,
 it is particularly prone to overfitting label noise.  Consider the
 data in Figure~\ref{fig:knn_classifyitbad}.  You would probably want
-to label the test point positive.  Unfortunately, it's nearest
+to label the test point positive.  Unfortunately, its nearest
 neighbor happens to be negative.  Since the nearest neighbor algorithm
 only looks at the \emph{single} nearest neighbor, it cannot consider
 the ``preponderance of evidence'' that this point should probably
@@ -220,6 +220,11 @@ Figure~\ref{fig:knn_classifyitbad}, you will see that two of them are
 positive and one is negative.  Through voting, positive would win.
 
 \thinkaboutit{Why is it a good idea to use an odd number for $K$?}
+\thinkaboutit{Why is the sign of the sum computed in lines 2-4 the
+	same as the majority vote of the associated training examples?}
+\thinkaboutit{Why can't you simply pick the value of $K$ that does
+	best on the training data?  In other words, why do we have to treat
+	it like a hyperparameter rather than just a parameter.}
 
 \newalgorithm%
   {knn:knn}%
@@ -262,9 +267,6 @@ sorted according to distance.  We then apply a clever trick of
 \emph{summing} the class labels for each of the $K$ nearest neighbors
 (lines 6-10) and using the \FUN{sign} of this sum as our prediction.
 
-\thinkaboutit{Why is the sign of the sum computed in lines 2-4 the
-  same as the majority vote of the associated training examples?}
-
 The big question, of course, is how to choose $K$.  As we've seen,
 with $K=1$, we run the risk of overfitting.  On the other hand, if $K$
 is large (for instance, $K=N$), then \FUN{KNN-Predict} will always
@@ -273,9 +275,14 @@ a hyperparameter of the KNN algorithm that allows us to trade-off
 between overfitting (small value of $K$) and underfitting (large value
 of $K$).
 
-\thinkaboutit{Why can't you simply pick the value of $K$ that does
-  best on the training data?  In other words, why do we have to treat
-  it like a hyperparameter rather than just a parameter.}
+\MoveNextFigure{-7cm}
+\Figure{knn:ski}{A figure of a ski and a snowboard.}
+%\MoveNextFigure{-3cm}
+\Figure{knn:skidata}{Classification data for ski vs snowboard in
+	2d}
+%\MoveNextFigure{-5cm}
+\Figure{knn:skidatabad}{Classification data for ski vs snowboard in
+	2d, with width rescaled to mm.}
 
 One aspect of \concept{inductive bias} that we've seen for KNN is that
 it assumes that nearby points should have the same label.  Another
@@ -289,13 +296,6 @@ the same amount.  This means that if you have data with only a few
 relevant features and lots of irrelevant features, KNN is likely to do
 poorly.
 
-\MoveNextFigure{-18cm}
-\Figure{knn:ski}{A figure of a ski and a snowboard.}
-
-\MoveNextFigure{-10cm}
-\Figure{knn:skidata}{Classification data for ski vs snowboard in
-  2d}
-
 A related issue with KNN is \concept{feature scale}.  Suppose that we
 are trying to classify whether some object is a ski or a snowboard
 (see Figure~\ref{fig:knn:ski}).  We are given two features about this
@@ -307,17 +307,12 @@ Based on this data, you might guess that a KNN classifier would do
 well.
 
 Suppose, however, that our measurement of the width was computed in
-millimeters (instead of centimeters).  This yields the data shown in
+centimeters (instead of millimeters).  This yields the data shown in
 Figure~\ref{fig:knn:skidatabad}.  Since the width values are now tiny,
 in comparison to the height values, a KNN classifier will effectively
 \emph{ignore} the width values and classify almost purely based on
 height.  The predicted class for the displayed test point had changed
 because of this feature scaling.
-
-\MoveNextFigure{-5cm}
-\Figure{knn:skidatabad}{Classification data for ski vs snowboard in
-  2d, with width rescaled to mm.}
-
 
 We will discuss feature scaling more in Chapter~\ref{sec:prac}.  For
 now, it is just important to keep in mind that KNN does not have the
@@ -329,7 +324,7 @@ power to decide which features are important.
   vector. In general, if $\vx = \langle x_1, x_2, \dots, x_D \rangle$,
   then $x_d$ is it's $d$th component. So $x_3 = -6$ in the previous
   example.
-  
+
 ~
 
   \textbf{Vector sums} are computed pointwise, and are only defined when
@@ -358,13 +353,13 @@ power to decide which features are important.
 The standard way that we've been thinking about learning algorithms up
 to now is in the \emph{query model}.  Based on training data, you
 learn something.  I then give you a query example and you have to
-guess it's label.
+guess its label.
 
 \Figure{knn:db}{decision boundary for 1nn.}
 
 An alternative, less passive, way to think about a learned model is to
 ask: what sort of test examples will it classify as positive, and what
-sort will it classify as negative.  In Figure~\ref{fig:knn:db}, we have a
+sort will it classify as negative?  In Figure~\ref{fig:knn:db}, we have a
 set of training data.  The background of the image is colored blue in
 regions that \emph{would} be classified as positive (if a query were
 issued there) and colored red in regions that \emph{would} be
@@ -383,7 +378,7 @@ Decision boundaries are useful ways to visualize the
 with a decision boundary that is really jagged (like the coastline of
 Norway) is really complex and prone to overfitting.  A learned model
 with a decision boundary that is really simple (like the bounary
-between Arizona and Utah) is potentially underfit. 
+between Arizona and Utah) is potentially underfit.
 %In
 %Figure~\ref{fig:knn:dbmany}, you can see the decision boundaries for KNN
 %models with $K \in \{1, 3, 5, 7\}$.  As you can see, the boundaries
@@ -420,7 +415,7 @@ for decision trees in general.  Their decision boundaries are
 axis-aligned cuts.  The cuts must be axis-aligned because nodes can
 only query on a single feature at a time.  In this case, since the
 decision tree was so shallow, the decision boundary was relatively
-simple.  
+simple.
 
 \thinkaboutit{What sort of data might yield a very simple decision
   boundary with a decision tree and very complex decision boundary
@@ -512,7 +507,7 @@ computed as the mean of the points assigned to it.  This process
 repeats until the centers converge.
 
 An obvious question about this algorithm is: does it converge?  A
-second question is: how long does it take to converge.  The first
+second question is: how long does it take to converge?  The first
 question is actually easy to answer.  Yes, it does.  And in practice,
 it usually converges quite quickly (usually fewer than $20$
 iterations).  In Chapter~\ref{sec:unsup}, we will actually
@@ -537,7 +532,7 @@ converge and guaranteed to converge quickly, it is \emph{not}
 guaranteed to converge to the ``right answer.''  The key problem with
 unsupervised learning is that we have no way of knowing what the
 ``right answer'' is.  Convergence to a bad solution is usually due to
-poor initialization. 
+poor initialization.
 %For example, poor initialization in the data set
 %from before yields convergence like that seen in
 %Figure~\ref{fig:knn:kmeansbad}.  As you can see, the algorithm
@@ -561,7 +556,7 @@ beyond that seems impossible.\sidenote{If you want to try to get an
   at \url{gutenberg.org/ebooks/201}.}
 
 In addition to being hard to visualize, there are at least two
-additional problems in high dimensions, both refered to as
+additional problems in high dimensions, both referred to as
 \concept{the curse of dimensionality}.  One is computational, the
 other is mathematical.
 
@@ -592,7 +587,7 @@ US national debt as of January 2011).  So if you're in $20$
 dimensions, this gridding technique will only be useful if you have at
 least $95$ trillion training examples.
 
-For ``medium dimensional'' data (approximately $1000$) dimesions, the
+For ``medium dimensional'' data (approximately $1000$) dimensions, the
 number of grid cells is a $9$ followed by $698$ numbers before the
 decimal point.  For comparison, the number of atoms in the universe is
 approximately $1$ followed by $80$ zeros.  So even if each atom
@@ -629,8 +624,8 @@ dimensions a ``sphere'' is just a ``circle.'')  We'll place a red
 sphere in the middle so that it touches all four green spheres.  We
 can easily compute the radius of this small sphere.  The pythagorean
 theorem says that $1^2 + 1^2 = (1+r)^2$, so solving for $r$ we get $r
-= \sqrt 2 - 1 \approx 0.41$.  Thus, by calculation, the blue sphere
-lies entirely within the cube (cube = square) that contains the grey
+= \sqrt 2 - 1 \approx 0.41$.  Thus, by calculation, the red sphere
+lies entirely within the cube (cube = square) that contains the green
 spheres.  (Yes, this is also obvious from the picture, but perhaps you
 can see where this is going.)
 
@@ -638,29 +633,29 @@ can see where this is going.)
 
 Now we can do the same experiment in three dimensions, as shown in
 Figure~\ref{fig:knn:cursethree}.  Again, we can use the pythagorean
-theorem to compute the radius of the blue sphere.  Now, we get $1^2 +
+theorem to compute the radius of the red sphere.  Now, we get $1^2 +
 1^2 + 1^2 = (1+r)^2$, so $r = \sqrt3 - 1 \approx 0.73$.  This is still
-entirely enclosed in the cube of width four that holds all eight grey
+entirely enclosed in the cube of width four that holds all eight green
 spheres.
 
 At this point it becomes difficult to produce figures, so you'll have
 to apply your imagination.  In four dimensions, we would have $16$
 green spheres (called \concept{hyperspheres}), each of radius one.
 They would still be inside a cube (called a \concept{hypercube}) of
-width four.  The blue hypersphere would have radius $r = \sqrt4 - 1 =
-1$.  Continuing to five dimensions, the blue hypersphere embedded in
+width four.  The red hypersphere would have radius $r = \sqrt4 - 1 =
+1$.  Continuing to five dimensions, the red hypersphere embedded in
 $256$ green hyperspheres would have radius $r = \sqrt5-1 \approx 1.23$
 and so on.
 
 In general, in $D$-dimensional space, there will be $2^D$ green
 hyperspheres of radius one.  Each green hypersphere will touch exactly
-$n$-many other hyperspheres.  The blue hyperspheres in the middle will
+$n$-many other hyperspheres.  The red hyperspheres in the middle will
 touch them all and will have radius $r = \sqrt D - 1$.
 
 Think about this for a moment.  As the number of dimensions grows, the
-radius of the blue hypersphere \emph{grows without bound!}.  For
-example, in $9$-dimensions the radius of the blue hypersphere is now
-$\sqrt9-1 = 2$.  But with a radius of two, the blue hypersphere is now
+radius of the red hypersphere \emph{grows without bound!}.  For
+example, in $9$-dimensions the radius of the red hypersphere is now
+$\sqrt9-1 = 2$.  But with a radius of two, the red hypersphere is now
 ``squeezing'' between the green hypersphere and \emph{touching} the
 edges of the hypercube.  In $10$ dimensional space, the radius is
 approximately $2.16$ and it pokes outside the cube.
@@ -674,8 +669,8 @@ approximately $2.16$ and it pokes outside the cube.
 %example, what you think looks like a ``round'' cluster in two or three
 %dimensions, might not look so ``round'' in high dimensions.
 
-%\Figure{knn:uniform}{100 uniform random points in 1, 2 and 3
-%  dimensions}
+\Figure{knn:uniform}{100 uniform random points in 1, 2 and 3
+  dimensions}
 
 The second strange fact we will consider has to do with the distances
 between points in high dimensions.  We start by considering random
@@ -702,7 +697,7 @@ interested in computing is:
       \Big] \Big]
 \end{equation}
 We can actually compute this in closed form and arrive
-at $\textit{avgDist}(D) = \sqrt D / 3$. Because we know that the maximum distance between two points grows like $\sqrt D$, this says that the ratio between average distance and maximum distance converges to $1/3$. 
+at $\textit{avgDist}(D) = \sqrt D / 3$. Because we know that the maximum distance between two points grows like $\sqrt D$, this says that the ratio between average distance and maximum distance converges to $1/3$.
 
 What is more interesting, however, is the \emph{variance} of the distribution of distances. You can show that in $D$ dimensions, the variance is \emph{constant} $1/\sqrt{18}$, \emph{independent of $D$}. This means that when you look at (variance) divided-by (max distance), the variance behaves like $1/\sqrt{18 D}$, which means that the effective variance continues to shrink as $D$ grows\mycite{brin95nn}.
 
@@ -712,7 +707,7 @@ When I first saw and re-proved this result, I was skeptical, as I
 imagine you are.  So I implemented it.  In
 Figure~\ref{fig:knn:uniformhist} you can see the results.  This
 presents a \emph{histogram} of distances between random points in $D$
-dimensions for $D \in \{1,2,3,10,20,100\}$.  As you can see, all of
+dimensions for $D \in \{2,8,32,128,512\}$.  As you can see, all of
 these distances begin to concentrate around $0.4\sqrt{D}$, even for ``medium
 dimension'' problems.
 
@@ -856,7 +851,7 @@ Reducing each class to one point: means
 K-means clustering
 \end{comment}
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "courseml"
-%%% End: 
+%%% End:
