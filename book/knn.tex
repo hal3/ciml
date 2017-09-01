@@ -170,9 +170,6 @@ d(\vec a, \vec b) = \left[ \sum_{d=1}^D (a_d - b_d)^2 \right]^{\frac 1 2}
 \thinkaboutit{Verify that $d$ from Eq~\eqref{eq:euclidean} gives the
   same result ($4.24$) for the previous computation.}
 
-\Figure{knn_classifyit}{A figure showing an easy NN classification
-  problem where the test point is a ? and should be negative.}
-
 Now that you have access to distances between examples, you can start
 thinking about what it means to learn again.  Consider
 Figure~\ref{fig:knn_classifyit}.  We have a collection of training
@@ -195,6 +192,9 @@ In particular, we find the training example $\vx$ that
 \emph{minimizes} $d(\vx,\hat\vx)$.  Since $\vx$ is a training example,
 it has a corresponding label, $y$.  We predict that the label of
 $\hat\vx$ is also $y$.
+
+\Figure{knn_classifyit}{A figure showing an easy NN classification
+	problem where the test point is a ? and should be negative.}
 
 Despite its simplicity, this nearest neighbor classifier is incredibly
 effective.  (Some might say \emph{frustratingly} effective.)  However,
@@ -220,6 +220,11 @@ Figure~\ref{fig:knn_classifyitbad}, you will see that two of them are
 positive and one is negative.  Through voting, positive would win.
 
 \thinkaboutit{Why is it a good idea to use an odd number for $K$?}
+\thinkaboutit{Why is the sign of the sum computed in lines 2-4 the
+	same as the majority vote of the associated training examples?}
+\thinkaboutit{Why can't you simply pick the value of $K$ that does
+	best on the training data?  In other words, why do we have to treat
+	it like a hyperparameter rather than just a parameter.}
 
 \newalgorithm%
   {knn:knn}%
@@ -262,9 +267,6 @@ sorted according to distance.  We then apply a clever trick of
 \emph{summing} the class labels for each of the $K$ nearest neighbors
 (lines 6-10) and using the \FUN{sign} of this sum as our prediction.
 
-\thinkaboutit{Why is the sign of the sum computed in lines 2-4 the
-  same as the majority vote of the associated training examples?}
-
 The big question, of course, is how to choose $K$.  As we've seen,
 with $K=1$, we run the risk of overfitting.  On the other hand, if $K$
 is large (for instance, $K=N$), then \FUN{KNN-Predict} will always
@@ -272,10 +274,6 @@ predict the majority class.  Clearly that is underfitting.  So, $K$ is
 a hyperparameter of the KNN algorithm that allows us to trade-off
 between overfitting (small value of $K$) and underfitting (large value
 of $K$).
-
-\thinkaboutit{Why can't you simply pick the value of $K$ that does
-  best on the training data?  In other words, why do we have to treat
-  it like a hyperparameter rather than just a parameter.}
 
 One aspect of \concept{inductive bias} that we've seen for KNN is that
 it assumes that nearby points should have the same label.  Another
