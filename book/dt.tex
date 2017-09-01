@@ -226,7 +226,7 @@ decision tree \emph{greedily.}  We will begin by asking:
 You want to find a feature that is \emph{most useful} in helping you
 guess whether this student will enjoy this course.
 A useful way to think about this is to look at the \concept{histogram}
-of labels for each feature.  
+of labels for each feature.
 \sidenote{A
   colleague related the story of getting his 8-year old nephew to
   guess a number between 1 and 100.  His nephew's first four questions
@@ -426,12 +426,12 @@ This is \emph{exactly} the weighted average loss over the all $(\vx,y)$ pairs in
 If $D$ is a \emph{finite discrete distribution}, for instance defined by a finite data set $\{ (\vx_1,y_1), \dots, (\vx_N,y_N)$ that puts equal weight on each example (probability $1/N$), then we get:
 %
 \begin{align}
-\Ep_{(\vx,y) \sim D} [ \ell(y, f(\vx)) ] 
+\Ep_{(\vx,y) \sim D} [ \ell(y, f(\vx)) ]
 &= \sum_{(\vx,y) \in D} [ D(\vx,y) \ell(y, f(\vx)) ]
    \becauseof{definition of expectation}\\
 &= \sum_{n=1}^N [ D(\vx_n,y_n) \ell(y_n, f(\vx_n)) ]
    \becauseof{$D$ is discrete and finite}\\
-&= \sum_{n=1}^N [ \frac 1 N \ell(y_n, f(\vx_n)) ] 
+&= \sum_{n=1}^N [ \frac 1 N \ell(y_n, f(\vx_n)) ]
    \becauseof{definition of $D$}\\
 &= \frac 1 N  \sum_{n=1}^N [ \ell(y_n, f(\vx_n)) ]
    \becauseof{rearranging terms}
@@ -624,7 +624,7 @@ From two classes to M classes
 \end{comment}
 
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "courseml"
-%%% End: 
+%%% End:
