@@ -247,12 +247,12 @@ answer is ``yes,'' you can be pretty confident that this student will
 like this course.
 
 More formally, you will consider each feature in turn.  You might
-consider the feature ``Is this a System's course?''  This feature has
+consider the feature ``Is this a Systems course?''  This feature has
 two possible value: no and yes.  Some of the training examples have an
 answer of ``no'' -- let's call that the ``NO'' set.  Some of the
 training examples have an answer of ``yes'' -- let's call that the
 ``YES'' set.  For each set (NO and YES) we will build a histogram over
-the labels.  This is the second histogram in
+the labels.  This is the fourth histogram (from the top) in
 Figure~\ref{fig:dt_histogram}.  Now, suppose you were to ask this
 question on a random example and observe a value of ``no.''  Further
 suppose that you must \emph{immediately} guess the label for this
@@ -501,7 +501,7 @@ data, we need to \concept{induce} a function $f$ that maps new inputs
 $\hat \vx$ to corresponding prediction $\hat y$.  The key property
 that $f$ should obey is that it should do well (as measured by $\ell$)
 on future examples that are \emph{also} drawn from $\cD$.  Formally,
-it's \concept{expected loss} $\ep$ over $\cD$ with repsect to $\ell$
+its \concept{expected loss} $\ep$ over $\cD$ with respect to $\ell$
 should be as small as possible:
 \begin{align} \label{eq:expectederror}
 \ep
@@ -542,7 +542,7 @@ expected error down, our learned function needs to
 \concept{generalize} beyond the training data to some future data that
 it might not have seen yet!
 
-So, putting it all together, we get a formal definition of induction
+So, putting it all together, we get a formal definition of induction in
 machine learning: \bigemph{Given (i) a loss function $\ell$ and (ii) a
   sample $D$ from some unknown distribution $\cD$, you must compute a
   function $f$ that has low expected error $\ep$ over $\cD$ with
