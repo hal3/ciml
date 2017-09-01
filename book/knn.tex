@@ -47,7 +47,7 @@ To a machine, the \concept{features} themselves have no meaning.  Only
 the \concept{feature values}, and how they vary across examples, mean
 something to the machine.  From this perspective, you can think about
 an example as being represented by a \concept{feature vector}
-consisting of one ``dimension'' for each feature, where each dimenion
+consisting of one ``dimension'' for each feature, where each dimension
 is simply some real value.
 
 Consider a review that said ``excellent'' three times, had one
@@ -186,7 +186,7 @@ believe that the label for an example should be similar to the label
 of nearby points.  This is an example of a new form of
 \concept{inductive bias}.
 
-The \concept{nearest neighbor} classifier is build upon this insight.
+The \concept{nearest neighbor} classifier is built upon this insight.
 In comparison to decision trees, the algorithm is ridiculously
 simple.  At training time, we simply store the entire training set.
 At test time, we get a test example $\hat\vx$.  To predict its label,
@@ -200,7 +200,7 @@ Despite its simplicity, this nearest neighbor classifier is incredibly
 effective.  (Some might say \emph{frustratingly} effective.)  However,
 it is particularly prone to overfitting label noise.  Consider the
 data in Figure~\ref{fig:knn_classifyitbad}.  You would probably want
-to label the test point positive.  Unfortunately, it's nearest
+to label the test point positive.  Unfortunately, its nearest
 neighbor happens to be negative.  Since the nearest neighbor algorithm
 only looks at the \emph{single} nearest neighbor, it cannot consider
 the ``preponderance of evidence'' that this point should probably
@@ -307,7 +307,7 @@ Based on this data, you might guess that a KNN classifier would do
 well.
 
 Suppose, however, that our measurement of the width was computed in
-millimeters (instead of centimeters).  This yields the data shown in
+centimeters (instead of millimeters).  This yields the data shown in
 Figure~\ref{fig:knn:skidatabad}.  Since the width values are now tiny,
 in comparison to the height values, a KNN classifier will effectively
 \emph{ignore} the width values and classify almost purely based on
@@ -358,13 +358,13 @@ power to decide which features are important.
 The standard way that we've been thinking about learning algorithms up
 to now is in the \emph{query model}.  Based on training data, you
 learn something.  I then give you a query example and you have to
-guess it's label.
+guess its label.
 
 \Figure{knn:db}{decision boundary for 1nn.}
 
 An alternative, less passive, way to think about a learned model is to
 ask: what sort of test examples will it classify as positive, and what
-sort will it classify as negative.  In Figure~\ref{fig:knn:db}, we have a
+sort will it classify as negative?  In Figure~\ref{fig:knn:db}, we have a
 set of training data.  The background of the image is colored blue in
 regions that \emph{would} be classified as positive (if a query were
 issued there) and colored red in regions that \emph{would} be
@@ -512,7 +512,7 @@ computed as the mean of the points assigned to it.  This process
 repeats until the centers converge.
 
 An obvious question about this algorithm is: does it converge?  A
-second question is: how long does it take to converge.  The first
+second question is: how long does it take to converge?  The first
 question is actually easy to answer.  Yes, it does.  And in practice,
 it usually converges quite quickly (usually fewer than $20$
 iterations).  In Chapter~\ref{sec:unsup}, we will actually
@@ -561,7 +561,7 @@ beyond that seems impossible.\sidenote{If you want to try to get an
   at \url{gutenberg.org/ebooks/201}.}
 
 In addition to being hard to visualize, there are at least two
-additional problems in high dimensions, both refered to as
+additional problems in high dimensions, both referred to as
 \concept{the curse of dimensionality}.  One is computational, the
 other is mathematical.
 
@@ -592,7 +592,7 @@ US national debt as of January 2011).  So if you're in $20$
 dimensions, this gridding technique will only be useful if you have at
 least $95$ trillion training examples.
 
-For ``medium dimensional'' data (approximately $1000$) dimesions, the
+For ``medium dimensional'' data (approximately $1000$) dimensions, the
 number of grid cells is a $9$ followed by $698$ numbers before the
 decimal point.  For comparison, the number of atoms in the universe is
 approximately $1$ followed by $80$ zeros.  So even if each atom
@@ -629,8 +629,8 @@ dimensions a ``sphere'' is just a ``circle.'')  We'll place a red
 sphere in the middle so that it touches all four green spheres.  We
 can easily compute the radius of this small sphere.  The pythagorean
 theorem says that $1^2 + 1^2 = (1+r)^2$, so solving for $r$ we get $r
-= \sqrt 2 - 1 \approx 0.41$.  Thus, by calculation, the blue sphere
-lies entirely within the cube (cube = square) that contains the grey
+= \sqrt 2 - 1 \approx 0.41$.  Thus, by calculation, the red sphere
+lies entirely within the cube (cube = square) that contains the green
 spheres.  (Yes, this is also obvious from the picture, but perhaps you
 can see where this is going.)
 
@@ -638,29 +638,29 @@ can see where this is going.)
 
 Now we can do the same experiment in three dimensions, as shown in
 Figure~\ref{fig:knn:cursethree}.  Again, we can use the pythagorean
-theorem to compute the radius of the blue sphere.  Now, we get $1^2 +
+theorem to compute the radius of the red sphere.  Now, we get $1^2 +
 1^2 + 1^2 = (1+r)^2$, so $r = \sqrt3 - 1 \approx 0.73$.  This is still
-entirely enclosed in the cube of width four that holds all eight grey
+entirely enclosed in the cube of width four that holds all eight green
 spheres.
 
 At this point it becomes difficult to produce figures, so you'll have
 to apply your imagination.  In four dimensions, we would have $16$
 green spheres (called \concept{hyperspheres}), each of radius one.
 They would still be inside a cube (called a \concept{hypercube}) of
-width four.  The blue hypersphere would have radius $r = \sqrt4 - 1 =
-1$.  Continuing to five dimensions, the blue hypersphere embedded in
+width four.  The red hypersphere would have radius $r = \sqrt4 - 1 =
+1$.  Continuing to five dimensions, the red hypersphere embedded in
 $256$ green hyperspheres would have radius $r = \sqrt5-1 \approx 1.23$
 and so on.
 
 In general, in $D$-dimensional space, there will be $2^D$ green
 hyperspheres of radius one.  Each green hypersphere will touch exactly
-$n$-many other hyperspheres.  The blue hyperspheres in the middle will
+$n$-many other hyperspheres.  The red hyperspheres in the middle will
 touch them all and will have radius $r = \sqrt D - 1$.
 
 Think about this for a moment.  As the number of dimensions grows, the
-radius of the blue hypersphere \emph{grows without bound!}.  For
-example, in $9$-dimensions the radius of the blue hypersphere is now
-$\sqrt9-1 = 2$.  But with a radius of two, the blue hypersphere is now
+radius of the red hypersphere \emph{grows without bound!}.  For
+example, in $9$-dimensions the radius of the red hypersphere is now
+$\sqrt9-1 = 2$.  But with a radius of two, the red hypersphere is now
 ``squeezing'' between the green hypersphere and \emph{touching} the
 edges of the hypercube.  In $10$ dimensional space, the radius is
 approximately $2.16$ and it pokes outside the cube.
@@ -712,7 +712,7 @@ When I first saw and re-proved this result, I was skeptical, as I
 imagine you are.  So I implemented it.  In
 Figure~\ref{fig:knn:uniformhist} you can see the results.  This
 presents a \emph{histogram} of distances between random points in $D$
-dimensions for $D \in \{1,2,3,10,20,100\}$.  As you can see, all of
+dimensions for $D \in \{2,8,32,128,512\}$.  As you can see, all of
 these distances begin to concentrate around $0.4\sqrt{D}$, even for ``medium
 dimension'' problems.
 
