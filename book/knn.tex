@@ -220,6 +220,11 @@ Figure~\ref{fig:knn_classifyitbad}, you will see that two of them are
 positive and one is negative.  Through voting, positive would win.
 
 \thinkaboutit{Why is it a good idea to use an odd number for $K$?}
+\thinkaboutit{Why is the sign of the sum computed in lines 2-4 the
+	same as the majority vote of the associated training examples?}
+\thinkaboutit{Why can't you simply pick the value of $K$ that does
+	best on the training data?  In other words, why do we have to treat
+	it like a hyperparameter rather than just a parameter.}
 
 \newalgorithm%
   {knn:knn}%
@@ -262,9 +267,6 @@ sorted according to distance.  We then apply a clever trick of
 \emph{summing} the class labels for each of the $K$ nearest neighbors
 (lines 6-10) and using the \FUN{sign} of this sum as our prediction.
 
-\thinkaboutit{Why is the sign of the sum computed in lines 2-4 the
-  same as the majority vote of the associated training examples?}
-
 The big question, of course, is how to choose $K$.  As we've seen,
 with $K=1$, we run the risk of overfitting.  On the other hand, if $K$
 is large (for instance, $K=N$), then \FUN{KNN-Predict} will always
@@ -273,9 +275,6 @@ a hyperparameter of the KNN algorithm that allows us to trade-off
 between overfitting (small value of $K$) and underfitting (large value
 of $K$).
 
-\thinkaboutit{Why can't you simply pick the value of $K$ that does
-  best on the training data?  In other words, why do we have to treat
-  it like a hyperparameter rather than just a parameter.}
 
 One aspect of \concept{inductive bias} that we've seen for KNN is that
 it assumes that nearby points should have the same label.  Another
