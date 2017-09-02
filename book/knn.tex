@@ -170,9 +170,6 @@ d(\vec a, \vec b) = \left[ \sum_{d=1}^D (a_d - b_d)^2 \right]^{\frac 1 2}
 \thinkaboutit{Verify that $d$ from Eq~\eqref{eq:euclidean} gives the
   same result ($4.24$) for the previous computation.}
 
-\Figure{knn_classifyit}{A figure showing an easy NN classification
-  problem where the test point is a ? and should be negative.}
-
 Now that you have access to distances between examples, you can start
 thinking about what it means to learn again.  Consider
 Figure~\ref{fig:knn_classifyit}.  We have a collection of training
@@ -195,6 +192,9 @@ In particular, we find the training example $\vx$ that
 \emph{minimizes} $d(\vx,\hat\vx)$.  Since $\vx$ is a training example,
 it has a corresponding label, $y$.  We predict that the label of
 $\hat\vx$ is also $y$.
+
+\Figure{knn_classifyit}{A figure showing an easy NN classification
+	problem where the test point is a ? and should be negative.}
 
 Despite its simplicity, this nearest neighbor classifier is incredibly
 effective.  (Some might say \emph{frustratingly} effective.)  However,
