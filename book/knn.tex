@@ -275,6 +275,14 @@ a hyperparameter of the KNN algorithm that allows us to trade-off
 between overfitting (small value of $K$) and underfitting (large value
 of $K$).
 
+\MoveNextFigure{-7cm}
+\Figure{knn:ski}{A figure of a ski and a snowboard.}
+%\MoveNextFigure{-3cm}
+\Figure{knn:skidata}{Classification data for ski vs snowboard in
+	2d}
+%\MoveNextFigure{-5cm}
+\Figure{knn:skidatabad}{Classification data for ski vs snowboard in
+	2d, with width rescaled to mm.}
 
 One aspect of \concept{inductive bias} that we've seen for KNN is that
 it assumes that nearby points should have the same label.  Another
@@ -287,13 +295,6 @@ away in KNN classifiers: every feature is used, and they are all used
 the same amount.  This means that if you have data with only a few
 relevant features and lots of irrelevant features, KNN is likely to do
 poorly.
-
-\MoveNextFigure{-18cm}
-\Figure{knn:ski}{A figure of a ski and a snowboard.}
-
-\MoveNextFigure{-10cm}
-\Figure{knn:skidata}{Classification data for ski vs snowboard in
-  2d}
 
 A related issue with KNN is \concept{feature scale}.  Suppose that we
 are trying to classify whether some object is a ski or a snowboard
@@ -312,11 +313,6 @@ in comparison to the height values, a KNN classifier will effectively
 \emph{ignore} the width values and classify almost purely based on
 height.  The predicted class for the displayed test point had changed
 because of this feature scaling.
-
-\MoveNextFigure{-5cm}
-\Figure{knn:skidatabad}{Classification data for ski vs snowboard in
-  2d, with width rescaled to mm.}
-
 
 We will discuss feature scaling more in Chapter~\ref{sec:prac}.  For
 now, it is just important to keep in mind that KNN does not have the
