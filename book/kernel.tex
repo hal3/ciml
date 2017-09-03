@@ -6,10 +6,9 @@
 \item Explain how kernels generalize both feature combinations and
   basis functions.
 \item Contrast dot products with kernel products.
-\item Implement kernelized perceptron.
+\item Implement a kernelized version of the perceptron.
 \item Derive a kernelized version of regularized least squares
   regression.
-\item Implement a kernelized version of the perceptron.
 \item Derive the dual formulation of the support vector machine.
 \end{learningobjectives}
 
@@ -181,7 +180,7 @@ the training data.
 \end{myproof}
 
 Now that you know that you can always write $\vw = \sum_n \al_n
-\phi(\vx_n)$ for some $\al_i$s, you can additionall compute the
+\phi(\vx_n)$ for some $\al_i$s, you can additionally compute the
 activations (line 4) as:
 %
 \begin{align}
@@ -411,7 +410,7 @@ Showing that this kernel is positive definite is a bit of an exercise
 in analysis (particularly, integration by parts), but otherwise not
 difficult.  Again, the proof is provided in the appendix.
 
-So far, you have seen two bsaic classes of kernels: polynomial kernels
+So far, you have seen two basic classes of kernels: polynomial kernels
 ($K(\vx,\vz) = (1 + \dotp{\vx}{\vz})^d$), which includes the linear
 kernel ($K(\vx,\vz) = \dotp{\vx}{\vz}$) and RBF kernels ($K(\vx,\vz) =
 \exp[-\ga \norm{\vx-\vz}^2]$).  The former have a direct connection to
@@ -518,7 +517,7 @@ properly non-negative), then the $\be_n$s cannot do anything to
 $+\infty$, breaking the solution.
 
 You can solve this problem by taking gradients.  This is a bit
-tedious, but and important step to realize how everything fits
+tedious, but an important step to realize how everything fits
 together.  Since your goal is to remove the dependence on $\vw$, the
 first step is to take a gradient with respect to $\vw$, set it equal
 to zero, and solve for $\vw$ in terms of the other variables.
@@ -598,7 +597,7 @@ The derivative with respect to $b$ is:
 \end{align}
 %
 This doesn't allow you to \emph{substitute} $b$ with something (as you
-did with $\vw$), but it does mean that the fourth term ($b \sum_n
+did with $\vw$), but it does mean that the thirs term ($b \sum_n
 \al_n y_n$) goes to zero at the optimum.
 
 The last of the original variables is $\xi_n$; the derivatives in this
