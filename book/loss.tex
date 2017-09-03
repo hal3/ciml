@@ -355,8 +355,8 @@ popular choice for sparsity-seeking applications.
   This is defined as:
   ~
   \begin{align}
-    \grad_{\vec x} f &= \left\langle \frac {\partial f} {\partial x_1}~~,~~ 
-                                    \frac {\partial f} {\partial x_2}~~,~~ 
+    \grad_{\vec x} f &= \left\langle \frac {\partial f} {\partial x_1}~~,~~
+                                    \frac {\partial f} {\partial x_2}~~,~~
                                     \dots~~,~~
                                     \frac {\partial f} {\partial x_D} \right\rangle
   \end{align}
@@ -436,7 +436,7 @@ regularizer.  Then, the regularized objective function is:
 %
 \begin{equation}
 \cL(\vw,b) =
-\sum_n 
+\sum_n
   \exp\big[-y_n (\dotp{\vec w}{\vx_n}+b)\big] +
  \frac \la 2 \norm{\vw}^2
 \end{equation}
@@ -474,11 +474,11 @@ respect to $\vw$.
 %
 \begin{align}
 \grad_\vw \cL
-&= \grad_\vw \sum_n \exp\big[-y_n (\dotp{\vec w}{\vx_n}+b)\big] 
+&= \grad_\vw \sum_n \exp\big[-y_n (\dotp{\vec w}{\vx_n}+b)\big]
  + \grad_\vw\frac \la 2 \norm{\vw}^2 \\
-&= \sum_n \left( \grad_\vw -y_n (\dotp{\vec w}{\vx_n}+b) \right) \exp\big[-y_n (\dotp{\vec w}{\vx_n}+b)\big] 
+&= \sum_n \left( \grad_\vw -y_n (\dotp{\vec w}{\vx_n}+b) \right) \exp\big[-y_n (\dotp{\vec w}{\vx_n}+b)\big]
  + \la \vw \\
-&= -\sum_n y_n \vx_n \exp\big[-y_n (\dotp{\vec w}{\vx_n}+b)\big] 
+&= -\sum_n y_n \vx_n \exp\big[-y_n (\dotp{\vec w}{\vx_n}+b)\big]
  + \la \vw
 \end{align}
 %
@@ -561,7 +561,7 @@ Let $L$ be large enough that $f''(z) < L$ for all $z$.
        + \frac 1 2 f''(a) (z-a)^2
   \end{align}
   The ``\dots'' is guaranteed to be non-negative because $f$ is
-  convex.  
+  convex.
 \end{myproof}
 \end{comment}
 
@@ -707,7 +707,7 @@ particular:
 %
 \begin{equation}
 a_n
-= \left[ \mat X \vec w \right]_n 
+= \left[ \mat X \vec w \right]_n
 = \sum_d \mat X_{n,d} w_d
 \end{equation}
 %
@@ -739,7 +739,7 @@ This can be expanded visually as:
 \left[
 \begin{array}{c}
   w_{1} \\
-  w_{2} \\ 
+  w_{2} \\
   \vdots \\
   w_{D}
 \end{array}
@@ -762,7 +762,7 @@ This can be expanded visually as:
 \left[
 \begin{array}{c}
   y_{1} \\
-  y_{2} \\ 
+  y_{2} \\
   \vdots \\
   y_{N}
 \end{array}
@@ -841,7 +841,7 @@ the middle, it's hard to say for sure.
 At the beginning of this chapter, you may have looked at the convex
 surrogate loss functions and asked yourself: where did these come
 from?!  They are all derived from different underlying principles,
-which essentially correspond to different inductive biases.  
+which essentially correspond to different inductive biases.
 
 \Figure{loss:geom}{picture of data points with three hyperplanes,
   RGB with G the best}
@@ -1007,7 +1007,7 @@ We can then compute the margin by algebra:
 %
 \begin{align}
 \ga
-&= \frac 1 2 \left[ \textcolor{darkblue}{d^+} 
+&= \frac 1 2 \left[ \textcolor{darkblue}{d^+}
                   - \textcolor{darkred}{d^-} \right] \\
 &= \frac 1 2
    \left[
@@ -1107,7 +1107,7 @@ TODO further reading
 \end{comment}
 
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "courseml"
-%%% End: 
+%%% End:
