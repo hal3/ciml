@@ -424,8 +424,8 @@ inject your knowledge of the problem into the learning algorithm.
   There are a few common probability distributions that we use in this book.
   The first is the Bernouilli distribution, which models binary outcomes (like coin flips).
   A Bernouilli distribution, $\Ber(\th)$ is parameterized by a single scalar value $\th \in [0,1]$ that represents the probability of heads. The likelihood function is $\Ber(x \| \th) = \th^x (1-\th)^{1-x}$.
-  The generalization of the Bernouilli to more than two possible outcomes (like rolls of a die) is the Discrete distribution, $\Disc(\vec th)$. If the die has $K$ sides, then $\vec \th \in \R^K$ with all entries non-negative and $\sum_k \th_k = 1$. $\th_k$ is the probabability that the die comes up on side $k$. The likelihood function is $\Disc(x \| \vec\th) = \prod_k \th_k^{\Ind[x=k]}$.
-  The Binomial distribution is just like the Bernouilli distribution but for multiple flips of the rather than a single flip; it's likelihood is $\Bin(k \| n, \th) = n \choose k \th^k (1-\th)^{n-k}$, where $n$ is the number of flips and $k$ is the number of heads.
+  The generalization of the Bernouilli to more than two possible outcomes (like rolls of a die) is the Discrete distribution, $\Disc(\vec \th)$. If the die has $K$ sides, then $\vec \th \in \R^K$ with all entries non-negative and $\sum_k \th_k = 1$. $\th_k$ is the probabability that the die comes up on side $k$. The likelihood function is $\Disc(x \| \vec\th) = \prod_k \th_k^{\Ind[x=k]}$.
+  The Binomial distribution is just like the Bernouilli distribution but for multiple flips of the rather than a single flip; its likelihood is $\Bin(k \| n, \th) = n \choose k \th^k (1-\th)^{n-k}$, where $n$ is the number of flips and $k$ is the number of heads.
   The Multinomial distribution extends the Discrete distribution also to multiple rolls; it's likelihood is $\Mult(\vec x \| n, \vec\th) = \frac {n!} {\prod_k x_k!} \prod_k \th_k^{x_k}$, where $n$ is the total number of rolls and $x_k$ is the number of times the die came up on side $k$ (so $\sum_k x_k = n$).
   The preceding distributions are all discrete.
   ~\\~\\
@@ -566,9 +566,9 @@ say $\mu_{k,i}$ and obtain:
      - \sum_n \sum_d \frac 1 {2 \si_{y_n,d}^2} (x_{n,d} - \mu_{y_n,d})^2
    \becauseof{ignore irrelevant terms} \\
 &= \frac {\partial} {\partial \mu_{k,i}}
-     - \sum_{n:y_n=k} \frac 1 {2 \si_{k,d}^2} (x_{n,i} - \mu_{k,i})^2
+     - \sum_{n:y_n=k} \frac 1 {2 \si_{k,i}^2} (x_{n,i} - \mu_{k,i})^2
    \becauseof{ignore irrelevant terms} \\
-&= \sum_{n:y_n=k} \frac 1 {\si_{k,d}^2} (x_{n,i} - \mu_{k,i})
+&= \sum_{n:y_n=k} \frac 1 {\si_{k,i}^2} (x_{n,i} - \mu_{k,i})
    \becauseof{take derivative}
 \end{align}
 %
