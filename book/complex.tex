@@ -312,7 +312,7 @@ The training and test algorithms for OVA are sketched in
 Algorithms~\ref{alg:complex:ovatrain} and \ref{alg:complex:ovatest}.
 In the testing procedure, the prediction of the $i$th classifier is
 added to the overall score for class $i$.  Thus, if the prediction is
-positive, class $i$ gets a vote; if the prdiction is negative,
+positive, class $i$ gets a vote; if the prediction is negative,
 everyone else (implicitly) gets a vote.  (In fact, if your learning
 algorithm can output a confidence, as discussed in Section~\ref{}, you
 can often do better by using the confidence as $y$, rather than a
@@ -533,7 +533,7 @@ ranking case.  This is because we need to predict an entire ranking of
 a large number of documents, somehow assimilating the preference
 function into an overall permutation.
 
-For notationally simplicity, let $\vx_{nij}$ denote the features
+For notational simplicity, let $\vx_{nij}$ denote the features
 associated with comparing document $i$ to document $j$ on query $n$.
 Training is fairly straightforward.  For every $n$ and every pair $i
 \neq j$, we will create a binary classification example based on
