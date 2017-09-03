@@ -47,7 +47,7 @@ incoming neurons are firing at different rates (i.e., have different
 \concept{activations}).  Based on how much these incoming neurons are
 firing, and how ``strong'' the neural connections are, our main neuron
 will ``decide'' how strongly it wants to fire.  And so on through the
-whole brain.  Learning in the brain happens by neurons becomming
+whole brain.  Learning in the brain happens by neurons becoming
 connected to other neurons, and the strengths of connections adapting
 over time.
 
@@ -65,7 +65,8 @@ and the neuron simply sums up all the weighted inputs.  Based on this
 sum, it decides whether to ``fire'' or not.  Firing is interpreted as
 being a positive example and not firing is interpreted as being a
 negative example.  In particular, if the weighted sum is positive, it
-``fires'' and otherwise it doesn't fire.
+``fires'' and otherwise it doesn't fire.  This is shown
+diagramatically in Figure~\ref{fig:perc:example}.
 
 Mathematically, an input vector $\vx = \langle x_1, x_2, \dots, x_D
 \rangle$ arrives.  The neuron stores $D$-many weights, $w_1, w_2,
@@ -73,17 +74,17 @@ Mathematically, an input vector $\vx = \langle x_1, x_2, \dots, x_D
 \begin{equation} \label{eq:perc:sum}
 a = \sum_{d=1}^D w_d x_d
 \end{equation}
-to determine it's amount of ``activation.''  If this activiation is
+to determine its amount of ``activation.''  If this activation is
 positive (i.e., $a > 0$) it predicts that this example is a positive
 example.  Otherwise it predicts a negative example.
 
 The weights of this neuron are fairly easy to interpret.  Suppose that
-a feature, for instance ``is this a System's class?'' gets a zero
+a feature, for instance ``is this a Systems class?'' gets a zero
 weight.  Then the activation is the same regardless of the value of
 this feature.  So features with zero weight are ignored.  Features
 with positive weights are indicative of positive examples because they
 cause the activation to increase.  Features with negative weights are
-indicative of negative examples because they cause the activiation to
+indicative of negative examples because they cause the activation to
 decrease.
 
 \thinkaboutit{What would happen if we encoded binary features like
@@ -273,7 +274,7 @@ as fast.
   %  \vspace{-3em}
   %  \includegraphics[width=2in]{figs/perc_dotprojection}.
   %\end{wrapfigure}
-  large and negative when $\vec u$ and $\vec v$ point in opposite directions, and is zero when their are perpendicular.
+  large and negative when $\vec u$ and $\vec v$ point in opposite directions, and is zero when they are perpendicular.
   A useful geometric interpretation of dot products is \concept{projection}.
   Suppose $\norm{\vec u} = 1$, so that $\vec u$ is a \concept{unit vector}.
   We can think of any other vector $\vec v$ as consisting of two components: (a) a component in the direction of $\vec u$ and (b) a component that's perpendicular to $\vec u$.
@@ -311,7 +312,7 @@ perpendicular to $\vw$.
 \Figure{perc:geom}{picture of data points with hyperplane and weight vector}
 
 This is shown pictorially in Figure~\ref{fig:perc:geom}.  Here, the
-weight vector is shown, together with it's perpendicular plane.  This
+weight vector is shown, together with its perpendicular plane.  This
 plane forms the decision boundary between positive points and negative
 points.  The vector points in the direction of the positive examples
 and away from the negative examples.
