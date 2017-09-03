@@ -1006,7 +1006,7 @@ Because one of the key questions in machine learning is the question of represen
 &=
 \underbrace{\left[ \text{error}(f) - \min_{f^* \in \cF} \text{error}(f^*) \right]}_{\text{\concept{estimation error}}}
 +
-\underbrace{\left[ \min_{f^* \in \cF} \text{error}(f) \right]}_{\text{\concept{approximation error}}}
+\underbrace{\left[ \min_{f^* \in \cF} \text{error}(f^*) \right]}_{\text{\concept{approximation error}}}
 \end{align}
 ~
 Here, the second term, the \concept{approximation error}, measures the quality of the model family\footnote{The ``model family'' (such as depth 20 decision trees, or linear classifiers) is often refered to as the \concept{hypothesis class}. The hypothesis class $\cF$ denotes the set of all possible classifiers we consider, such as all linear classifiers. An classifier $f \in \cF$ is sometimes called a \concept{hypothesis}, though we generally avoid this latter terminology here.}. One way of thinking of approximation error is: suppose someone gave me infinite data to train on---how well could I do with this representation?
