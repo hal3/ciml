@@ -459,7 +459,7 @@ practical perspective, the optimization will operate by updating $b
 \leftarrow b - \eta \partialof{\cL}{b}$.  Consider positive examples:
 examples with $y_n=+1$.  We would hope for these examples that the
 current prediction, $\dotp{\vw}{\vx_n}+b$, is as large as possible.
-As this value tends toward $\infty$, the term in the $\exp[]$ goes to
+As this value tends toward $\infty$, the $\exp[]$ term goes to
 zero.  Thus, such points will not contribute to the step.  However, if
 the current prediction is small, then the $\exp[]$ term will be
 positive and non-zero.  This means that the bias term $b$ will be
