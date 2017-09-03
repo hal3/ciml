@@ -83,7 +83,7 @@ The key idea is to think of the adaptation as follows.
 All examples are drawn according to some fixed base distribution $\Dbase$.
 Some of these are selected to go into the new distribution, and some of them are selected to go into the old distribution.
 The mechanism for deciding which ones are kept and which are thrown out is governed by a \emph{selection variable}, which we call $s$.
-The choice of selection-or-not, $s$, is based \emph{only} on the input example $\vx$ and not on it's label.\thinkaboutit{What could go wrong if $s$ got to look at the label, too?}
+The choice of selection-or-not, $s$, is based \emph{only} on the input example $\vx$ and not on its label.\thinkaboutit{What could go wrong if $s$ got to look at the label, too?}
 In particular, we define:
 ~
 \begin{align}
@@ -183,7 +183,7 @@ Note that this algorithm can be \emph{combined} with the instance weighting (uns
 Although this approach is general, it is most effective when the two distributions are ``not too close but not too far'':
 \begin{itemize}
 \item If the distributions are too far, and there's little information to share, you're probably better off throwing out the old distribution data and training just on the (untransformed) new distribution data.
-\item If the distributions are too close, then you might as well just take the union of the (untransformed) old and new distribution data, and training on that.
+\item If the distributions are too close, then you might as well just take the union of the (untransformed) old and new distribution data, and train on that.
 \end{itemize}
 In general, the interplay between how far the distributions are and how much new distribution data you have is complex, and you should always try ``old only'' and ``new only'' and ``simple union'' as baselines.
 
@@ -283,7 +283,7 @@ If we want a way out of this dilemma, we need more technology.
 The core idea is that if we're learning a function $f$ from some hypothesis class $\cF$, and this hypothesis class isn't rich enough to peek at the 29th decimal digit of feature 1, then perhaps things are not as bad as they could be.
 This motivates the idea of looking at a measure of distance between probability distributions that \emph{depends on the hypothesis class}.
 A popular measure is the \concept{$d_\cA$-distance} or the \concept{discrepancy}.
-The discrepancy measure distances between probability distributions based on how much two function $f$ and $f'$ in the hypothesis class can disagree on their labels.
+The discrepancy measure distances between probability distributions based on how much two functions $f$ and $f'$ in the hypothesis class can disagree on their labels.
 Let:
 %
 \begin{align}
@@ -291,7 +291,7 @@ Let:
   &= \Ep_{\vx \sim P} \Big[ \Ind[ f(\vx) \neq f'(\vx) ] \Big]
 \end{align}
 %
-You can think of $\ep_P(f,f')$ as the \emph{error} of $f'$ when the ground truth is given by $f$, where the error is taken with repsect to examples drawn from $P$.
+You can think of $\ep_P(f,f')$ as the \emph{error} of $f'$ when the ground truth is given by $f$, where the error is taken with respect to examples drawn from $P$.
 Given a hypothesis class $\cF$, the discrepancy between $P$ and $Q$ is defined as:
 %
 \begin{align}
