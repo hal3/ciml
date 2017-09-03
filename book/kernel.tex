@@ -223,7 +223,7 @@ The advantage to this ``kernelized'' algorithm is that you can perform
 feature expansions like the quadratic feature expansion from the
 introduction for ``free.''  For example, for exactly the same cost as
 the quadratic features, you can use a \concept{cubic feature map},
-computed as $\ddot{\phi(\vx)}{\phi(\vz)} = (1 + \dotp{\vx}{\vz})^3$,
+computed as $\dotp{\phi(\vx)}{\phi(\vz)} = (1 + \dotp{\vx}{\vz})^3$,
 which corresponds to three-way interactions between variables.  (And,
 in general, you can do so for any polynomial degree $p$ at the same
 computational complexity.)
