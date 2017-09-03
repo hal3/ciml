@@ -3,7 +3,7 @@
 \chapterquote{Science and everyday life cannot\\and should not be separated.}{Rosalind~Franklin}
 
 \begin{learningobjectives}
-\item 
+\item
 \end{learningobjectives}
 
 \dependencies{\chref{sec:dt},\chref{sec:knn},\chref{sec:perc},\chref{sec:prac}}
@@ -171,7 +171,7 @@ This is summarized in Algorithm~\ref{alg:bias:easyadapt}.
   {bias:easyadapt}%
   {\FUN{EasyAdapt}(\VAR{$\langle (\vxold_n,\yold_n) \rangle_{n=1}^N$}, \VAR{$\langle (\vxnew_m, \ynew_m) \rangle_{m=1}^M$}, \VAR{$\cA$})}
   {
-    \SETST{$D$}{$\left\langle ( \langle \VARm{\vxold_n}, \VARm{\vxold_n}, \vec 0 \rangle, \VARm{\yold_n} ) \right\rangle_{\VARm{n}=1}^{\VARm{N}} 
+    \SETST{$D$}{$\left\langle ( \langle \VARm{\vxold_n}, \VARm{\vxold_n}, \vec 0 \rangle, \VARm{\yold_n} ) \right\rangle_{\VARm{n}=1}^{\VARm{N}}
                   \bigcup
                  \left\langle ( \langle \VARm{\vxnew_m}, \vec 0, \VARm{\vxnew_m} \rangle, \VARm{\ynew_m} ) \right\rangle_{\VARm{m}=1}^{\VARm{M}} $}
     \COMMENT{union} \\ \COMMENT{of transformed data}
@@ -212,8 +212,8 @@ The current legal mechanism for measuring discimination is \concept{disparate im
 Informally, the 80\% rule says that your rate of hiring women (for instance) must be at least 80\% of your rate of hiring men.
 Formally, the rule states:
 \begin{align}
-                    \Pr(y = +1 \| \text{G} \neq \text{male}) 
-& \geq 0.8 ~\times~ \Pr(y = +1 \| \text{G} =    \text{male}) 
+                    \Pr(y = +1 \| \text{G} \neq \text{male})
+& \geq 0.8 ~\times~ \Pr(y = +1 \| \text{G} =    \text{male})
 \end{align}
 Of course, gender/male can be replaced with any other protected attribute.
 
@@ -243,7 +243,7 @@ That is:
 %
 The question is: how badly can $f$ do on the new distribution?
 
-We can calculate this directly. 
+We can calculate this directly.
 %
 \begin{align}
   & \ep\xth{new} \nonumber \\
@@ -324,7 +324,7 @@ One can, in fact, prove a generalization bound---generalizing from finite sample
 %
 \begin{align}
   \underbrace{\ep\xth{new}(f)}_{\textrm{error on } \Dnew}
-  &\leq 
+  &\leq
     \underbrace{\ep\xth{old}(f)}_{\textrm{error on } \Dold} +
     \underbrace{\ep\xth{best}}_{\textrm{minimal avg error}} +
     \underbrace{d_\cA(\Dold,\Dnew)}_{\textrm{distance}}
@@ -342,7 +342,7 @@ The main practical use of this result is that it suggests a way to look for repr
 TODO further reading
 
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "courseml"
-%%% End: 
+%%% End:
