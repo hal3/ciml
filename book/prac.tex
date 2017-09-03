@@ -232,7 +232,7 @@ least, it should be small.
 \section{Feature Pruning and Normalization}
 
 In text categorization problems, some words simply do not appear very
-often.  Perhaps the word ``groovy''\sidenote{This is typically
+often.  Perhaps the word ``groovy''\sidenote{This is typically a
   positive indicator, or at least it was back in the US in the 1970s.}
 appears in exactly one training document, which is positive.  Is it
 really worth keeping this word around as a feature?  It's a dangerous
@@ -508,7 +508,7 @@ information retrieval is the \concept{precision}/\concept{recall}
 metric.  Precision asks the question: of all the X's that you found,
 how many of them were actually X's?  Recall asks: of all the X's that
 were out there, how many of them did you find?\sidenote{A colleague
-  make the analogy to the US court system's saying ``Do you promise to
+  made the analogy to the US court system's saying ``Do you promise to
   tell the whole truth and nothing but the truth?''  In this case, the
   ``whole truth'' means high recall and ``nothing but the truth''
   means high precision.''}  Formally, precision and recall are defined
@@ -551,7 +551,7 @@ the threshold very low, you'll have high recall (but low precision).
 By considering \emph{every possible} place you could put this
 threshold, you can trace out a curve of precision/recall values, like
 the one in Figure~\ref{fig:prac:prcurve}.  This allows us to ask the
-question: for some fixed precision, what sort of recall can I get.
+question: for some fixed precision, what sort of recall can I get?
 Obviously, the closer your curve is to the upper-right corner, the
 better.  And when comparing learning algorithms A and B you can say
 that A \concept{dominates} B if A's precision/recall curve is always
@@ -628,7 +628,7 @@ plots the sensitivity against $1 - \text{specificity}$.  Given an ROC
 curve, you can compute the \concept{area under the curve} (or
 \concept{AUC}) metric, which also provides a meaningful single number
 for a system's performance.  Unlike f-measures, which tend to be low
-because the require agreement, AUC scores tend to be very high, even
+because they require agreement, AUC scores tend to be very high, even
 for not great systems.  This is because random chance will give you an
 AUC of $0.5$ and the best possible AUC is $1.0$.
 
@@ -698,7 +698,7 @@ have two choices.  You can either select one of the $K$ trained models
 as your final model to make predictions with, or you can train a
 \emph{new} model on all of the data, using the hyperparameters
 selected by cross-validation.  If you have the time, the latter is
-probably a better options.
+probably a better option.
 
 \newalgorithm{prac:loo}%
   {\FUN{KNN-Train-LOO}(\VAR{$\mat D$})}
@@ -827,12 +827,12 @@ $\geq 1.96$ & $97.5\%$ \\
 $\geq 2.58$ & $99.5\%$
 }
 
-Suppose that you evaluate two algorithm on $N$-many examples.  On each
+Suppose that you evaluate two algorithms on $N$-many examples.  On each
 example, you can compute whether the algorithm made the correct
 prediction.  Let $a_1, \dots, a_N$ denote the error of the first
 algorithm on each example.  Let $b_1, \dots, b_N$ denote the error of
 the second algorithm.  You can compute $\mu_a$ and $\mu_b$ as the
-means of $\vec a$ and $\vec b$, respecitively.  Finally, center the
+means of $\vec a$ and $\vec b$, respectively.  Finally, center the
 data as $\hat a = \vec a - \mu_a$ and $\hat b = \vec b - \mu_b$.
 The t-statistic is defined as:
 \begin{equation} \label{eq:prac:t}
@@ -892,7 +892,7 @@ One disadvantage to cross validation is that it is computationally
 expensive.  More folds typically leads to better estimates, but every
 new fold requires training a new classifier.  This can get very time
 consuming.  The technique of \concept{bootstrapping} (and closely
-related idea of \concept{jack-knifing} can address this problem.
+related idea of \concept{jack-knifing}) can address this problem.
 
 Suppose that you didn't want to run cross validation.  All you have is
 a single held-out test set with $1000$ data points in it.  You can run
