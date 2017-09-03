@@ -90,7 +90,7 @@ exactly when the hyperplane correctly separates the data.
 You might then come back and say: okay, well I don't really need an
 \emph{exact} solution.  I'm willing to have a solution that makes one
 or two more errors than it has to.  Unfortunately, the situation is
-really bad.  Zero/one loss is NP-hard to even \emph{appproximately
+really bad.  Zero/one loss is NP-hard to even \emph{approximately
   minimize}.  In other words, there is no efficient algorithm for even
 finding a solution that's a small constant worse than optimal.  (The
 best known constant at this time is $418/415 \approx 1.007$.)
@@ -329,7 +329,7 @@ aspect is how they trade-off multiple features.  To see the behavior
 of $p$-norms in two dimensions, we can plot their \concept{contour}
 (or \concept{level-set}).  Figure~\ref{fig:loss:norms2d} shows the
 contours for the same $p$ norms in two dimensions.  Each line denotes
-the two-dimensional vectors to which this norm assignes a total value
+the two-dimensional vectors to which this norm assigns a total value
 of $1$.  By changing the value of $p$, you can interpolate between a
 square (the so-called ``max norm''), down to a circle ($2$-norm),
 diamond ($1$-norm) and pointy-star-shaped-thing ($p<1$ norm).
@@ -350,7 +350,7 @@ popular choice for sparsity-seeking applications.
 \begin{mathreview}{Gradients}
   A gradient is a multidimensional generalization of a derivative.
   Suppose you have a function $f : \R^D \fto \R$ that takes a vector $\vx = \langle x_1, x_2, \dots, x_D \rangle$ as input and produces a scalar value as output.
-  You can differentite this function according to any one of the inputs; for instance, you can compute $\frac {\partial f} {\partial x_5}$ to get the derivative with respect to the fifth input.
+  You can differentiate this function according to any one of the inputs; for instance, you can compute $\frac {\partial f} {\partial x_5}$ to get the derivative with respect to the fifth input.
   The \concept{gradient} of $f$ is just the vector consisting of the derivative $f$ with respect to each of its input coordinates independently, and is denoted $\grad f$, or, when the input to $f$ is ambiguous, $\grad_{\vec x} f$.
   This is defined as:
   ~
@@ -932,7 +932,7 @@ can ``move'' that point across the hyperplane on to the proper side.
 You will have to pay a little bit to do so, but as long as you aren't
 moving a \emph{lot} of points around, it should be a good idea to do
 this.  In this picture, the amount that you move the point is denoted
-$\xi$ (xi).
+$\xi$ ($x_i$).
 
 By introducing one slack parameter for each training example, and
 penalizing yourself for having to use slack, you can create an
