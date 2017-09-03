@@ -299,7 +299,7 @@ In addition to small weights being good, you could argue that
 this means that feature $d$ is not used at all in the classification
 decision.  If there are a large number of irrelevant features, you
 might want as many weights to go to zero as possible.  This suggests
-an alternative regularizer: $R\xth{cnt}(\vw,b) = \sum_d \Ind[x_d \neq
+an alternative regularizer: $R\xth{cnt}(\vw,b) = \sum_d \Ind[w_d \neq
 0]$.
 
 \thinkaboutit{Why might you not want to use $R\xth{cnt}$ as a regularizer?}
