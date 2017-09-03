@@ -262,7 +262,7 @@ Given this expansion, in order to execute step (1), you need to
 compute norms.  This can be done as follows:
 %
 \begin{align}
-z_n 
+z_n
 &= \arg\min_k \norm{\textcolor{darkblue}{\phi(\vx_n)} - \textcolor{darkred}{\vec\mu\kth}}^2
    \becauseof{definition of $z_n$} \\
 &= \arg\min_k \norm{\textcolor{darkblue}{\phi(\vx_n)} - \textcolor{darkred}{\sum_m \al\kth_m \phi(\vx_m)}}^2
@@ -365,11 +365,11 @@ You need to verify the positive semi-definite property on $K$.  You
 can do this as follows:
 %
 \begin{align}
-\int\!\!\!\int f(\vx) K(\vx,\vz) f(\vz) \ud \vx \ud \vz 
-&= \int\!\!\!\int f(\vx) \left[ K_1(\vx,\vz) + K_2(\vx,\vz) \right] f(\vz) \ud \vx \ud \vz 
+\int\!\!\!\int f(\vx) K(\vx,\vz) f(\vz) \ud \vx \ud \vz
+&= \int\!\!\!\int f(\vx) \left[ K_1(\vx,\vz) + K_2(\vx,\vz) \right] f(\vz) \ud \vx \ud \vz
    \becauseof{definition of $K$}\\
 &= \int\!\!\!\int f(\vx) K_1(\vx,\vz) f(\vz) \ud \vx \ud \vz \nonumber\\
-&\quad + \int\!\!\!\int f(\vx) K_2(\vx,\vz) f(\vz) \ud \vx \ud \vz 
+&\quad + \int\!\!\!\int f(\vx) K_2(\vx,\vz) f(\vz) \ud \vx \ud \vz
   \becauseof{distributive rule}\\
 &> 0 + 0
    \becauseof{$K_1$ and $K_2$ are psd}
@@ -492,7 +492,7 @@ first set of constraints and $\be_n$ for the second set.
 %
 \begin{align}
 \cL(\vw,b,\vec\xi,\vec\al,\vec\be)
-&= 
+&=
   \textcolor{darkblue}{\frac 1 2 \norm{\vw}^2}
 %\\&\qquad
 + \textcolor{darkergreen}{C \sum_n \xi_n}
@@ -501,7 +501,7 @@ first set of constraints and $\be_n$ for the second set.
 \\&\qquad
 - \sum_n \al_n \left[
     \textcolor{darkred}{y_n \left( \dotp{\vw}{\vx_n} + b \right) - 1 + \xi_n}
-  \right] 
+  \right]
 \end{align}
 %
 The \emph{new} optimization problem is:
@@ -525,10 +525,10 @@ to zero, and solve for $\vw$ in terms of the other variables.
 %
 \begin{align}
 \grad_{\vw} \cL
-= \textcolor{darkblue}{\vw} 
+= \textcolor{darkblue}{\vw}
   - \sum_n \al_n \textcolor{darkred}{y_n \vx_n}
 = 0 \quad\Longleftrightarrow\quad
-\textcolor{darkblue}{\vw} 
+\textcolor{darkblue}{\vw}
 = \sum_n \al_n \textcolor{darkred}{y_n \vx_n}
 \end{align}
 %
@@ -543,7 +543,7 @@ expression for $\vw$ with, say, $m$.  This yields:
 %
 \begin{align}
 \cL(b,\vec\xi,\vec\al,\vec\be)
-&= 
+&=
   \textcolor{darkblue}{\frac 1 2 \norm{\sum_m \al_m y_m \vx_m}^2}
 %\\&\qquad
 + \textcolor{darkergreen}{C \sum_n \xi_n}
@@ -560,7 +560,7 @@ understand where the following comes from:
 %
 \begin{align}
 \cL(b,\vec\xi,\vec\al,\vec\be)
-&= 
+&=
   \textcolor{darkblue}{\frac 1 2
     \sum_n \sum_m \al_n \al_m y_n y_m \dotp{\vx_n}{\vx_m}
   }
@@ -568,7 +568,7 @@ understand where the following comes from:
 \\&\qquad
    - \textcolor{darkred}{
     \sum_n
-    \sum_m 
+    \sum_m
       \al_n \al_m y_n y_m \dotp{\vx_n}{\vx_m}
 }
 - \textcolor{darkred}{
@@ -580,7 +580,7 @@ understand where the following comes from:
 + \sum_n (\textcolor{darkergreen}{C} - \textcolor{darkpurple}{\be_n}) \xi_n
 \\&\qquad
 \textcolor{darkred}{
--  b \sum_n \al_n y_n 
+-  b \sum_n \al_n y_n
 -  \sum_n \al_n (\xi_n - 1)}
 \end{align}
 %
@@ -631,7 +631,7 @@ has been replaced by $K(\vx_n,\vx_m)$:
 \end{align}
 %
 If you are comfortable with matrix notation, this has a very compact
-form.  Let $\vec 1$ denote the $N$-dimensional vector of all $1$s, 
+form.  Let $\vec 1$ denote the $N$-dimensional vector of all $1$s,
 let $\vec y$ denote the vector of labels and let $\mat G$ be the $N
 \times N$ matrix, where $\mat G_{n,m} = y_n y_m K(\vx_n, \vx_m)$, then this
 has the following form:
@@ -650,7 +650,7 @@ the constraint added when removing the $\be$ variables).  Thus, your
 problem is:
 %
 \optimize{kernel:svmdual}{\vec\al}{%
-- \cL(\vec \al) = 
+- \cL(\vec \al) =
 \frac 1 2
     \sum_n \sum_m \al_n \al_m y_n y_m K(\vx_n,\vx_m)
 - \sum_n \al_n
@@ -786,7 +786,7 @@ regularization parameter and $\vec Y$ is the $N\times 1$ vector of
 labels.
 
 This algorithm is, in some ways, even easier to kernelize than the
-perceptron.  The optimal solution has a closed form, and 
+perceptron.  The optimal solution has a closed form, and
 \end{comment}
 
 \section{Further Reading}
@@ -800,7 +800,7 @@ TODO further reading
 % http://nlp.stanford.edu/IR-book/html/htmledition/nonlinear-svms-1.html
 
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "courseml"
 %%% End:
