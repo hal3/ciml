@@ -98,7 +98,7 @@ data ~ knn ~ dimensions ~ points ~ feature ~ figure ~ decision ~ features ~ poin
 }
 
 
-    
+
 \TODOFigure{prac:bow}{BOW repr of one positive and one negative review}
 
 In the context of \concept{text categorization} (for instance, the
@@ -120,7 +120,7 @@ irrelevant feature is one that is completely uncorrelated with the
 prediction task.  A feature $f$ whose expectation does not depend on
 the label $\Ep[f \| Y] = \Ep[f]$ might be irrelevant.  For instance,
 the presence of the word ``the'' might be largely irrelevant for
-predicting whether a course review is positive or negative.  
+predicting whether a course review is positive or negative.
 
 A secondary issue is how well these algorithms deal with
 \concept{redundant features}.  Two features are redundant if they are
@@ -141,7 +141,7 @@ is usually not worthwhile thinking of the case where one has $999$
 great features and $1$ bad feature.  The interesting case is when the
 bad features outnumber the good features, and often outnumber by a
 large degree.  %For instance, perhaps the number of good features is
-%something like $\log D$ out of a set of $D$ total features.  
+%something like $\log D$ out of a set of $D$ total features.
 The
 question is how robust are algorithms in this case.\sidenote{You might
   think it's absurd to have so many irrelevant features, but the cases
@@ -197,7 +197,7 @@ examples.
 Unfortunately, the situation is actually worse than this.  In the
 above analysis we only considered the case of \emph{perfect}
 correlation.  We could also consider the case of \emph{partial}
-correlation, which would yield even higher probabilities.  
+correlation, which would yield even higher probabilities.
 Suffice it to say that even
 decision trees can become confused.
 
@@ -273,13 +273,13 @@ words and performance suffers.
   Suppose we have $N$ real valued numbers $z_1, z_2, \dots, z_N$.
   The \concept{sample mean} (or just \concept{mean}) of these numbers is just their average value, or expected value: $\mu = \frac 1 N \sum_n z_n$.
   The \concept{sample variance} (or just \concept{variance}) measures how much they vary around their mean: $\si^2 = \frac 1 {N-1} \sum_n (z_n - \mu)^2$, where $\mu$ is the sample mean.
-  
+
 ~\\
 
   The mean and variance have convenient interpretations in terms of prediction.
   Suppose we wanted to choose a single constant value to ``predict'' the next $z$, and were minimizing squared error.
   Call this constant value $a$.
-  Then $a = \argmin_{a \in \R} \frac 1 2 \sum_n (a - z_n)^2$. 
+  Then $a = \argmin_{a \in \R} \frac 1 2 \sum_n (a - z_n)^2$.
   (Here, the $\frac 1 2$ is for convenience and does not change the answer.)
   To solve for $a$, we can take derivatives and set to zero:
     $\frac \partial {\partial a} \frac 1 2 \sum_n (a - z_n)^2
@@ -967,7 +967,7 @@ Can your learning system do well on fitting the training data? If so, then the p
 
 \textbf{Do you have train/test mismatch?} If you can fit the training data, but it doesn't generalize, it could be because there's something different about your test data. Try shuffling your training data and test data together and then randomly selecting a new test set. If you do well in that condition, then probably the test distribution is strange in some way. If reselecting the test data doesn't help, you have other generalization problems.
 
-\textbf{Is your learning algorithm implemented correctly?} This often means: is it optimizing what you think it's optimizing. Instead of measuring accuracy, try measuring whatever-quantity-your-algorithm-is-supposedly-optimizing (like log loss or hinge loss) and make sure that the optimizer is successfully minimizing this quantity. It is usually useful to hand-craft some datasets on which you know the desired behavior. 
+\textbf{Is your learning algorithm implemented correctly?} This often means: is it optimizing what you think it's optimizing. Instead of measuring accuracy, try measuring whatever-quantity-your-algorithm-is-supposedly-optimizing (like log loss or hinge loss) and make sure that the optimizer is successfully minimizing this quantity. It is usually useful to hand-craft some datasets on which you know the desired behavior.
 For instance, you could run KNN on the XOR data.  Or you
 could run perceptron on some easily linearly separable data (for
 instance positive points along the line $x_2 = x_1 + 1$ and negative
@@ -975,7 +975,7 @@ points along the line $x_2 = x_1 - 1$).  Or a decision tree on nice
 axis-aligned data.
 Finally, can you compare against a reference implementation?
 
-\textbf{Do you have an adequate representation?} 
+\textbf{Do you have an adequate representation?}
 If you cannot even fit the training data, you might not have a rich enough feature set.
 The easiest way to try to get a learning algorithm to overfit is to
 add a new feature to it.  You can call this feature the
@@ -1003,7 +1003,7 @@ Because one of the key questions in machine learning is the question of represen
 ~
 \begin{align}
 \text{error}(f)
-&= 
+&=
 \underbrace{\left[ \text{error}(f) - \min_{f^* \in \cF} \text{error}(f^*) \right]}_{\text{\concept{estimation error}}}
 +
 \underbrace{\left[ \min_{f^* \in \cF} \text{error}(f) \right]}_{\text{\concept{approximation error}}}
@@ -1061,7 +1061,7 @@ TODO
 % and performance drops.
 
 % One can take this idea further.  Instead of sequences of characters,
-% we can consider sequences of \emph{bits}.  
+% we can consider sequences of \emph{bits}.
 
 % \thinkaboutit{Can you think of a text categorization problem where bag
 %   of characters might actually be a reasonable representation?}
@@ -1094,7 +1094,7 @@ TODO
 %TODO: answers to image questions
 
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "courseml"
-%%% End: 
+%%% End:
