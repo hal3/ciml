@@ -145,8 +145,11 @@ adjusting $b$ upwards by $0.00000011$ will decrease your error rate by
 $1$.  But adjusting it upwards by $0.00000009$ will have no effect.
 This makes it really difficult to figure out good ways to adjust the
 parameters.
-
+\MoveNextFigure{-5cm}
 \Figure{loss:zeroone}{plot of zero/one versus margin}
+
+\Figure{loss:sigmoidzeroone}{plot of zero/one versus margin and an
+	S version of it}
 
 To see this more clearly, it is useful to look at plots that relate
 \emph{margin} to \emph{loss}.  Such a plot for zero/one loss is shown
@@ -158,9 +161,6 @@ then you get a loss of zero.  Otherwise you get a loss of one.  By
 thinking about this plot, you can see how changes to the parameters
 that change the margin \emph{just a little bit} can have an enormous
 effect on the overall loss.
-
-\Figure{loss:sigmoidzeroone}{plot of zero/one versus margin and an
-  S version of it}
 
 You might decide that a reasonable way to address this problem is to
 replace the non-smooth zero/one loss with a smooth approximation.
