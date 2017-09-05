@@ -502,6 +502,7 @@ not-X'' problems often have more of the feel of ``X spotting'' rather
 than a true distinction between X and Y.  (Can you spot the spam?  can
 you spot the relevant documents?)
 
+
 For spotting problems (X versus not-X), there are often more
 appropriate success metrics than accuracy.  A very popular one from
 information retrieval is the \concept{precision}/\concept{recall}
@@ -526,8 +527,6 @@ that $0/0 = 1$ in these definitions.  Thus, if you system found
 nothing, your precision is always perfect; and if there is nothing to
 find, your recall is always perfect.
 
-\TODOFigure{prac:spam}{show a bunch of emails spam/nospam sorted by model predicion, not perfect}
-
 Once you can compute precision and recall, you are often able to
 produce \concept{precision/recall curves}.  Suppose that you are
 attempting to identify spam.  You run a learning algorithm to make
@@ -540,6 +539,8 @@ emails at the top and the least spam-like emails at the bottom, like
 in Figure~\ref{fig:prac:spam}.
 
 \thinkaboutit{How would you get a confidence out of a decision tree or KNN?}
+
+\TODOFigure{prac:spam}{show a bunch of emails spam/nospam sorted by model predicion, not perfect}
 
 \TODOFigure{prac:prcurve}{precision recall curve}
 
