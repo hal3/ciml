@@ -53,6 +53,8 @@ But, like so many problems in the world, there is a significant
 you give it is trash, the learning algorithm is unlikely to be able to
 overcome it.
 
+\Figure{prac_imagepix}{object recognition in pixels}
+
 Consider a problem of object recognition from images.  If you start
 with a $100 \times 100$ pixel image, a very easy feature
 representation of this image is as a $30,000$ dimensional vector,
@@ -60,8 +62,6 @@ where each dimension corresponds to the red, green or blue component
 of some pixel in the image.  So perhaps feature 1 is the amount of red
 in pixel $(1,1)$; feature 2 is the amount of green in that pixel; and
 so on.  This is the \concept{pixel representation} of images.
-
-\Figure{prac_imagepix}{object recognition in pixels}
 
 One thing to keep in mind is that the pixel representation
 \emph{throws away} all locality information in the image.  Learning
