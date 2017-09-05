@@ -314,15 +314,15 @@ flavor.  We write $\norm{\vw}_p$ to denote the $p$-norm of $\vw$.
   \norm{\vw}_p = \left( \sum_d \ab{w_d}^p \right)^{\frac 1 p}
 \end{equation}
 %
+\thinkaboutit{You can actually identify the $R\xth{cnt}$ regularizer
+	with a $p$-norm as well.  Which value of $p$ gives it to you?
+	(Hint: you may have to take a limit.)}
+
+\TODOFigure{loss:norms2d}{level sets of the same $p$-norms}
+
 You can check that the $2$-norm exactly corresponds to the usual
 Euclidean norm, and that the $1$-norm corresponds to the ``absolute''
 regularizer described above.
-
-\thinkaboutit{You can actually identify the $R\xth{cnt}$ regularizer
-  with a $p$-norm as well.  Which value of $p$ gives it to you?
-  (Hint: you may have to take a limit.)}
-
-\TODOFigure{loss:norms2d}{level sets of the same $p$-norms}
 
 When $p$-norms are used to regularize weight vectors, the interesting
 aspect is how they trade-off multiple features.  To see the behavior
