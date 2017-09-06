@@ -472,15 +472,21 @@
 
 \floatname{algorithm}{\textcolor{\algorithmiccolor}{\algorithmicfont Algorithm}}
 
+\makeatletter
+\@addtoreset{algorithm}{chapter}% algorithm counter resets every chapter
+\makeatother
+
+\renewcommand{\thealgorithm}{\arabic{chapter}.\arabic{algorithm}}
+
 \newcommand{\newalgorithm}[3]{%
   \begin{algorithm}[t]
-    \label{alg:#1}
-    \caption{#2}
     \begin{small}
       \begin{algorithmic}[1]
         #3
       \end{algorithmic}
     \end{small}
+    \caption{#2}
+	\label{alg:#1}
   \end{algorithm}}
 
 \newcommand{\categ}[1]{\textsc{\textcolor{darkgrey}{#1}}}
