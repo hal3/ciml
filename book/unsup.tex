@@ -148,7 +148,7 @@ from each other as possible.  The heuristic is sketched below:
   \item For $k = 2 \dots K$:
     \begin{enumerate}
       \item Find the example $m$ that is as far as possible from
-        \emph{all} previously selected means; namely: 
+        \emph{all} previously selected means; namely:
           $m = \arg\max_m \min_{k' < k} \norm{ \vx_m - \vec\mu_{k'} }^2$
           and set $\vec\mu_k = \vx_m$
     \end{enumerate}
@@ -301,8 +301,8 @@ zero, the mean of the $p$s is also zero.  This can be seen as follows:
 %
 \begin{align}
   \sum_n p_n
-  = \sum_n \dotp{\vx_n}{\vec u} 
-  = \dotp{\left( \sum_n \vx_n \right)}{\vec u} 
+  = \sum_n \dotp{\vx_n}{\vec u}
+  = \dotp{\left( \sum_n \vx_n \right)}{\vec u}
   = \dotp{\vec 0}{\vec u} = \vec 0
 \end{align}
 %
@@ -423,14 +423,14 @@ u\T$.  Instead of maximizing variance, you might instead want to
 minimize the \concept{reconstruction error}, defined by:
 %
 \begin{align}
-\norm{ \mat X - \mat Z\vec u\T}^2 
-&= \norm{ \mat X - \mat X \vec u \vec u\T }^2 
+\norm{ \mat X - \mat Z\vec u\T}^2
+&= \norm{ \mat X - \mat X \vec u \vec u\T }^2
 \becauseof{definition of $\mat Z$}\\
-&= \norm{\mat X}^2 
+&= \norm{\mat X}^2
  + \norm{\mat X \vec u \vec u\T}^2
  - 2 \mat X\T \mat X \vec u \vec u\T
 \becauseof{quadratic rule}\\
-&= \norm{\mat X}^2 
+&= \norm{\mat X}^2
  + \norm{\mat X \vec u \vec u\T}^2
  - 2 \vec u\T\mat X\T \mat X \vec u
 \becauseof{quadratic rule}\\
@@ -506,8 +506,7 @@ TODO
 \end{comment}
 
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "courseml"
-%%% End: 
-
+%%% End:
