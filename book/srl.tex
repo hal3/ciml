@@ -65,7 +65,7 @@ The main challenge we will face is how to do this \emph{efficiently}, given that
 % The multiclass perceptron training algorithm is summarized in Algorithm~\ref{alg:srl:multiclassperc}.
 % Like the standard perceptron algorithm, the multiclass perceptron works better under an averaging strategy.
 
-In order to build up to structured problems, let's begin with a simplified by pedagogically useful stepping stone: multiclass classification with a perceptron.
+In order to build up to structured problems, let's begin with a simplified but pedagogically useful stepping stone: multiclass classification with a perceptron.
 As discussed earlier, in multiclass classification we have inputs $\vx \in \R^D$ and output labels $y \in \{ 1, 2, \dots, K \}$.
 Our goal is to learn a scoring function $s$ so that $s(x,y) > s(x,\hat y)$ for all $\hat y \neq y$, where $y$ is the true label and $\hat y$ is an imposter label.
 The general form of scoring function we consider is a linear function of a joint feature vector $\phi(\vx,y)$:
@@ -274,7 +274,7 @@ In particular, we're taking advantage of the associative law for addition:
   &= \sum_{l=1}^L \dotp{\vw}{\phi_l(\vx, \vy)} \becauseof{associative law}
 \end{align}
 %
-What this means is that we can build a graph like that in Figure~\ref{fig:srl:trellis}, with one verticle slice per time step ($l \ 1 \dots L$).\footnote{A graph of this sort is called a \concept{trellis}, and sometimes a \concept{lattice} in the literature.}
+What this means is that we can build a graph like that in Figure~\ref{fig:srl:trellis}, with one vertical slice per time step ($l \ 1 \dots L$).\footnote{A graph of this sort is called a \concept{trellis}, and sometimes a \concept{lattice} in the literature.}
 Each \emph{edge} in this graph will receive a weight, constructed in such a way that if you take a complete path through the lattice, and add up all the weights, this will correspond exactly to $\dotp{\vw}{\phi(\vx,\vy)}$.
 
 \FigureFull{srl:trellis}{A picture of a trellis sequence labeling. At each time step $l$ the corresponding word can have any of the three possible labels. Any path through this trellis corresponds to a unique labeling of this sentence. The gold standard path is drawn with bold red arrows. The highlighted edge corresponds to the edge between $l=2$ and $l=3$ for verb/adj as described in the text. That edge has weight $\dotp{\vw}{\phi_3(\vx, \dots \circ \text{verb} \circ \text{adj})}$.}
@@ -293,10 +293,10 @@ For trellises, this can be computed by the Viterbi algorithm, or by applying any
 A complete derivation of the dynamic program in this case is given in Section~\ref{sec:srl:dp} for those who want to implement it directly.
 
 The main benefit of this construction is that it is guaranteed to exactly compute the argmax output for sequences required in the structured perceptron algorithm, \emph{efficiently}.
-In particular, it's runtime is $O(LK^2)$, which is an exponential improvement on the naive $O(K^L)$ runtime if one were to enumerate every possible output sequence.
+In particular, its runtime is $O(LK^2)$, which is an exponential improvement on the naive $O(K^L)$ runtime if one were to enumerate every possible output sequence.
 The algorithm can be naturally extended to handle ``higher order'' Markov assumptions, where features depend on triples or quadruples of the output.
 The trellis becomes larger, but the algorithm remains essentially the same.
-In order to handle a length $M$ Markov features, the resulting algorithm will take $O(LK^M)$ time.
+In order to handle length $M$ Markov features, the resulting algorithm will take $O(LK^M)$ time.
 In practice, it's rare that $M>3$ is necessary or useful.
 
 
@@ -369,7 +369,7 @@ The rest of the optimization problem remains the same, yielding:
   \xi_{n,\hat\vy} \geq 0 & (\forall n, \forall \hat\vy \in \cY(\vx_n))
 }
 %
-This optimization problem asks for a large margin and small slack, where there is a slack very for every training example and every possible incorrect output associated with that training example.
+This optimization problem asks for a large margin and small slack, where there is a slack variable for every training example and every possible incorrect output associated with that training example.
 In general, this is \emph{way too many} slack variables and \emph{way too many} constraints!
 
 There is a very useful, general trick we can apply.
@@ -391,7 +391,7 @@ Expanding out the definition of $s()$ and adding slack back in, we can replace t
 \end{align}
 We can now apply the same trick as before to remove $\xi_n$ from the analysis.
 In particular, because $\xi_n$ is constrained to be $\geq 0$ and because we are
-trying to minimize it's sum, we can figure out that out the optimum, it will be the case that:
+trying to minimize its sum, we can figure out that at the optimum, it will be the case that:
 \begin{align}
   \xi_n &=
     \max \left\{ 0,
@@ -407,7 +407,7 @@ trying to minimize it's sum, we can figure out that out the optimum, it will be 
 This value is referred to as
 the \concept{structured hinge loss}, which we have denoted as $\ell\xth{s-h}(\vy_n, \vx_n, \vw)$.
 This is because, although it is more complex, it bears a striking resemlance to the \concept{hinge loss} from Chapter~\ref{sec:loss}.
-In particular, if the score of the true output beats the score of every the best imposter by at least its loss, then $\xi_n$ will be zero.
+In particular, if the score of the true output beats the score of the best imposter by at least its loss, then $\xi_n$ will be zero.
 On the other hand, if some imposter (plus its loss) beats the true output, the loss scales linearly as a function of the difference.
 At this point, there is nothing special about Hamming loss, so we will replace it with some arbitrary structured loss $\ell$.
 
@@ -477,8 +477,8 @@ The only differences are: (1) on line~\ref{eq:srl:algolossaug} you use loss-augm
 
 The challenge that arises is that we now have a more complicated argmax problem that before.
 In structured perceptron, we only needed to compute $\hat\vy_n$ as the output that maximized its score (see Eq~\ref{eq:srl:argmax}).
-Here, we need to find the output that maximizes it score \emph{plus} it's loss (Eq~\eqref{eq:srl:lossaug}).
-This optimization problem is refered to as \concept{loss-augmented search} or \concept{loss-augmented inference}.
+Here, we need to find the output that maximizes its score \emph{plus} its loss (Eq~\eqref{eq:srl:lossaug}).
+This optimization problem is referred to as \concept{loss-augmented search} or \concept{loss-augmented inference}.
 
 Before solving the loss-augmented inference problem, it's worth thinking about why it makes sense.
 What is $\hat\vy_n$?
