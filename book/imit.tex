@@ -140,7 +140,7 @@ If it \emph{ever} veers from that state distribution, it may have no idea how to
 As a concrete example, perhaps the expert driver never ever gets themselves into a state where they are directly facing a wall.
 Moreover, the expert driver probably tends to drive forward more than backward.
 If the imperfect learner manages to make a few errors and get stuck next to a wall, it's likely to resort to the general ``drive forward'' rule and stay there forever.
-This is the problem of \concept{compounding error}; 
+This is the problem of \concept{compounding error};
 and yes, it does happen in practice.
 
 It turns out that it's possible to construct an imitation learning problem on which the $T^2$ compounding error is unavoidable.
@@ -375,7 +375,7 @@ Given that notion of best, the expert is easy to define:
   &= \argmin_a \text{best}(\ell, \vy, \hat\vy \circ a)
 \end{align}
 ~
-Namely, it is the action that leads to the best possible completion \emph{after} taking that action. 
+Namely, it is the action that leads to the best possible completion \emph{after} taking that action.
 So in the example above, the expert action is ``adj''.
 For some problems and some loss functions, computing the expert is easy.
 In particular, for sequence labeling under Hamming loss, it's trivial.
@@ -392,7 +392,7 @@ You define a feature vector $\phi(\vx,\hat\vy)$, which will typically consist of
 The expert label for the $t$th word is just the corresponding label in the ground truth $\vy$.
 Given all this, one can run Dagger (Algorithm~\ref{alg:imit:dldfs}) exactly as specified.
 
-Moving to structured prediction problems other than sequence labeling problems is beyond the scope of this book. 
+Moving to structured prediction problems other than sequence labeling problems is beyond the scope of this book.
 The general framework is to cast your structured prediction problem as a sequential decision making problem.
 Once you've done that, you need to decide on features (this is the easy part) and an expert (this is often the harder part).
 However, once you've done so, there are generic libraries for ``compiling'' your specification down to code.
@@ -402,7 +402,7 @@ However, once you've done so, there are generic libraries for ``compiling'' your
 TODO further reading
 
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "courseml"
-%%% End: 
+%%% End:
