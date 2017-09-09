@@ -1,7 +1,7 @@
 %%% Local Variables: 
 %%% mode: latex
 %%% TeX-master: "courseml"
-%%% End: 
+%%% End:
 
 \chapter{Expectation Maximization} \label{sec:em}
 
@@ -100,7 +100,7 @@ This can be translated into the following likelihood:
   &p(\vec a, \vec t, \vec s) \nonumber\\
   &=      \textcolor{darkpurple}{\left[ \prod_m 0.5^{t_m} 0.5^{1-t_m} \right]} \times
             \textcolor{darkblue}{\left[ \prod_n 1 \right]} \nonumber\\
-  &\qquad \times    \textcolor{darkred}{\left[ \prod_n\prod_m 
+  &\qquad \times    \textcolor{darkred}{\left[ \prod_n\prod_m
     s_n^{a_{n,m}t_m}
     (1-s_n)^{(1-a_{n,m})t_m} \right.} \nonumber\\
   &\qquad\qquad\textcolor{darkred}{\left. s_n^{(1-a_{n,m})(1-t_m)}
@@ -108,7 +108,7 @@ This can be translated into the following likelihood:
     \right]} \\
  &= \textcolor{darkpurple}{0.5^M}
    \textcolor{darkred}{
-\prod_n\prod_m 
+\prod_n\prod_m
     s_n^{a_{n,m}t_m}
     (1-s_n)^{(1-a_{n,m})t_m}
    s_n^{(1-a_{n,m})(1-t_m)}
@@ -143,7 +143,7 @@ A+B &= \sum_m \big[ 1 \big] = M
 Putting this together, we get:
 %
 \begin{align}
-  s_n &= \frac 1 M \sum_m \big[ a_{n,m} t_m + (1-a_{n,m}) (1-t_m) \big] 
+  s_n &= \frac 1 M \sum_m \big[ a_{n,m} t_m + (1-a_{n,m}) (1-t_m) \big]
 \end{align}
 %
 In the case of known $t$s, this matches exactly what we had in the heuristic.
@@ -162,7 +162,7 @@ We will compute $C = p(t_m=1, \vec a, \vec s)$ and $D = p(t_m=0, \vec a, \vec s)
 The computation is straightforward:
 %
 \begin{align}
-  C &= 0.5 \prod_n s_n^{a_{n,m}} (1-s_n)^{1-a_{n,m}} 
+  C &= 0.5 \prod_n s_n^{a_{n,m}} (1-s_n)^{1-a_{n,m}}
     &= 0.5 \prod_{\substack{n : \\ a_{n,m} = 1}} s_n \prod_{\substack{n : \\ a_{n,m} = 0}} (1-s_n) \\
   D &= 0.5 \prod_n s_n^{1-a_{n,m}} (1-s_n)^{a_{n,m}}
     &= 0.5 \prod_{\substack{n : \\ a_{n,m} = 1}} (1-s_n) \prod_{\substack{n : \\ a_{n,m} = 0}} s_n
@@ -457,7 +457,7 @@ hoping to maximize $\cL$ by instead maximizing a lower bound.  In
 order to ensure that an increase in the lower bound implies an
 increase in $\cL$, we need to ensure that $\cL(\mat X \| \vth) =
 \tilde\cL(\mat X \| \vth)$.  In words: $\tilde\cL$ should be a lower
-bound on $\cL$ that makes contact at the current point, $\vth$.  
+bound on $\cL$ that makes contact at the current point, $\vth$.
 %This
 %is shown in Figure~\ref{fig:em:lb}, including a case where the lower
 %bound does \emph{not} make contact, and thereby does not guarantee an
@@ -491,7 +491,7 @@ TODO further reading
 
 
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "courseml"
-%%% End: 
+%%% End:
