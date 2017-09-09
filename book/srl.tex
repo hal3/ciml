@@ -429,9 +429,9 @@ If the structured hinge loss is positive, then the gradient is:
   &= \grad_{\vw} \left\{
     \max_{\hat\vy \in \cY(\vx_n)} \Big[ \dotp{\vw}{\phi(\vx_n,\hat\vy)} + \ell(\vy_n, \hat\vy) \Big] - \dotp{\vw}{\phi(\vx_n,\vy_n)} \right\} \\
   \becauseoffull{define $\hat\vy_n$ to be the output that attains the maximum above, rearrange} \\
-  &= \grad_{\vw} \Big\{ \dotp{\vw}{\phi(\vx_n,\hat\vy)} - \dotp{\vw}{\phi(\vx_n,\vy_n)} + \ell(\vy_n, \hat\vy) \Big\} \\
+  &= \grad_{\vw} \Big\{ \dotp{\vw}{\phi(\vx_n,\hat\vy_n)} - \dotp{\vw}{\phi(\vx_n,\vy_n)} + \ell(\vy_n, \hat\vy_n) \Big\} \\
   \becauseoffull{take gradient} \\
-  &= \phi(\vx_n,\hat\vy) - \phi(\vx_n,\vy_n)
+  &= \phi(\vx_n,\hat\vy_n) - \phi(\vx_n,\vy_n)
 \end{align}
 Putting this together, we get the full gradient as:
 \begin{align}
