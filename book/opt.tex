@@ -89,13 +89,13 @@ as follows:
 %
 \begin{align}
 \vw^*
-&= \arg\max_{\vw} \sum_n \ell(y_n, \dotp{\vw}{\vx_n}) + R(\vw) 
+&= \arg\max_{\vw} \sum_n \ell(y_n, \dotp{\vw}{\vx_n}) + R(\vw)
 \becauseof{definition}\\
-&= \arg\max_{\vw} \sum_n \left[ \ell(y_n, \dotp{\vw}{\vx_n}) + \frac 1 N R(\vw) \right] 
+&= \arg\max_{\vw} \sum_n \left[ \ell(y_n, \dotp{\vw}{\vx_n}) + \frac 1 N R(\vw) \right]
 \becauseof{move $R$ inside sum}\\
-&= \arg\max_{\vw} \sum_n \left[ \frac 1 N \ell(y_n, \dotp{\vw}{\vx_n}) + \frac 1 {N^2} R(\vw) \right] 
+&= \arg\max_{\vw} \sum_n \left[ \frac 1 N \ell(y_n, \dotp{\vw}{\vx_n}) + \frac 1 {N^2} R(\vw) \right]
 \becauseof{divide through by $N$}\\
-&= \arg\max_{\vw} \Ep_{(y,\vx) \sim D} \left[ \ell(y, \dotp{\vw}{\vx}) + \frac 1 N R(\vw) \right] 
+&= \arg\max_{\vw} \Ep_{(y,\vx) \sim D} \left[ \ell(y, \dotp{\vw}{\vx}) + \frac 1 N R(\vw) \right]
 \becauseof{write as expectation}\\
 & \text{where } D \text{ is the training data distribution}
 \end{align}
@@ -274,7 +274,7 @@ heuristic flavor to them and are beyond the scope of this book.
 % alternative regularizer is the KL-regularizer.  The motivation for the
 % KL-regularizer differs slightly from the previous notion of sparsity.
 % Instead of ``hoping'' that most of the weights go to zero, you instead
-% hope that most of the weights tend toward some positive constant $p$.  
+% hope that most of the weights tend toward some positive constant $p$.
 % The entropy
 % regularizer only works when the weights of your model are
 % non-negative, though this is not a big problem in practice: you can
@@ -323,7 +323,7 @@ Mathematically, the mapping looks like:
 %
 \begin{align}
   \phi(\vx)_p
-  &= \sum_d [h(d) = p] x_d 
+  &= \sum_d [h(d) = p] x_d
   \quad= \sum_{d \in h\inv(p)} x_d
 \end{align}
 %
@@ -343,7 +343,7 @@ well.
 Consider the kernel defined by this hash mapping.  Namely:
 %
 \begin{align}
-  K\xth{hash}(\vx, \vz) 
+  K\xth{hash}(\vx, \vz)
   &=
   \dotp{\phi(\vx)}{\phi(\vz)} \\
   &=
@@ -387,7 +387,7 @@ sparsity
 \end{comment}
 
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "courseml"
-%%% End: 
+%%% End:
