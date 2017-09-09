@@ -232,11 +232,11 @@ estimates of all parameters by taking a log and then taking gradients
 of the log likelihood:
 %
 \begin{align}
-\th_k &= \text{fraction of training examples in class $k$} \\
+\th_k &= \text{fraction of training examples in class $k$} \label{eq:em:mlfrac}\\
 &= \frac 1 N \sum_n [y_n = k] \nonumber\\
 \vec\mu_k &= \text{mean of training examples in class $k$} \\
 &= \frac {\sum_n [y_n = k] \vx_n} {\sum_n [y_n = k]} \nonumber\\
-\si^2_k &= \text{variance of training examples in class $k$} \\
+\si^2_k &= \text{variance of training examples in class $k$} \label{eq:em:mlvar}\\
 &= \frac {\sum_n [y_n = k] \norm{\vx_n-\mu_k}} {\sum_n [y_n = k]} \nonumber
 \end{align}
 %
@@ -277,9 +277,9 @@ Given a set of parameters (the $\vec\th$s, $\vec\mu$s and $\si^2$s),
 the \concept{fractional assignments} $z_{n,k}$ are easy to compute.
 Now, akin to $K$-means, given fractional assignments, you need to
 recompute estimates of the model parameters.  In analogy to the
-maximum likelihood solution (Eqs~\eqref{}-\eqref{}), you can do this
-by counting fractional points rather than full points.  This gives the
-following re-estimation updates:
+maximum likelihood solution (Eqs~\eqref{eq:em:mlfrac}-\eqref{eq:em:mlvar}), you
+can do this by counting fractional points rather than full points.  This gives
+the following re-estimation updates:
 %
 \begin{align}
 \th_k &= \text{fraction of training examples in class $k$} \\
