@@ -167,7 +167,7 @@ on the remainder of the cases.
 This leads to the formal definition of an $(\ep,\de)$ PAC-learning
 algorithm.  In this definition, $\ep$ plays the role of measuring
 accuracy (in the previous example, $\ep = 0.05$) and $\de$ plays the
-role of measuring failure (in the previous, $\de = 0.1$).  
+role of measuring failure (in the previous, $\de = 0.1$).
 
 \begin{definition}
   An algorithm $\cA$ is an \textcolor{darkblue}{$(\ep,\de)$-PAC
@@ -284,7 +284,7 @@ through are:
 f^0(\vx) &=  x_1 \land \lnot x_1 \land x_2 \land \lnot x_2 \land x_3 \land \lnot x_3 \land x_4 \land \lnot x_4 \\
 f^1(\vx) &=  \lnot x_1 \land \lnot x_2 \land x_3 \land x_4 \\
 f^2(\vx) &=  \lnot x_1 \land x_3 \land x_4 \\
-f^3(\vx) &=  \lnot x_1 \land x_3 \land x_4 
+f^3(\vx) &=  \lnot x_1 \land x_3 \land x_4
 \end{align}
 %
 The first thing to notice about this algorithm is that after
@@ -335,7 +335,7 @@ have seen them).  So bad things must not be that common.
   term $t$ that is not in $c$.  There are initially $2D$ many terms in
   $f$, and any (or all!) of them might not be in $c$.  We want to
   ensure that the probability that $f$ makes an error is at most
-  $\ep$.  It is sufficient to ensure that 
+  $\ep$.  It is sufficient to ensure that
 
 For a term $t$
   (e.g., $\lnot x_5$), we say that $t$ ``negates'' an example $\vx$ if
@@ -344,11 +344,11 @@ For a term $t$
   respect to the unknown distribution $\cD$ over data points).
 
   First, we show that if we have no bad terms left in $f$, then $f$
-  has an error rate at most $\ep$.  
+  has an error rate at most $\ep$.
 
 We know that $f$ contains \emph{at
     most} $2D$ terms, since is begins with $2D$ terms and throws them
-  out.  
+  out.
 
   The algorithm begins with $2D$ terms (one for each variable and one
   for each negated variable).  Note that $f$ will only make one type
@@ -603,7 +603,7 @@ TODO
 
 
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "courseml"
-%%% End: 
+%%% End:
