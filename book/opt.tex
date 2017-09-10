@@ -52,7 +52,7 @@ One issue that is not covered in this chapter is parallel learning.
 This is largely because it is currently not a well-understood area in
 machine learning.  There are many aspects of parallelism that come
 into play, such as the speed of communication across the network,
-whether you have shared memory, etc.  Right now, this the general,
+whether you have shared memory, etc.  Right now, the general,
 poor-man's approach to parallelization, is to employ ensembles.
 
 \section{Stochastic Optimization}
@@ -89,13 +89,13 @@ as follows:
 %
 \begin{align}
 \vw^*
-&= \arg\max_{\vw} \sum_n \ell(y_n, \dotp{\vw}{\vx_n}) + R(\vw) 
+&= \arg\max_{\vw} \sum_n \ell(y_n, \dotp{\vw}{\vx_n}) + R(\vw)
 \becauseof{definition}\\
-&= \arg\max_{\vw} \sum_n \left[ \ell(y_n, \dotp{\vw}{\vx_n}) + \frac 1 N R(\vw) \right] 
+&= \arg\max_{\vw} \sum_n \left[ \ell(y_n, \dotp{\vw}{\vx_n}) + \frac 1 N R(\vw) \right]
 \becauseof{move $R$ inside sum}\\
-&= \arg\max_{\vw} \sum_n \left[ \frac 1 N \ell(y_n, \dotp{\vw}{\vx_n}) + \frac 1 {N^2} R(\vw) \right] 
+&= \arg\max_{\vw} \sum_n \left[ \frac 1 N \ell(y_n, \dotp{\vw}{\vx_n}) + \frac 1 {N^2} R(\vw) \right]
 \becauseof{divide through by $N$}\\
-&= \arg\max_{\vw} \Ep_{(y,\vx) \sim D} \left[ \ell(y, \dotp{\vw}{\vx}) + \frac 1 N R(\vw) \right] 
+&= \arg\max_{\vw} \Ep_{(y,\vx) \sim D} \left[ \ell(y, \dotp{\vw}{\vx}) + \frac 1 N R(\vw) \right]
 \becauseof{write as expectation}\\
 & \text{where } D \text{ is the training data distribution}
 \end{align}
@@ -122,7 +122,7 @@ optimization problem:
 \optimizeuc{opt:stochastic}{\vz}{ \Ep_{\ze}[ \cF(\vz, \ze) ]}
 %
 In the example, $\ze$ denotes the random choice of examples over the
-dataset, $\vz$ denotes the weight vector and $\cF(\vw,\ze)$ denotes
+dataset, $\vz$ denotes the weight vector and $\cF(\vz,\ze)$ denotes
 the loss on that example \emph{plus} a fraction of the regularizer.
 
 Stochastic optimization problems are formally \emph{harder} than
@@ -162,7 +162,7 @@ time at a reasonable slow rate.  In particular, convergence can be
 guaranteed for learning rates of the form: $\eta\kth = \frac {\eta_0}
 {\sqrt{k}}$, where $\eta_0$ is a fixed, initial step size, typically
 $0.01$, $0.1$ or $1$ depending on how quickly you expect the algorithm
-to converge.  Unfortunately, in comparisong to gradient descent,
+to converge.  Unfortunately, in comparison to gradient descent,
 stochastic gradient is quite sensitive to the selection of a good
 learning rate.
 
@@ -179,7 +179,7 @@ to fit in memory, this is not a big deal: you will only pay for cache
 misses.  However, if your data is too large for memory and resides on
 a magnetic disk that has a slow seek time, randomly seeking to new
 data points for each example is prohibitivly slow, and you will likely
-need to forgo permuting the data.  The speed hit in convergence speed
+need to forgo permuting the data.  The hit in convergence speed
 will almost certainly be recovered by the speed gain in not having to
 seek on disk routinely.  (Note that the story is very different for
 solid state disks, on which random accesses really are quite
@@ -274,7 +274,7 @@ heuristic flavor to them and are beyond the scope of this book.
 % alternative regularizer is the KL-regularizer.  The motivation for the
 % KL-regularizer differs slightly from the previous notion of sparsity.
 % Instead of ``hoping'' that most of the weights go to zero, you instead
-% hope that most of the weights tend toward some positive constant $p$.  
+% hope that most of the weights tend toward some positive constant $p$.
 % The entropy
 % regularizer only works when the weights of your model are
 % non-negative, though this is not a big problem in practice: you can
@@ -323,7 +323,7 @@ Mathematically, the mapping looks like:
 %
 \begin{align}
   \phi(\vx)_p
-  &= \sum_d [h(d) = p] x_d 
+  &= \sum_d [h(d) = p] x_d
   \quad= \sum_{d \in h\inv(p)} x_d
 \end{align}
 %
@@ -343,7 +343,7 @@ well.
 Consider the kernel defined by this hash mapping.  Namely:
 %
 \begin{align}
-  K\xth{hash}(\vx, \vz) 
+  K\xth{hash}(\vx, \vz)
   &=
   \dotp{\phi(\vx)}{\phi(\vz)} \\
   &=
@@ -387,7 +387,7 @@ sparsity
 \end{comment}
 
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "courseml"
-%%% End: 
+%%% End:

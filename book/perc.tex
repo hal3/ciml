@@ -47,7 +47,7 @@ incoming neurons are firing at different rates (i.e., have different
 \concept{activations}).  Based on how much these incoming neurons are
 firing, and how ``strong'' the neural connections are, our main neuron
 will ``decide'' how strongly it wants to fire.  And so on through the
-whole brain.  Learning in the brain happens by neurons becomming
+whole brain.  Learning in the brain happens by neurons becoming
 connected to other neurons, and the strengths of connections adapting
 over time.
 
@@ -60,7 +60,7 @@ However, our goal isn't to build a brain, but to simply be
 learning algorithm as a \emph{single} neuron.  It receives input from
 $D$-many other neurons, one for each input feature.  The strength of
 these inputs are the feature values.  This is shown schematically in
-Figure~\ref{fig:perc:neuron}.  Each incoming connection has a weight
+Figure~\ref{fig:perc:example}.  Each incoming connection has a weight
 and the neuron simply sums up all the weighted inputs.  Based on this
 sum, it decides whether to ``fire'' or not.  Firing is interpreted as
 being a positive example and not firing is interpreted as being a
@@ -74,17 +74,17 @@ Mathematically, an input vector $\vx = \langle x_1, x_2, \dots, x_D
 \begin{equation} \label{eq:perc:sum}
 a = \sum_{d=1}^D w_d x_d
 \end{equation}
-to determine it's amount of ``activation.''  If this activiation is
+to determine its amount of ``activation.''  If this activation is
 positive (i.e., $a > 0$) it predicts that this example is a positive
 example.  Otherwise it predicts a negative example.
 
 The weights of this neuron are fairly easy to interpret.  Suppose that
-a feature, for instance ``is this a System's class?'' gets a zero
+a feature, for instance ``is this a Systems class?'' gets a zero
 weight.  Then the activation is the same regardless of the value of
 this feature.  So features with zero weight are ignored.  Features
 with positive weights are indicative of positive examples because they
 cause the activation to increase.  Features with negative weights are
-indicative of negative examples because they cause the activiation to
+indicative of negative examples because they cause the activation to
 decrease.
 
 \thinkaboutit{What would happen if we encoded binary features like
@@ -143,7 +143,7 @@ back around for a specified number of iterations.
   \COMMENT{initialize bias}
 \FOR{\VAR{iter} = \CON{1} \dots \VAR{MaxIter}}
 \FORALL{(\VAR{$\vx$},\VAR{$y$}) $\in$ \VAR{$\mat D$}}
-\SETST{$a$}{$\sum_{\VAR{d}=\CON{1}}^{\VAR{D}}$ \VAR{$w_d$} \VAR{$x_d$} + \VAR{$b$}} 
+\SETST{$a$}{$\sum_{\VAR{d}=\CON{1}}^{\VAR{D}}$ \VAR{$w_d$} \VAR{$x_d$} + \VAR{$b$}}
   \COMMENT{compute activation for this example}
 \IF{\VAR{$y$}\VAR{$a$} $\leq \CON{0}$}
 \SETST{$w_d$}{\VAR{$w_d$} + \VAR{$y$}\VAR{$x_d$}, \text{for all } \VAR{$d$} = $\CON{1} \dots \VAR{D}$}
@@ -274,7 +274,7 @@ as fast.
   %  \vspace{-3em}
   %  \includegraphics[width=2in]{figs/perc_dotprojection}.
   %\end{wrapfigure}
-  large and negative when $\vec u$ and $\vec v$ point in opposite directions, and is zero when their are perpendicular.
+  large and negative when $\vec u$ and $\vec v$ point in opposite directions, and is zero when they are perpendicular.
   A useful geometric interpretation of dot products is \concept{projection}.
   Suppose $\norm{\vec u} = 1$, so that $\vec u$ is a \concept{unit vector}.
   We can think of any other vector $\vec v$ as consisting of two components: (a) a component in the direction of $\vec u$ and (b) a component that's perpendicular to $\vec u$.
@@ -312,7 +312,7 @@ perpendicular to $\vw$.
 \Figure{perc:geom}{picture of data points with hyperplane and weight vector}
 
 This is shown pictorially in Figure~\ref{fig:perc:geom}.  Here, the
-weight vector is shown, together with it's perpendicular plane.  This
+weight vector is shown, together with its perpendicular plane.  This
 plane forms the decision boundary between positive points and negative
 points.  The vector points in the direction of the positive examples
 and away from the negative examples.
@@ -467,7 +467,7 @@ This certainly fits intuition.  The question is how to \emph{define}
 ``easy'' and ``hard'' in a meaningful way.  One way to make this
 definition is through the notion of \concept{margin}.  If I give you a
 data set and hyperplane that separates it% (like that shown in
-%Figure~\ref{fig:perc:margin}) 
+%Figure~\ref{fig:perc:margin})
 then the \emph{margin} is the distance
 between the hyperplane and the nearest point.  Intuitively, problems
 with large margins should be easy (there's lots of ``wiggle room'' to
@@ -499,7 +499,7 @@ talks about the \concept{margin of a data set}.  The margin of a data
 set is the largest attainable margin on this data.  Formally:
 \begin{equation} \label{eq:margin2}
 \textit{margin}(\mat D)
-= 
+=
 \sup_{\vw,b} \textit{margin}(\mat D, \vw, b)
 \end{equation}
 In words, to compute the margin of a data set, you ``try'' every
@@ -555,7 +555,7 @@ between them has to be shrinking.  The rest is algebra.
   $\vw\kth = \vw\kpth + y \vx$.  We do a little computation:
   \begin{align}
     \dotp{\vw^*}{\vw\kth}
-    &= \dotp{\vw^*}{\left(\vw\kpth + y \vx\right)} 
+    &= \dotp{\vw^*}{\left(\vw\kpth + y \vx\right)}
          \becauseof{definition of $\vw\kth$}
     \\
     &= \dotp{\vw^*}{\vw\kpth} + y \dotp{\vw^*}{\vx}
@@ -586,11 +586,11 @@ between them has to be shrinking.  The rest is algebra.
 
   Now we put together the two things we have learned before.  By our
   first conclusion, we know $\dotp{\vw^*}{\vw\kth} \geq k \ga$.  But
-  our second conclusion, $\sqrt{k} \geq \norm{\vw\kth}^2$.  Finally,
+  our second conclusion, $\sqrt{k} \geq \norm{\vw\kth}$.  Finally,
   because $\vw^*$ is a unit vector, we know that $\norm{\vw\kth} \geq
   \dotp{\vw^*}{\vw\kth}$.  Putting this together, we have:
   \begin{equation}
-    \sqrt k 
+    \sqrt k
     \quad\geq\quad
     \norm{\vw\kth}
     \quad\geq\quad
@@ -662,7 +662,7 @@ $c=1$; one that survives another round gets $c=2$ and so on.)  Then
 the prediction on a test point is:
 \begin{equation} \label{eq:perc:vote}
   \hat y = \sign \left(
-    \sum_{k=1}^K c\kth 
+    \sum_{k=1}^K c\kth
       \sign \left(
         \dotp{\vw\kth}{\hat\vx} + b\kth
         \right)
@@ -690,7 +690,7 @@ according to the \emph{average} weight vector, rather than the
 voting.  In particular, the prediction is:
 \begin{equation} \label{eq:perc:avg}
   \hat y = \sign \left(
-    \sum_{k=1}^K c\kth 
+    \sum_{k=1}^K c\kth
       \left(
         \dotp{\vw\kth}{\hat\vx} + b\kth
         \right)
@@ -704,7 +704,7 @@ prediction as:
 \begin{equation}
   \hat y = \sign \left(
     \dotp{\textcolor{darkblue}{\left(
-        \sum_{k=1}^K c\kth \vw\kth 
+        \sum_{k=1}^K c\kth \vw\kth
         \right)}}{\hat\vx} +
       \textcolor{darkred}{\sum_{k=1}^K c\kth b\kth}
       \right)
@@ -744,7 +744,7 @@ just as efficient as it is with the vanilla perceptron.
   \COMMENT{increment counter regardless of update}
 \ENDFOR
 \ENDFOR
-\RETURN \VAR{$\vw$} - $\frac 1 {\VAR{c}}$ \VAR{$\vec u$}, 
+\RETURN \VAR{$\vw$} - $\frac 1 {\VAR{c}}$ \VAR{$\vec u$},
         \VAR{$b$}   - $\frac 1 {\VAR{c}}$ \VAR{$\beta$}
 \COMMENT{return averaged weights and bias}
 }
@@ -780,7 +780,7 @@ Algorithm~\ref{alg:perc:avgperc} achieves this.
 The averaged perceptron is almost always better than the perceptron,
 in the sense that it generalizes better to test data.  However, that
 does not free you from having to do \concept{early stopping}.  It
-will, eventually, overfit.  
+will, eventually, overfit.
 %Figure~\ref{fig:perc:avgperc} shows the
 %performance of the vanilla perceptron and the averaged perceptron on
 %the same data set, with both training and test performance.  As you
@@ -820,7 +820,7 @@ follows, you can achieve the desired effect:
 w_{\feat{execellent}} &= +1
 & w_{\feat{terrible}} &= -1
 & w_{\feat{not}} &= 0 \\
-w_{\feat{execllent-and-not}} &= -2 
+w_{\feat{execllent-and-not}} &= -2
 & w_{\feat{terrible-and-not}} &= +2
 \end{align*}
 In this particular case, we have addressed the problem.  However, if
@@ -868,7 +868,7 @@ this is the \concept{kernels} approach (see Chapter~\ref{sec:kernel}).
 %   this data.}
 
 % In practice, there is little reason to \emph{actually} perform this
-% mapping.  It is more interesting from a theoretical perspective.  
+% mapping.  It is more interesting from a theoretical perspective.
 
 \section{Further Reading}
 
@@ -886,8 +886,7 @@ TODO further reading
 \end{comment}
 
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "courseml"
-%%% End: 
-
+%%% End:

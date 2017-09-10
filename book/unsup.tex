@@ -97,7 +97,7 @@ objective is:
 \begin{theorem}[$K$-Means Convergence Theorem] \label{thm:unsup:kmeans}
   For any dataset $\mat D$ and any number of clusters $K$, the
   $K$-means algorithm converges in a finite number of iterations,
-  where convergence is measured by $\cL$ ceasing the change.
+  where convergence is measured by $\cL$ ceasing to change.
 \end{theorem}
 \begin{myproof}{\ref{thm:unsup:kmeans}}
     The proof works as follows.  There are only two points in which
@@ -116,11 +116,11 @@ objective is:
     It remains to show that lines 6 and 9 decrease $\cL$.  For line 6,
     when looking at example $n$, suppose that the previous value of
     $z_n$ is $a$ and the new value is $b$.  It must be the case that
-    $\norm{\vx_n-\vec\mu_b} \leq \norm{\vx_n-\vec\mu_b}$.  Thus,
+    $\norm{\vx_n-\vec\mu_b} \leq \norm{\vx_n-\vec\mu_a}$.  Thus,
     changing from $a$ to $b$ can only decrease $\cL$.  For line 9,
     consider the second form of $\cL$.  Line 9 computes $\vec\mu_k$ as
     the mean of the data points for which $z_n=k$, which is precisely
-    the point that minimizes squared sitances.  Thus, this update to
+    the point that minimizes squared distances.  Thus, this update to
     $\vec\mu_k$ can only decrease $\cL$.
 \end{myproof}
 
@@ -148,7 +148,7 @@ from each other as possible.  The heuristic is sketched below:
   \item For $k = 2 \dots K$:
     \begin{enumerate}
       \item Find the example $m$ that is as far as possible from
-        \emph{all} previously selected means; namely: 
+        \emph{all} previously selected means; namely:
           $m = \arg\max_m \min_{k' < k} \norm{ \vx_m - \vec\mu_{k'} }^2$
           and set $\vec\mu_k = \vx_m$
     \end{enumerate}
@@ -186,7 +186,7 @@ is made formal in Algorithm~\ref{alg:unsup:kmeanspp}.
 \FOR{$\VAR{k} = \CON{2}$ \TO $\VAR{K}$}
 \SETST{$d_n$}{$\min_{\VARm{k'}<\VARm{k}} \norm{ \VARm{\vx_n} - \VARm{\vec\mu_{k'}} }^2$, $\forall \VARm{n}$}
   \COMMENT{compute distances}
-\SETST{$\vec p$}{$\frac 1 {\sum_{\VARm{n}} \VARm{n_d}} \VARm{\vec d}$}
+\SETST{$\vec p$}{$\frac 1 {\sum_{\VARm{n}} \VARm{d_n}} \VARm{\vec d}$}
   \COMMENT{normalize to probability distribution}
 \SETST{$m$}{random sample from \VAR{$\vec p$}}
   \COMMENT{pick an example at random}
@@ -301,8 +301,8 @@ zero, the mean of the $p$s is also zero.  This can be seen as follows:
 %
 \begin{align}
   \sum_n p_n
-  = \sum_n \dotp{\vx_n}{\vec u} 
-  = \dotp{\left( \sum_n \vx_n \right)}{\vec u} 
+  = \sum_n \dotp{\vx_n}{\vec u}
+  = \dotp{\left( \sum_n \vx_n \right)}{\vec u}
   = \dotp{\vec 0}{\vec u} = \vec 0
 \end{align}
 %
@@ -368,7 +368,7 @@ and differentiate:
 \norm{ \mat X \vec v }^2
   - \la_1 \left( \norm{\vec v}^2 - 1 \right)
   - \la_2 \dotp{\vec u}{\vec v}\\
-\grad_{\vec u} \cL &=
+\grad_{\vec v} \cL &=
   2 \mat X\T\mat X \vec v  - 2 \la_1 \vec v - \la_2 \vec u\\
 \Longrightarrow & \quad\la_1 \vec v =  \left(\mat X\T\mat X\right)\vec v
 - \frac {\la_2} 2 \vec u
@@ -401,8 +401,8 @@ sample covariance between features $i$ and $j$.
   \COMMENT{project data using $\mat U$}
 }
 
-This leads to the technique of \concept{principle components
-  analysis}, or \concept{PCA}.  For completeness, the is depicted in
+This leads to the technique of \concept{principal components
+  analysis}, or \concept{PCA}.  For completeness, this is depicted in
 Algorithm~\ref{alg:unsup:pca}.  The important thing to note is that
 the eigenanalysis only gives you the projection directions.  It does
 not give you the embedded data.  To embed a data point $\vx$ you need
@@ -423,14 +423,14 @@ u\T$.  Instead of maximizing variance, you might instead want to
 minimize the \concept{reconstruction error}, defined by:
 %
 \begin{align}
-\norm{ \mat X - \mat Z\vec u\T}^2 
-&= \norm{ \mat X - \mat X \vec u \vec u\T }^2 
+\norm{ \mat X - \mat Z\vec u\T}^2
+&= \norm{ \mat X - \mat X \vec u \vec u\T }^2
 \becauseof{definition of $\mat Z$}\\
-&= \norm{\mat X}^2 
+&= \norm{\mat X}^2
  + \norm{\mat X \vec u \vec u\T}^2
  - 2 \mat X\T \mat X \vec u \vec u\T
 \becauseof{quadratic rule}\\
-&= \norm{\mat X}^2 
+&= \norm{\mat X}^2
  + \norm{\mat X \vec u \vec u\T}^2
  - 2 \vec u\T\mat X\T \mat X \vec u
 \becauseof{quadratic rule}\\
@@ -506,8 +506,7 @@ TODO
 \end{comment}
 
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "courseml"
-%%% End: 
-
+%%% End:

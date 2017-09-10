@@ -104,7 +104,7 @@ as:
 \cD( \langle +1 \rangle , -1 ) &= 0.1 &
 \cD( \langle -1 \rangle , +1 ) &= 0.1
 \end{align}
-In other words, $80\%$ of data points in this distrubtion have $x = y$
+In other words, $80\%$ of data points in this distribution have $x = y$
 and $20\%$ don't.  No matter what function your learning algorithm
 produces, there's no way that it can do better than $20\%$ error on
 this data.
@@ -158,7 +158,7 @@ different binary classification data sets.  For each one, it comes
 back with functions $f_1$, $f_2$, $\dots$, $f_{10}$.  For some reason,
 whenever you run $f_4$ on a test point, it crashes your computer.  For
 the other learned functions, their performance on test data is always
-at most $5\%$ error.  If this situtation is guaranteed to happen, then
+at most $5\%$ error.  If this situation is guaranteed to happen, then
 this hypothetical learning algorithm is a PAC learning algorithm.  It
 satisfies ``probably'' because it only failed in one out of ten cases,
 and it's ``approximate'' because it achieved low, but non-zero, error
@@ -167,7 +167,7 @@ on the remainder of the cases.
 This leads to the formal definition of an $(\ep,\de)$ PAC-learning
 algorithm.  In this definition, $\ep$ plays the role of measuring
 accuracy (in the previous example, $\ep = 0.05$) and $\de$ plays the
-role of measuring failure (in the previous, $\de = 0.1$).  
+role of measuring failure (in the previous, $\de = 0.1$).
 
 \begin{definition}
   An algorithm $\cA$ is an \textcolor{darkblue}{$(\ep,\de)$-PAC
@@ -183,7 +183,7 @@ learning.  The first is the usual notion of \emph{computational
 that takes forever.  The second is the notion of \concept{sample
   complexity}: the number of examples required for your algorithm to
 achieve its goals.  Note that the goal of both of these measure of
-complexity is to bound how much of a scarse resource your algorithm
+complexity is to bound how much of a scarce resource your algorithm
 uses.  In the computational case, the resource is CPU cycles.  In the
 sample case, the resource is labeled examples.
 \\
@@ -195,7 +195,7 @@ it is an $(\ep,\de)$-PAC learning algorithm whose runtime is
 polynomial in $\frac 1 \ep$ and $\frac 1 \de$.
 
 In other words, suppose that you want your algorithm to achieve $4\%$
-error rate rather than $5\%$.  The runtime required to do so should no
+error rate rather than $5\%$.  The runtime required to do so should not
 go up by an exponential factor.
 
 \section{PAC Learning of Conjunctions}
@@ -238,7 +238,7 @@ $y$ & $x_1$  & $x_2$ & $x_3$ & $x_4$   \\
 }
 
 What is a reasonable algorithm in this case?  Suppose that you observe
-the example in Table~\ref{tab:thy:booleandata}.  From the first
+the data set in Table~\ref{tab:thy:booleandata}.  From the first
 example, we know that the true formula cannot include the term $x_1$.
 If it did, this example would have to be negative, which it is not.
 By the same reasoning, it cannot include $x_2$.  By analogous
@@ -284,7 +284,7 @@ through are:
 f^0(\vx) &=  x_1 \land \lnot x_1 \land x_2 \land \lnot x_2 \land x_3 \land \lnot x_3 \land x_4 \land \lnot x_4 \\
 f^1(\vx) &=  \lnot x_1 \land \lnot x_2 \land x_3 \land x_4 \\
 f^2(\vx) &=  \lnot x_1 \land x_3 \land x_4 \\
-f^3(\vx) &=  \lnot x_1 \land x_3 \land x_4 
+f^3(\vx) &=  \lnot x_1 \land x_3 \land x_4
 \end{align}
 %
 The first thing to notice about this algorithm is that after
@@ -335,7 +335,7 @@ have seen them).  So bad things must not be that common.
   term $t$ that is not in $c$.  There are initially $2D$ many terms in
   $f$, and any (or all!) of them might not be in $c$.  We want to
   ensure that the probability that $f$ makes an error is at most
-  $\ep$.  It is sufficient to ensure that 
+  $\ep$.  It is sufficient to ensure that
 
 For a term $t$
   (e.g., $\lnot x_5$), we say that $t$ ``negates'' an example $\vx$ if
@@ -344,11 +344,11 @@ For a term $t$
   respect to the unknown distribution $\cD$ over data points).
 
   First, we show that if we have no bad terms left in $f$, then $f$
-  has an error rate at most $\ep$.  
+  has an error rate at most $\ep$.
 
 We know that $f$ contains \emph{at
     most} $2D$ terms, since is begins with $2D$ terms and throws them
-  out.  
+  out.
 
   The algorithm begins with $2D$ terms (one for each variable and one
   for each negated variable).  Note that $f$ will only make one type
@@ -510,7 +510,7 @@ labeling for which you cannot find a perfect classifier.  The VC
 dimension is the \emph{maximum} number of points for which you can
 always find such a classifier.
 
-\thinkaboutit{What is that labeling?  What is it's name?}
+\thinkaboutit{What is that labeling?  What is its name?}
 
 You can think of VC dimension as a game between you and an adversary.
 To play this game, \emph{you} choose $K$ unlabeled points however you
@@ -546,7 +546,7 @@ win this game against the adversary.  This is much more difficult.  In
 the proof that the VC dimension is at least three, you simply need to
 provide an example of three points, and then work through the small
 number of possible labelings of that data.  To show that it is at most
-three, you need to argue that no matter what set of four point you
+three, you need to argue that no matter what set of four points you
 pick, you cannot win the game.
 
 
@@ -603,7 +603,7 @@ TODO
 
 
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "courseml"
-%%% End: 
+%%% End:

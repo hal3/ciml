@@ -1,8 +1,3 @@
-%%% Local Variables: 
-%%% mode: latex
-%%% TeX-master: "courseml"
-%%% End: 
-
 \chapter{Expectation Maximization} \label{sec:em}
 
 \chapterquote{A hen is only an egg's way of making another egg.}{Samuel~Butler}
@@ -16,7 +11,7 @@
   lower bounds.
 \item Implement EM for clustering with mixtures of Gaussians, and
   contrasting it with $k$-means.
-\item Evaluate the differences betweem EM and gradient descent for
+\item Evaluate the differences between EM and gradient descent for
   hidden variable models.
 \end{learningobjectives}
 
@@ -100,7 +95,7 @@ This can be translated into the following likelihood:
   &p(\vec a, \vec t, \vec s) \nonumber\\
   &=      \textcolor{darkpurple}{\left[ \prod_m 0.5^{t_m} 0.5^{1-t_m} \right]} \times
             \textcolor{darkblue}{\left[ \prod_n 1 \right]} \nonumber\\
-  &\qquad \times    \textcolor{darkred}{\left[ \prod_n\prod_m 
+  &\qquad \times    \textcolor{darkred}{\left[ \prod_n\prod_m
     s_n^{a_{n,m}t_m}
     (1-s_n)^{(1-a_{n,m})t_m} \right.} \nonumber\\
   &\qquad\qquad\textcolor{darkred}{\left. s_n^{(1-a_{n,m})(1-t_m)}
@@ -108,7 +103,7 @@ This can be translated into the following likelihood:
     \right]} \\
  &= \textcolor{darkpurple}{0.5^M}
    \textcolor{darkred}{
-\prod_n\prod_m 
+\prod_n\prod_m
     s_n^{a_{n,m}t_m}
     (1-s_n)^{(1-a_{n,m})t_m}
    s_n^{(1-a_{n,m})(1-t_m)}
@@ -116,7 +111,7 @@ This can be translated into the following likelihood:
    }
 \end{align}
 
-Suppose we knew the true lables $\vec t$. We can take the log of this likelihood and differentiate it with respect to the score $s_n$ of some student (note: we can drop the $0.5^M$ term because it is just a constant):
+Suppose we knew the true labels $\vec t$. We can take the log of this likelihood and differentiate it with respect to the score $s_n$ of some student (note: we can drop the $0.5^M$ term because it is just a constant):
 ~
 \begin{align}
 \log p(\vec a, \vec t, \vec s)
@@ -143,7 +138,7 @@ A+B &= \sum_m \big[ 1 \big] = M
 Putting this together, we get:
 %
 \begin{align}
-  s_n &= \frac 1 M \sum_m \big[ a_{n,m} t_m + (1-a_{n,m}) (1-t_m) \big] 
+  s_n &= \frac 1 M \sum_m \big[ a_{n,m} t_m + (1-a_{n,m}) (1-t_m) \big]
 \end{align}
 %
 In the case of known $t$s, this matches exactly what we had in the heuristic.
@@ -154,7 +149,7 @@ In particular, we will compute $s_n$ by maximizing its likelihood under the \emp
 If we are going to compute expectations of $t$, we have to say: expectations according to which probability distribution?
 We will use the distribution $p(t_m \| \vec a, \vec s)$.
 Let $\tilde t_m$ denote $\Ep_{t_m \sim p(t_m \| \vec a, \vec s)}[t_m]$.
-Because $t_m$ is a binary variable, its expectation is equal to it's probability;
+Because $t_m$ is a binary variable, its expectation is equal to its probability;
 namely: $\tilde t_m = p(t_m \| \vec a, \vec s)$.
 
 How can we compute this?
@@ -162,7 +157,7 @@ We will compute $C = p(t_m=1, \vec a, \vec s)$ and $D = p(t_m=0, \vec a, \vec s)
 The computation is straightforward:
 %
 \begin{align}
-  C &= 0.5 \prod_n s_n^{a_{n,m}} (1-s_n)^{1-a_{n,m}} 
+  C &= 0.5 \prod_n s_n^{a_{n,m}} (1-s_n)^{1-a_{n,m}}
     &= 0.5 \prod_{\substack{n : \\ a_{n,m} = 1}} s_n \prod_{\substack{n : \\ a_{n,m} = 0}} (1-s_n) \\
   D &= 0.5 \prod_n s_n^{1-a_{n,m}} (1-s_n)^{a_{n,m}}
     &= 0.5 \prod_{\substack{n : \\ a_{n,m} = 1}} (1-s_n) \prod_{\substack{n : \\ a_{n,m} = 0}} s_n
@@ -197,7 +192,7 @@ and then a generic mathematical framework for expectation maximization, which wi
 
 \section{Clustering with a Mixture of Gaussians}
 
-In Chapter~\ref{sec:prob}, you learned about probabilitic models for
+In Chapter~\ref{sec:prob}, you learned about probabilistic models for
 classification based on density estimation.  Let's start with a fairly
 simple classification model that \emph{assumes} we have labeled data.
 We will shortly remove this assumption.  Our model will state that we
@@ -237,11 +232,11 @@ estimates of all parameters by taking a log and then taking gradients
 of the log likelihood:
 %
 \begin{align}
-\th_k &= \text{fraction of training examples in class $k$} \\
+\th_k &= \text{fraction of training examples in class $k$} \label{eq:em:mlfrac}\\
 &= \frac 1 N \sum_n [y_n = k] \nonumber\\
 \vec\mu_k &= \text{mean of training examples in class $k$} \\
 &= \frac {\sum_n [y_n = k] \vx_n} {\sum_n [y_n = k]} \nonumber\\
-\si^2_k &= \text{variance of training examples in class $k$} \\
+\si^2_k &= \text{variance of training examples in class $k$} \label{eq:em:mlvar}\\
 &= \frac {\sum_n [y_n = k] \norm{\vx_n-\mu_k}} {\sum_n [y_n = k]} \nonumber
 \end{align}
 %
@@ -251,19 +246,19 @@ Suppose that you \emph{don't} have labels.  Analogously to the
 $K$-means algorithm, one potential solution is to iterate.  You can
 start off with guesses for the values of the unknown variables, and
 then iteratively improve them over time.  In $K$-means, the approach
-was the \emph{assign} examples to labels (or clusters).  This time,
+was to \emph{assign} examples to labels (or clusters).  This time,
 instead of making hard assignments (``example $10$ belongs to cluster
 $4$''), we'll make \concept{soft assignments} (``example $10$ belongs
 half to cluster $4$, a quarter to cluster $2$ and a quarter to cluster
 $5$'').  So as not to confuse ourselves too much, we'll introduce a
-new variable, $\vec z_n = \langle z_{n,1}, \dots, z_{n,K}$ (that sums
+new variable, $\vec z_n = \langle z_{n,1}, \dots, z_{n,K} \rangle$ (that sums
 to one), to denote a fractional assignment of examples to clusters.
 
 \TODOFigure{em:piecharts}{A figure showing pie charts}
 
 This notion of soft-assignments is visualized in
 Figure~\ref{fig:em:piecharts}.  Here, we've depicted each example as a
-pie chart, and it's coloring denotes the degree to which it's been
+pie chart, and its coloring denotes the degree to which it's been
 assigned to each (of three) clusters.  The size of the pie pieces
 correspond to the $\vec z_n$ values.
 
@@ -282,9 +277,9 @@ Given a set of parameters (the $\vec\th$s, $\vec\mu$s and $\si^2$s),
 the \concept{fractional assignments} $z_{n,k}$ are easy to compute.
 Now, akin to $K$-means, given fractional assignments, you need to
 recompute estimates of the model parameters.  In analogy to the
-maximum likelihood solution (Eqs~\eqref{}-\eqref{}), you can do this
-by counting fractional points rather than full points.  This gives the
-following re-estimation updates:
+maximum likelihood solution (Eqs~\eqref{eq:em:mlfrac}-\eqref{eq:em:mlvar}), you
+can do this by counting fractional points rather than full points.  This gives
+the following re-estimation updates:
 %
 \begin{align}
 \th_k &= \text{fraction of training examples in class $k$} \\
@@ -433,7 +428,7 @@ is, indeed, concave) and each ``$x$'' as the $p/q$ term.  This yields:
 %
 Note that this inequality holds for \emph{any} choice of function $q$,
 so long as its non-negative and sums to one.  In particular, it
-needn't even by the same function $q$ for each $n$.  We will need to
+needn't even be the same function $q$ for each $n$.  We will need to
 take advantage of both of these properties.
 
 We have succeeded in our first goal: constructing a lower bound on
@@ -457,7 +452,7 @@ hoping to maximize $\cL$ by instead maximizing a lower bound.  In
 order to ensure that an increase in the lower bound implies an
 increase in $\cL$, we need to ensure that $\cL(\mat X \| \vth) =
 \tilde\cL(\mat X \| \vth)$.  In words: $\tilde\cL$ should be a lower
-bound on $\cL$ that makes contact at the current point, $\vth$.  
+bound on $\cL$ that makes contact at the current point, $\vth$.
 %This
 %is shown in Figure~\ref{fig:em:lb}, including a case where the lower
 %bound does \emph{not} make contact, and thereby does not guarantee an
@@ -491,7 +486,7 @@ TODO further reading
 
 
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "courseml"
-%%% End: 
+%%% End:

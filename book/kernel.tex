@@ -6,10 +6,9 @@
 \item Explain how kernels generalize both feature combinations and
   basis functions.
 \item Contrast dot products with kernel products.
-\item Implement kernelized perceptron.
+\item Implement a kernelized version of the perceptron.
 \item Derive a kernelized version of regularized least squares
   regression.
-\item Implement a kernelized version of the perceptron.
 \item Derive the dual formulation of the support vector machine.
 \end{learningobjectives}
 
@@ -181,7 +180,7 @@ the training data.
 \end{myproof}
 
 Now that you know that you can always write $\vw = \sum_n \al_n
-\phi(\vx_n)$ for some $\al_i$s, you can additionall compute the
+\phi(\vx_n)$ for some $\al_i$s, you can additionally compute the
 activations (line 4) as:
 %
 \begin{align}
@@ -223,7 +222,7 @@ The advantage to this ``kernelized'' algorithm is that you can perform
 feature expansions like the quadratic feature expansion from the
 introduction for ``free.''  For example, for exactly the same cost as
 the quadratic features, you can use a \concept{cubic feature map},
-computed as $\ddot{\phi(\vx)}{\phi(\vz)} = (1 + \dotp{\vx}{\vz})^3$,
+computed as $\dotp{\phi(\vx)}{\phi(\vz)} = (1 + \dotp{\vx}{\vz})^3$,
 which corresponds to three-way interactions between variables.  (And,
 in general, you can do so for any polynomial degree $p$ at the same
 computational complexity.)
@@ -262,7 +261,7 @@ Given this expansion, in order to execute step (1), you need to
 compute norms.  This can be done as follows:
 %
 \begin{align}
-z_n 
+z_n
 &= \arg\min_k \norm{\textcolor{darkblue}{\phi(\vx_n)} - \textcolor{darkred}{\vec\mu\kth}}^2
    \becauseof{definition of $z_n$} \\
 &= \arg\min_k \norm{\textcolor{darkblue}{\phi(\vx_n)} - \textcolor{darkred}{\sum_m \al\kth_m \phi(\vx_m)}}^2
@@ -365,11 +364,11 @@ You need to verify the positive semi-definite property on $K$.  You
 can do this as follows:
 %
 \begin{align}
-\int\!\!\!\int f(\vx) K(\vx,\vz) f(\vz) \ud \vx \ud \vz 
-&= \int\!\!\!\int f(\vx) \left[ K_1(\vx,\vz) + K_2(\vx,\vz) \right] f(\vz) \ud \vx \ud \vz 
+\int\!\!\!\int f(\vx) K(\vx,\vz) f(\vz) \ud \vx \ud \vz
+&= \int\!\!\!\int f(\vx) \left[ K_1(\vx,\vz) + K_2(\vx,\vz) \right] f(\vz) \ud \vx \ud \vz
    \becauseof{definition of $K$}\\
 &= \int\!\!\!\int f(\vx) K_1(\vx,\vz) f(\vz) \ud \vx \ud \vz \nonumber\\
-&\quad + \int\!\!\!\int f(\vx) K_2(\vx,\vz) f(\vz) \ud \vx \ud \vz 
+&\quad + \int\!\!\!\int f(\vx) K_2(\vx,\vz) f(\vz) \ud \vx \ud \vz
   \becauseof{distributive rule}\\
 &> 0 + 0
    \becauseof{$K_1$ and $K_2$ are psd}
@@ -411,7 +410,7 @@ Showing that this kernel is positive definite is a bit of an exercise
 in analysis (particularly, integration by parts), but otherwise not
 difficult.  Again, the proof is provided in the appendix.
 
-So far, you have seen two bsaic classes of kernels: polynomial kernels
+So far, you have seen two basic classes of kernels: polynomial kernels
 ($K(\vx,\vz) = (1 + \dotp{\vx}{\vz})^d$), which includes the linear
 kernel ($K(\vx,\vz) = \dotp{\vx}{\vz}$) and RBF kernels ($K(\vx,\vz) =
 \exp[-\ga \norm{\vx-\vz}^2]$).  The former have a direct connection to
@@ -492,7 +491,7 @@ first set of constraints and $\be_n$ for the second set.
 %
 \begin{align}
 \cL(\vw,b,\vec\xi,\vec\al,\vec\be)
-&= 
+&=
   \textcolor{darkblue}{\frac 1 2 \norm{\vw}^2}
 %\\&\qquad
 + \textcolor{darkergreen}{C \sum_n \xi_n}
@@ -501,7 +500,7 @@ first set of constraints and $\be_n$ for the second set.
 \\&\qquad
 - \sum_n \al_n \left[
     \textcolor{darkred}{y_n \left( \dotp{\vw}{\vx_n} + b \right) - 1 + \xi_n}
-  \right] 
+  \right]
 \end{align}
 %
 The \emph{new} optimization problem is:
@@ -518,17 +517,17 @@ properly non-negative), then the $\be_n$s cannot do anything to
 $+\infty$, breaking the solution.
 
 You can solve this problem by taking gradients.  This is a bit
-tedious, but and important step to realize how everything fits
+tedious, but an important step to realize how everything fits
 together.  Since your goal is to remove the dependence on $\vw$, the
 first step is to take a gradient with respect to $\vw$, set it equal
 to zero, and solve for $\vw$ in terms of the other variables.
 %
 \begin{align}
 \grad_{\vw} \cL
-= \textcolor{darkblue}{\vw} 
+= \textcolor{darkblue}{\vw}
   - \sum_n \al_n \textcolor{darkred}{y_n \vx_n}
 = 0 \quad\Longleftrightarrow\quad
-\textcolor{darkblue}{\vw} 
+\textcolor{darkblue}{\vw}
 = \sum_n \al_n \textcolor{darkred}{y_n \vx_n}
 \end{align}
 %
@@ -543,7 +542,7 @@ expression for $\vw$ with, say, $m$.  This yields:
 %
 \begin{align}
 \cL(b,\vec\xi,\vec\al,\vec\be)
-&= 
+&=
   \textcolor{darkblue}{\frac 1 2 \norm{\sum_m \al_m y_m \vx_m}^2}
 %\\&\qquad
 + \textcolor{darkergreen}{C \sum_n \xi_n}
@@ -560,7 +559,7 @@ understand where the following comes from:
 %
 \begin{align}
 \cL(b,\vec\xi,\vec\al,\vec\be)
-&= 
+&=
   \textcolor{darkblue}{\frac 1 2
     \sum_n \sum_m \al_n \al_m y_n y_m \dotp{\vx_n}{\vx_m}
   }
@@ -568,7 +567,7 @@ understand where the following comes from:
 \\&\qquad
    - \textcolor{darkred}{
     \sum_n
-    \sum_m 
+    \sum_m
       \al_n \al_m y_n y_m \dotp{\vx_n}{\vx_m}
 }
 - \textcolor{darkred}{
@@ -580,7 +579,7 @@ understand where the following comes from:
 + \sum_n (\textcolor{darkergreen}{C} - \textcolor{darkpurple}{\be_n}) \xi_n
 \\&\qquad
 \textcolor{darkred}{
--  b \sum_n \al_n y_n 
+-  b \sum_n \al_n y_n
 -  \sum_n \al_n (\xi_n - 1)}
 \end{align}
 %
@@ -598,7 +597,7 @@ The derivative with respect to $b$ is:
 \end{align}
 %
 This doesn't allow you to \emph{substitute} $b$ with something (as you
-did with $\vw$), but it does mean that the fourth term ($b \sum_n
+did with $\vw$), but it does mean that the thirs term ($b \sum_n
 \al_n y_n$) goes to zero at the optimum.
 
 The last of the original variables is $\xi_n$; the derivatives in this
@@ -631,7 +630,7 @@ has been replaced by $K(\vx_n,\vx_m)$:
 \end{align}
 %
 If you are comfortable with matrix notation, this has a very compact
-form.  Let $\vec 1$ denote the $N$-dimensional vector of all $1$s, 
+form.  Let $\vec 1$ denote the $N$-dimensional vector of all $1$s,
 let $\vec y$ denote the vector of labels and let $\mat G$ be the $N
 \times N$ matrix, where $\mat G_{n,m} = y_n y_m K(\vx_n, \vx_m)$, then this
 has the following form:
@@ -650,7 +649,7 @@ the constraint added when removing the $\be$ variables).  Thus, your
 problem is:
 %
 \optimize{kernel:svmdual}{\vec\al}{%
-- \cL(\vec \al) = 
+- \cL(\vec \al) =
 \frac 1 2
     \sum_n \sum_m \al_n \al_m y_n y_m K(\vx_n,\vx_m)
 - \sum_n \al_n
@@ -786,7 +785,7 @@ regularization parameter and $\vec Y$ is the $N\times 1$ vector of
 labels.
 
 This algorithm is, in some ways, even easier to kernelize than the
-perceptron.  The optimal solution has a closed form, and 
+perceptron.  The optimal solution has a closed form, and
 \end{comment}
 
 \section{Further Reading}
@@ -800,7 +799,7 @@ TODO further reading
 % http://nlp.stanford.edu/IR-book/html/htmledition/nonlinear-svms-1.html
 
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "courseml"
 %%% End:

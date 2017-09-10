@@ -36,7 +36,7 @@ The main challenge we will face is how to do this \emph{efficiently}, given that
 % maintain a weight vector $\vw\kth$ for \emph{every} possible class $k$.
 % To make a prediction on example $\vx$, choose the class $k$ that maximizes $\dotp{\vx}{\vw\kth}$.
 % Intuitively, $\vw\kth$ should point in the same direction as examples that should have label $k$.
-% At training time, a prediction $\hat y$ is made. 
+% At training time, a prediction $\hat y$ is made.
 % If it's correct, continue.
 % If it's incorrect, adjust the weights for the \emph{true} class, $\vw\xth{y}$ toward $\vx$ and adjust the weights for the \emph{incorrect but predicted} class, $\vw\xthm{\hat y}$ away from $\vx$.\thinkaboutit{After a single update, if the same example is presented again, will the multiclass perceptron make a correct prediction?}
 
@@ -65,7 +65,7 @@ The main challenge we will face is how to do this \emph{efficiently}, given that
 % The multiclass perceptron training algorithm is summarized in Algorithm~\ref{alg:srl:multiclassperc}.
 % Like the standard perceptron algorithm, the multiclass perceptron works better under an averaging strategy.
 
-In order to build up to structured problems, let's begin with a simplified by pedagogically useful stepping stone: multiclass classification with a perceptron.
+In order to build up to structured problems, let's begin with a simplified but pedagogically useful stepping stone: multiclass classification with a perceptron.
 As discussed earlier, in multiclass classification we have inputs $\vx \in \R^D$ and output labels $y \in \{ 1, 2, \dots, K \}$.
 Our goal is to learn a scoring function $s$ so that $s(x,y) > s(x,\hat y)$ for all $\hat y \neq y$, where $y$ is the true label and $\hat y$ is an imposter label.
 The general form of scoring function we consider is a linear function of a joint feature vector $\phi(\vx,y)$:
@@ -263,7 +263,7 @@ We can do a similar exercise for Markov features, like the number of times ``adj
 However, we don't actually \emph{need} these counts.
 All we need for computing the $\argmax$ sequence is the dot product between the weights $\vw$ and these counts.
 In particular, we can compute $\dotp{\vw}{\phi(\vx,\vy)}$ as the dot product on all-but-the-last word plus the dot product on the last word: $\dotp{\vw}{\phi_{1:3}(\vx, \vy)} + \dotp{\vw}{\phi_4(\vx, \vy)}$.
-Here, $\phi_{1:3}$ means ``features for everything up to and including position $3$'' and $\phi_{4}$ means ``features for position $4$.'' 
+Here, $\phi_{1:3}$ means ``features for everything up to and including position $3$'' and $\phi_{4}$ means ``features for position $4$.''
 
 More generally, we can write $\phi(\vx,\vy) = \sum_{l=1}^L \phi_l(\vx,\vy)$, where $\phi_l(\vx,\vy)$ only includes features about position $l$.\footnote{In the case of Markov features, we think of them as pairs that \emph{end} at position $l$, so ``verb adj'' would be the active feature for $\phi_3$.}
 In particular, we're taking advantage of the associative law for addition:
@@ -274,10 +274,10 @@ In particular, we're taking advantage of the associative law for addition:
   &= \sum_{l=1}^L \dotp{\vw}{\phi_l(\vx, \vy)} \becauseof{associative law}
 \end{align}
 %
-What this means is that we can build a graph like that in Figure~\ref{fig:srl:trellis}, with one verticle slice per time step ($l \ 1 \dots L$).\footnote{A graph of this sort is called a \concept{trellis}, and sometimes a \concept{lattice} in the literature.}
+What this means is that we can build a graph like that in Figure~\ref{fig:srl:trellis}, with one vertical slice per time step ($l \ 1 \dots L$).\footnote{A graph of this sort is called a \concept{trellis}, and sometimes a \concept{lattice} in the literature.}
 Each \emph{edge} in this graph will receive a weight, constructed in such a way that if you take a complete path through the lattice, and add up all the weights, this will correspond exactly to $\dotp{\vw}{\phi(\vx,\vy)}$.
 
-\FigureFull{srl_trellis}{A picture of a trellis sequence labeling. At each time step $l$ the corresponding word can have any of the three possible labels. Any path through this trellis corresponds to a unique labeling of this sentence. The gold standard path is drawn with bold red arrows. The highlighted edge corresponds to the edge between $l=2$ and $l=3$ for verb/adj as described in the text. That edge has weight $\dotp{\vw}{\phi_3(\vx, \dots \circ \text{verb} \circ \text{adj})}$.}
+\FigureFull{srl:trellis}{A picture of a trellis sequence labeling. At each time step $l$ the corresponding word can have any of the three possible labels. Any path through this trellis corresponds to a unique labeling of this sentence. The gold standard path is drawn with bold red arrows. The highlighted edge corresponds to the edge between $l=2$ and $l=3$ for verb/adj as described in the text. That edge has weight $\dotp{\vw}{\phi_3(\vx, \dots \circ \text{verb} \circ \text{adj})}$.}
 
 To complete the construction, let $\phi_l(\vx, \dots \circ y \circ y')$ denote the \emph{unary} features at position $l$ together with the \emph{Markov} features that end at position $l$. These features depend \emph{only} on $\vx$, $y$ and $y'$, and \emph{not} any of the previous parts of the output.
 
@@ -293,10 +293,10 @@ For trellises, this can be computed by the Viterbi algorithm, or by applying any
 A complete derivation of the dynamic program in this case is given in Section~\ref{sec:srl:dp} for those who want to implement it directly.
 
 The main benefit of this construction is that it is guaranteed to exactly compute the argmax output for sequences required in the structured perceptron algorithm, \emph{efficiently}.
-In particular, it's runtime is $O(LK^2)$, which is an exponential improvement on the naive $O(K^L)$ runtime if one were to enumerate every possible output sequence.
+In particular, its runtime is $O(LK^2)$, which is an exponential improvement on the naive $O(K^L)$ runtime if one were to enumerate every possible output sequence.
 The algorithm can be naturally extended to handle ``higher order'' Markov assumptions, where features depend on triples or quadruples of the output.
 The trellis becomes larger, but the algorithm remains essentially the same.
-In order to handle a length $M$ Markov features, the resulting algorithm will take $O(LK^M)$ time.
+In order to handle length $M$ Markov features, the resulting algorithm will take $O(LK^M)$ time.
 In practice, it's rare that $M>3$ is necessary or useful.
 
 
@@ -305,7 +305,7 @@ In practice, it's rare that $M>3$ is necessary or useful.
 
 \section{Structured Support Vector Machines}
 
-In Section~\ref{sec:loss:svm} we saw the support vector machine as a very useful general framework for binary classification. 
+In Section~\ref{sec:loss:svm} we saw the support vector machine as a very useful general framework for binary classification.
 In this section, we will develop a related framework for structured support vector machines.
 The two main advantages of structured SVMs over the structured perceptron are (1) it is regularized (though averaging in structured perceptron achieves a similar effect) and (2) we can incorporate more complex loss functions.
 
@@ -346,7 +346,7 @@ To keep notation simple, we will write $s_\vw(\vx,\vy)$ to denote the score of t
 This suggests a set of constraints of the form:
 \begin{align} &
   s_\vw(\vx,\vy) - s_\vw(\vx,\hat\vy)
-  \geq 
+  \geq
   \ell\xth{Ham}(\vy, \hat\vy)
   - \xi_{\hat\vy}
  & (\forall n, \forall \hat\vy \in \cY(\vx))
@@ -358,9 +358,9 @@ The rest of the optimization problem remains the same, yielding:
 + C \sum_n \sum_{\hat\vy \in \cY{\vx_n}} \xi_{n,\hat\vy}
 }{%
   s_\vw(\vx,\vy) - s_\vw(\vx,\hat\vy)  \\ &
-%  \dotp{\vw}{\phi(\vx_n,\vy_n)} - 
+%  \dotp{\vw}{\phi(\vx_n,\vy_n)} -
 %  \dotp{\vw}{\phi(\vx_n,\hat\vy)}   \\ &
-  \qquad\qquad\geq 
+  \qquad\qquad\geq
   \ell\xth{Ham}(\vy_n, \hat\vy)
   - \xi_{n,\hat\vy}\nonumber
  & (\forall n, \forall \hat\vy \in \cY(\vx_n))
@@ -369,11 +369,11 @@ The rest of the optimization problem remains the same, yielding:
   \xi_{n,\hat\vy} \geq 0 & (\forall n, \forall \hat\vy \in \cY(\vx_n))
 }
 %
-This optimization problem asks for a large margin and small slack, where there is a slack very for every training example and every possible incorrect output associated with that training example.
+This optimization problem asks for a large margin and small slack, where there is a slack variable for every training example and every possible incorrect output associated with that training example.
 In general, this is \emph{way too many} slack variables and \emph{way too many} constraints!
 
 There is a very useful, general trick we can apply.
-If you focus on the first constraint, it roughly says (letting $s()$ denote score): 
+If you focus on the first constraint, it roughly says (letting $s()$ denote score):
 $s(\vy) \geq \big[ s(\hat\vy) + \ell(\vy,\hat\vy) \big]$ for all $\hat\vy$, modulo slack.
 We'll refer to the thing in brackets as the ``loss-augmented score.''
 But if we want to guarantee that the score of the true $\vy$ beats the loss-augmented score of \emph{all} $\hat\vy$, it's enough to ensure that it beats the loss-augmented score of the most confusing imposter.
@@ -383,7 +383,7 @@ Expanding out the definition of $s()$ and adding slack back in, we can replace t
     %\dotp{\vw}{\phi(\vx_n,\vy_n)} \geq
    s_\vw(\vx_n,\vy_n) \geq
     \max_{\hat\vy \in \cY(\vx_n)} \Big[
-  %\dotp{\vw}{\phi(\vx_n,\hat\vy)} 
+  %\dotp{\vw}{\phi(\vx_n,\hat\vy)}
     s_\vw(\vx_n, \hat\vy)
     + \ell\xth{Ham}(\vy_n, \hat\vy) \Big]
     - \xi_{n}\nonumber
@@ -391,12 +391,12 @@ Expanding out the definition of $s()$ and adding slack back in, we can replace t
 \end{align}
 We can now apply the same trick as before to remove $\xi_n$ from the analysis.
 In particular, because $\xi_n$ is constrained to be $\geq 0$ and because we are
-trying to minimize it's sum, we can figure out that out the optimum, it will be the case that:
+trying to minimize its sum, we can figure out that at the optimum, it will be the case that:
 \begin{align}
   \xi_n &=
-    \max \left\{ 0, 
+    \max \left\{ 0,
     \max_{\hat\vy \in \cY(\vx_n)} \Big[
-    %\dotp{\vw}{\phi(\vx_n,\hat\vy)} 
+    %\dotp{\vw}{\phi(\vx_n,\hat\vy)}
           s_\vw(\vx_n,\hat\vy)
     + \ell\xth{Ham}(\vy_n, \hat\vy) \Big]
     - %\dotp{\vw}{\phi(\vx_n,\vy_n)}
@@ -406,8 +406,8 @@ trying to minimize it's sum, we can figure out that out the optimum, it will be 
 \end{align}
 This value is referred to as
 the \concept{structured hinge loss}, which we have denoted as $\ell\xth{s-h}(\vy_n, \vx_n, \vw)$.
-This is because, although it is more complex, it bears a striking resemlance to the \concept{hinge loss} from Chapter~\ref{sec:loss}. 
-In particular, if the score of the true output beats the score of every the best imposter by at least its loss, then $\xi_n$ will be zero. 
+This is because, although it is more complex, it bears a striking resemlance to the \concept{hinge loss} from Chapter~\ref{sec:loss}.
+In particular, if the score of the true output beats the score of the best imposter by at least its loss, then $\xi_n$ will be zero.
 On the other hand, if some imposter (plus its loss) beats the true output, the loss scales linearly as a function of the difference.
 At this point, there is nothing special about Hamming loss, so we will replace it with some arbitrary structured loss $\ell$.
 
@@ -429,9 +429,9 @@ If the structured hinge loss is positive, then the gradient is:
   &= \grad_{\vw} \left\{
     \max_{\hat\vy \in \cY(\vx_n)} \Big[ \dotp{\vw}{\phi(\vx_n,\hat\vy)} + \ell(\vy_n, \hat\vy) \Big] - \dotp{\vw}{\phi(\vx_n,\vy_n)} \right\} \\
   \becauseoffull{define $\hat\vy_n$ to be the output that attains the maximum above, rearrange} \\
-  &= \grad_{\vw} \Big\{ \dotp{\vw}{\phi(\vx_n,\hat\vy)} - \dotp{\vw}{\phi(\vx_n,\vy_n)} + \ell(\vy_n, \hat\vy) \Big\} \\
+  &= \grad_{\vw} \Big\{ \dotp{\vw}{\phi(\vx_n,\hat\vy_n)} - \dotp{\vw}{\phi(\vx_n,\vy_n)} + \ell(\vy_n, \hat\vy_n) \Big\} \\
   \becauseoffull{take gradient} \\
-  &= \phi(\vx_n,\hat\vy) - \phi(\vx_n,\vy_n)
+  &= \phi(\vx_n,\hat\vy_n) - \phi(\vx_n,\vy_n)
 \end{align}
 Putting this together, we get the full gradient as:
 \begin{align}
@@ -439,7 +439,7 @@ Putting this together, we get the full gradient as:
   &= \brack{ \vec 0 & \text{if } \ell\xth{s-h}(\vy_n, \vx_n, \vw) = 0 \\
              \phi(\vx_n,\hat\vy_n) - \phi(\vx_n,\vy_n) & \text{otherwise} } \nonumber\\
 \text{where } &
- \hat\vy_n = 
+ \hat\vy_n =
 \argmax_{\hat\vy_n \in \cY(\vx_n)} \Big[ \dotp{\vw}{\phi(\vx_n,\hat\vy_n)} + \ell(\vy_n, \hat\vy_n) \Big] \label{eq:srl:lossaug}
 \end{align}
 The form of this gradient is very simple: it is equal to the features of the worst imposter minus the features of the truth, unless the truth beats all imposters, in which case it's zero.
@@ -468,7 +468,7 @@ When plugged into stochastic subgradient descent, you end up with an update that
   }
 
 
-We will consider how to compute the loss-augmented argmax in the next section, 
+We will consider how to compute the loss-augmented argmax in the next section,
 but before that we summarize an algorithm for optimizing structured SVMs using stochastic subgradient descent: Algorithm~\ref{alg:srl:ssgdssvm}. Of course there are other possible optimization strategies; we are highlighting this one because it is nearly identical to the structured perceptron.
 The only differences are: (1) on line~\ref{eq:srl:algolossaug} you use loss-augmented argmax instead of argmax; and (2) on line~\ref{eq:srl:algoreg} the weights are shrunk slightly corresponding to the $\ell_2$ regularizer on $\vw$. (Note: we have used $\lambda = 1/(2C)$ to make the connection to linear models clearer.)
 
@@ -477,8 +477,8 @@ The only differences are: (1) on line~\ref{eq:srl:algolossaug} you use loss-augm
 
 The challenge that arises is that we now have a more complicated argmax problem that before.
 In structured perceptron, we only needed to compute $\hat\vy_n$ as the output that maximized its score (see Eq~\ref{eq:srl:argmax}).
-Here, we need to find the output that maximizes it score \emph{plus} it's loss (Eq~\eqref{eq:srl:lossaug}).
-This optimization problem is refered to as \concept{loss-augmented search} or \concept{loss-augmented inference}.
+Here, we need to find the output that maximizes its score \emph{plus} its loss (Eq~\eqref{eq:srl:lossaug}).
+This optimization problem is referred to as \concept{loss-augmented search} or \concept{loss-augmented inference}.
 
 Before solving the loss-augmented inference problem, it's worth thinking about why it makes sense.
 What is $\hat\vy_n$?
@@ -593,8 +593,8 @@ The max denotes the fact that we are seeking the \emph{best} possible prefix up 
 
 Before working through the details, let's consider an example.
 Suppose that we've computing the $\alpha$s up to $l=2$, and have:
-$\alpha_{2,\text{noun}} = 2$, 
-$\alpha_{2,\text{verb}} = 9$, 
+$\alpha_{2,\text{noun}} = 2$,
+$\alpha_{2,\text{verb}} = 9$,
 $\alpha_{2,\text{adj}} = -1$ (recall: position $l=2$ is ``eat'').
 We want to extend this to position $3$; for example, we want to compute $\alpha_{3,\text{adj}}$.
 Let's assume there's a single unary feature here, ``tasty/adj'' and three possible Markov features of the form ``?:adj''.
@@ -630,10 +630,10 @@ The full recursion is derived as:
   \becauseoffull{separate score of prefix from score of position l+1} \\
               &= \max_{\hat\vy_{1:l}} \dotp{\vw}{\Big( \phi_{1:l}(\vx, \hat\vy) + \phi_{l+1}(\vx, \hat\vy \circ k)\Big)}  \\
   \becauseoffull{distributive law over dot products} \\
-              &= \max_{\hat\vy_{1:l}} \Big[ \dotp{\vw}{\phi_{1:l}(\vx, \hat\vy)} 
+              &= \max_{\hat\vy_{1:l}} \Big[ \dotp{\vw}{\phi_{1:l}(\vx, \hat\vy)}
                                          + \dotp{\vw}{\phi_{l+1}(\vx, \hat\vy \circ k)} \Big] \\
   \becauseoffull{separate out final label from prefix, call it k'} \\
-              &= \max_{\hat\vy_{1:l-1}} \max_{k'} \Big[ \dotp{\vw}{\phi_{1:l}(\vx, \hat\vy \circ k')} 
+              &= \max_{\hat\vy_{1:l-1}} \max_{k'} \Big[ \dotp{\vw}{\phi_{1:l}(\vx, \hat\vy \circ k')}
                                          + \dotp{\vw}{\phi_{l+1}(\vx, \hat\vy \circ k' \circ k)} \Big] \\
   \becauseoffull{swap order of maxes, and last term doesn't depend on prefix} \\
               &= \max_{k'} \left[ \Big[ \max_{\hat\vy_{1:l-1}} \dotp{\vw}{\phi_{1:l}(\vx, \hat\vy \circ k')} \Big] \right. \nonumber\\
@@ -641,7 +641,7 @@ The full recursion is derived as:
   \becauseoffull{apply recursive definition} \\
               &= \max_{k'} \Big[ \alpha_{l,k'} + \dotp{\vw}{\phi_{l+1}(\vx, \langle \dots, k', k \rangle)} \Big] \label{eq:srl:recursion}  \\
   \becauseoffull{and record a backpointer to the k' that achieves the max} \\
-\zeta_{l+1,k}  &= \argmax_{k'} \Big[ \alpha_{l,k'} + \dotp{\vw}{\phi_{l+1}(\vx, \langle \dots, k', k \rangle)} \Big] 
+\zeta_{l+1,k}  &= \argmax_{k'} \Big[ \alpha_{l,k'} + \dotp{\vw}{\phi_{l+1}(\vx, \langle \dots, k', k \rangle)} \Big]
 \end{align}
 At the end, we can take $\max_k \alpha_{L,k}$ as the score of the best output sequence.
 To extract the final sequence, we know that the best label for the last word is $\argmax \alpha_{L,k}$.
@@ -695,7 +695,7 @@ Recall that in the non-loss-augmented case, we have the $\alpha$ recursion as:
 \end{align}
 If we define $\tilde\alpha$ to be the loss-augmented score, the corresponding recursion is (differences highlighted in blue):
 \begin{align}
-\tilde\alpha_{l+1,k} 
+\tilde\alpha_{l+1,k}
   &= \max_{\hat\vy_{1:l}} \dotp{\vw}{\phi_{1:l+1}(\vx, \hat\vy \circ k)} \textcolor{darkblue}{+ \ell^{\textsf{(Ham)}}_{1:l+1}(\vy, \hat\vy\circ k)}\\
   &= \max_{k'} \Big[ \tilde\alpha_{l,k'} + \dotp{\vw}{\phi_{l+1}(\vx, \langle \dots, k', k \rangle)} \Big]
     \textcolor{darkblue}{+ \Ind[k \neq \vy_{l+1}]} \label{eq:srl:laargmaxrec}
@@ -719,7 +719,7 @@ TODO
 
 
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "courseml"
-%%% End: 
+%%% End:

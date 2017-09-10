@@ -90,7 +90,7 @@ exactly when the hyperplane correctly separates the data.
 You might then come back and say: okay, well I don't really need an
 \emph{exact} solution.  I'm willing to have a solution that makes one
 or two more errors than it has to.  Unfortunately, the situation is
-really bad.  Zero/one loss is NP-hard to even \emph{appproximately
+really bad.  Zero/one loss is NP-hard to even \emph{approximately
   minimize}.  In other words, there is no efficient algorithm for even
 finding a solution that's a small constant worse than optimal.  (The
 best known constant at this time is $418/415 \approx 1.007$.)
@@ -145,8 +145,11 @@ adjusting $b$ upwards by $0.00000011$ will decrease your error rate by
 $1$.  But adjusting it upwards by $0.00000009$ will have no effect.
 This makes it really difficult to figure out good ways to adjust the
 parameters.
-
+\MoveNextFigure{-5cm}
 \Figure{loss:zeroone}{plot of zero/one versus margin}
+
+\Figure{loss:sigmoidzeroone}{plot of zero/one versus margin and an
+	S version of it}
 
 To see this more clearly, it is useful to look at plots that relate
 \emph{margin} to \emph{loss}.  Such a plot for zero/one loss is shown
@@ -158,9 +161,6 @@ then you get a loss of zero.  Otherwise you get a loss of one.  By
 thinking about this plot, you can see how changes to the parameters
 that change the margin \emph{just a little bit} can have an enormous
 effect on the overall loss.
-
-\Figure{loss:sigmoidzeroone}{plot of zero/one versus margin and an
-  S version of it}
 
 You might decide that a reasonable way to address this problem is to
 replace the non-smooth zero/one loss with a smooth approximation.
@@ -176,7 +176,7 @@ function is one that looks like a sad face ($\frown$); an easy
 mnemonic is that you can hide under a con{\bf cave} function.)  There
 are two equivalent definitions of a convex function.  The first is
 that it's second derivative is always non-negative.  The second, more
-geometric, defition is that any \concept{chord} of the function lies
+geometric, definition is that any \concept{chord} of the function lies
 above it.  This is shown in Figure~\ref{fig:loss:convex}.  There you
 can see a convex function and a non-convex function, both with two
 chords drawn in.  In the case of the convex function, the chords lie
@@ -299,7 +299,7 @@ In addition to small weights being good, you could argue that
 this means that feature $d$ is not used at all in the classification
 decision.  If there are a large number of irrelevant features, you
 might want as many weights to go to zero as possible.  This suggests
-an alternative regularizer: $R\xth{cnt}(\vw,b) = \sum_d \Ind[x_d \neq
+an alternative regularizer: $R\xth{cnt}(\vw,b) = \sum_d \Ind[w_d \neq
 0]$.
 
 \thinkaboutit{Why might you not want to use $R\xth{cnt}$ as a regularizer?}
@@ -314,22 +314,22 @@ flavor.  We write $\norm{\vw}_p$ to denote the $p$-norm of $\vw$.
   \norm{\vw}_p = \left( \sum_d \ab{w_d}^p \right)^{\frac 1 p}
 \end{equation}
 %
+\thinkaboutit{You can actually identify the $R\xth{cnt}$ regularizer
+	with a $p$-norm as well.  Which value of $p$ gives it to you?
+	(Hint: you may have to take a limit.)}
+
+\TODOFigure{loss:norms2d}{level sets of the same $p$-norms}
+
 You can check that the $2$-norm exactly corresponds to the usual
 Euclidean norm, and that the $1$-norm corresponds to the ``absolute''
 regularizer described above.
-
-\thinkaboutit{You can actually identify the $R\xth{cnt}$ regularizer
-  with a $p$-norm as well.  Which value of $p$ gives it to you?
-  (Hint: you may have to take a limit.)}
-
-\TODOFigure{loss:norms2d}{level sets of the same $p$-norms}
 
 When $p$-norms are used to regularize weight vectors, the interesting
 aspect is how they trade-off multiple features.  To see the behavior
 of $p$-norms in two dimensions, we can plot their \concept{contour}
 (or \concept{level-set}).  Figure~\ref{fig:loss:norms2d} shows the
 contours for the same $p$ norms in two dimensions.  Each line denotes
-the two-dimensional vectors to which this norm assignes a total value
+the two-dimensional vectors to which this norm assigns a total value
 of $1$.  By changing the value of $p$, you can interpolate between a
 square (the so-called ``max norm''), down to a circle ($2$-norm),
 diamond ($1$-norm) and pointy-star-shaped-thing ($p<1$ norm).
@@ -350,13 +350,13 @@ popular choice for sparsity-seeking applications.
 \begin{mathreview}{Gradients}
   A gradient is a multidimensional generalization of a derivative.
   Suppose you have a function $f : \R^D \fto \R$ that takes a vector $\vx = \langle x_1, x_2, \dots, x_D \rangle$ as input and produces a scalar value as output.
-  You can differentite this function according to any one of the inputs; for instance, you can compute $\frac {\partial f} {\partial x_5}$ to get the derivative with respect to the fifth input.
+  You can differentiate this function according to any one of the inputs; for instance, you can compute $\frac {\partial f} {\partial x_5}$ to get the derivative with respect to the fifth input.
   The \concept{gradient} of $f$ is just the vector consisting of the derivative $f$ with respect to each of its input coordinates independently, and is denoted $\grad f$, or, when the input to $f$ is ambiguous, $\grad_{\vec x} f$.
   This is defined as:
   ~
   \begin{align}
-    \grad_{\vec x} f &= \left\langle \frac {\partial f} {\partial x_1}~~,~~ 
-                                    \frac {\partial f} {\partial x_2}~~,~~ 
+    \grad_{\vec x} f &= \left\langle \frac {\partial f} {\partial x_1}~~,~~
+                                    \frac {\partial f} {\partial x_2}~~,~~
                                     \dots~~,~~
                                     \frac {\partial f} {\partial x_D} \right\rangle
   \end{align}
@@ -436,7 +436,7 @@ regularizer.  Then, the regularized objective function is:
 %
 \begin{equation}
 \cL(\vw,b) =
-\sum_n 
+\sum_n
   \exp\big[-y_n (\dotp{\vec w}{\vx_n}+b)\big] +
  \frac \la 2 \norm{\vw}^2
 \end{equation}
@@ -459,7 +459,7 @@ practical perspective, the optimization will operate by updating $b
 \leftarrow b - \eta \partialof{\cL}{b}$.  Consider positive examples:
 examples with $y_n=+1$.  We would hope for these examples that the
 current prediction, $\dotp{\vw}{\vx_n}+b$, is as large as possible.
-As this value tends toward $\infty$, the term in the $\exp[]$ goes to
+As this value tends toward $\infty$, the $\exp[]$ term goes to
 zero.  Thus, such points will not contribute to the step.  However, if
 the current prediction is small, then the $\exp[]$ term will be
 positive and non-zero.  This means that the bias term $b$ will be
@@ -474,11 +474,11 @@ respect to $\vw$.
 %
 \begin{align}
 \grad_\vw \cL
-&= \grad_\vw \sum_n \exp\big[-y_n (\dotp{\vec w}{\vx_n}+b)\big] 
+&= \grad_\vw \sum_n \exp\big[-y_n (\dotp{\vec w}{\vx_n}+b)\big]
  + \grad_\vw\frac \la 2 \norm{\vw}^2 \\
-&= \sum_n \left( \grad_\vw -y_n (\dotp{\vec w}{\vx_n}+b) \right) \exp\big[-y_n (\dotp{\vec w}{\vx_n}+b)\big] 
+&= \sum_n \left( \grad_\vw -y_n (\dotp{\vec w}{\vx_n}+b) \right) \exp\big[-y_n (\dotp{\vec w}{\vx_n}+b)\big]
  + \la \vw \\
-&= -\sum_n y_n \vx_n \exp\big[-y_n (\dotp{\vec w}{\vx_n}+b)\big] 
+&= -\sum_n y_n \vx_n \exp\big[-y_n (\dotp{\vec w}{\vx_n}+b)\big]
  + \la \vw
 \end{align}
 %
@@ -561,7 +561,7 @@ Let $L$ be large enough that $f''(z) < L$ for all $z$.
        + \frac 1 2 f''(a) (z-a)^2
   \end{align}
   The ``\dots'' is guaranteed to be non-negative because $f$ is
-  convex.  
+  convex.
 \end{myproof}
 \end{comment}
 
@@ -707,7 +707,7 @@ particular:
 %
 \begin{equation}
 a_n
-= \left[ \mat X \vec w \right]_n 
+= \left[ \mat X \vec w \right]_n
 = \sum_d \mat X_{n,d} w_d
 \end{equation}
 %
@@ -739,7 +739,7 @@ This can be expanded visually as:
 \left[
 \begin{array}{c}
   w_{1} \\
-  w_{2} \\ 
+  w_{2} \\
   \vdots \\
   w_{D}
 \end{array}
@@ -762,7 +762,7 @@ This can be expanded visually as:
 \left[
 \begin{array}{c}
   y_{1} \\
-  y_{2} \\ 
+  y_{2} \\
   \vdots \\
   y_{N}
 \end{array}
@@ -841,7 +841,7 @@ the middle, it's hard to say for sure.
 At the beginning of this chapter, you may have looked at the convex
 surrogate loss functions and asked yourself: where did these come
 from?!  They are all derived from different underlying principles,
-which essentially correspond to different inductive biases.  
+which essentially correspond to different inductive biases.
 
 \Figure{loss:geom}{picture of data points with three hyperplanes,
   RGB with G the best}
@@ -932,7 +932,7 @@ can ``move'' that point across the hyperplane on to the proper side.
 You will have to pay a little bit to do so, but as long as you aren't
 moving a \emph{lot} of points around, it should be a good idea to do
 this.  In this picture, the amount that you move the point is denoted
-$\xi$ (xi).
+$\xi$ ($x_i$).
 
 By introducing one slack parameter for each training example, and
 penalizing yourself for having to use slack, you can create an
@@ -1007,7 +1007,7 @@ We can then compute the margin by algebra:
 %
 \begin{align}
 \ga
-&= \frac 1 2 \left[ \textcolor{darkblue}{d^+} 
+&= \frac 1 2 \left[ \textcolor{darkblue}{d^+}
                   - \textcolor{darkred}{d^-} \right] \\
 &= \frac 1 2
    \left[
@@ -1085,7 +1085,8 @@ problem:
 + \underbrace{C \sum_n \ell\xth{hin}(y_n,
   \dotp{\vw}{\vx_n}+b)}_{\text{small slack}}}
 %
-Multiplying this objective through by $\la/C$, we obtain exactly the
+Substituting $C = 1/2\lambda$ and multiplying this objective through by
+$2\lambda$, we obtain exactly the
 regularized objective from Eq~\eqref{opt:loss:reg} with hinge loss as
 the loss function and the $2$-norm as the regularizer!
 
@@ -1107,7 +1108,7 @@ TODO further reading
 \end{comment}
 
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "courseml"
-%%% End: 
+%%% End:

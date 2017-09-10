@@ -54,7 +54,7 @@ architectures.  Call these classifiers $f_1, \dots, f_M$.  At test
 time, you can make a prediction by \emph{voting}.  On a test example
 $\hat x$, you compute $\hat y_1 = f_1(\hat x)$, $\dots$, $\hat y_M =
 f_M(\hat x)$.  If there are more $+1$s in the list $\langle y_1,
-\dots, y_M$ then you predict $+1$; otherwise you predict $-1$.
+\dots, y_M \rangle$ then you predict $+1$; otherwise you predict $-1$.
 
 The main advantage of ensembles of different classifiers is that it is
 unlikely that all classifiers will make the same mistake.  In fact, as
@@ -269,9 +269,9 @@ curves) run for differing numbers of boosting iterations (the
 x-axis).  As you can see, if you are willing to boost for many
 iterations, very shallow trees are quite effective.
 
-In fact, a very popular weak learner is a decision \concept{decision
+In fact, a very popular weak learner is a \concept{decision
   stump}: a decision tree that can only ask \emph{one} question.  This
-may seem like a silly model (and, in fact, it is on it's own), but
+may seem like a silly model (and, in fact, it is on its own), but
 when combined with boosting, it becomes very effective.  To understand
 why, suppose for a moment that our data consists only of binary
 features, so that any question that a decision tree might ask is of
@@ -282,12 +282,12 @@ $s \in \{\pm 1\}$ and $d$ indexes \emph{some} feature.
 \thinkaboutit{Why do the functions have this form?}
 
 Now, consider the \emph{final} form of a function learned by
-AdaBoost.  We can expand it as follow, where we let $f_k$ denote the
+AdaBoost.  We can expand it as follows, where we let $f_k$ denote the
 single feature selected by the $k$th decision stump and let $s_k$
 denote its sign:
 %
 \begin{align}
-f(\vx) 
+f(\vx)
 &= \sgn\left[ \sum_k \al_k f\kth(\vx) \right] \\
 &= \sgn\left[ \sum_k \al_k s_k (2 x_{f_k} - 1) \right] \\
 &= \sgn\left[ \sum_k 2 \al_k s_k x_{f_k} - \sum_k \al_k s_k \right] \\
@@ -387,7 +387,7 @@ TODO further reading
 \end{comment}
 
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "courseml"
-%%% End: 
+%%% End:

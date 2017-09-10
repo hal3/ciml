@@ -182,8 +182,8 @@ here.  It simply involves some algebra on expected values.
   that distribution.  We will compute the expected error $\ep^w$ of
   $f$ on the weighted problem:
   \begin{align}
-    \ep^w 
-    &= \Ep_{(\vx,y) \sim \cD^w} 
+    \ep^w
+    &= \Ep_{(\vx,y) \sim \cD^w}
          \Big[ \al^{y=1} \big[f(\vx) \neq y\big] \Big] \\
     &= \sum_{\vx \in \cX} \sum_{y \in \pm 1}
          \cD^w(\vx,y) \al^{y=1} \big[f(\vx) \neq y\big] \\
@@ -312,7 +312,7 @@ The training and test algorithms for OVA are sketched in
 Algorithms~\ref{alg:complex:ovatrain} and \ref{alg:complex:ovatest}.
 In the testing procedure, the prediction of the $i$th classifier is
 added to the overall score for class $i$.  Thus, if the prediction is
-positive, class $i$ gets a vote; if the prdiction is negative,
+positive, class $i$ gets a vote; if the prediction is negative,
 everyone else (implicitly) gets a vote.  (In fact, if your learning
 algorithm can output a confidence, as discussed in Section~\ref{}, you
 can often do better by using the confidence as $y$, rather than a
@@ -533,7 +533,7 @@ ranking case.  This is because we need to predict an entire ranking of
 a large number of documents, somehow assimilating the preference
 function into an overall permutation.
 
-For notationally simplicity, let $\vx_{nij}$ denote the features
+For notational simplicity, let $\vx_{nij}$ denote the features
 associated with comparing document $i$ to document $j$ on query $n$.
 Training is fairly straightforward.  For every $n$ and every pair $i
 \neq j$, we will create a binary classification example based on
@@ -603,7 +603,7 @@ problems that are very different in terms of preference than others.
 Second, rather than producing a list of scores and then calling an
 arbitrary sorting algorithm, you can actually use the preference
 function as the sorting function inside your own implementation of
-quicksort.  
+quicksort.
 
 We can now formalize the problem.  Define a ranking as a function
 $\si$ that maps the objects we are ranking (documents) to the desired
@@ -825,7 +825,7 @@ TODO further reading
 % \learningproblem{Collective Classification}{
 % \item An input space $\cX$ and number of classes $K$
 % \item An unknown distribution $\cD$ over $\cG(\cX\times[K])$
-% }{A function $f : \cG(\cX) \fto \cG([K])$ minimizing: 
+% }{A function $f : \cG(\cX) \fto \cG([K])$ minimizing:
 % $\Ep_{(V,E) \sim \cD} \left[
 %   \sum_{v \in V} \big[ \hat y_v \neq y_v \big]
 %   \right]$, where $y_v$ is the label associated with vertex $v$ in $G$
@@ -950,7 +950,7 @@ TODO further reading
 % ensure that your predictions at the $k$th layer are indicative of how
 % well the algorithm will actually do at test time.
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "courseml"
-%%% End: 
+%%% End:

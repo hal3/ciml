@@ -182,7 +182,7 @@ to do so, you need to compute the probability of the data:
 %
 \begin{align} \label{eq:prob:binomial}
   p_\be(D)
-  &= p_\be(\texttt{HHTH}) 
+  &= p_\be(\texttt{HHTH})
      \becauseof{definition of $D$} \\
   &= p_\be(\texttt{H})
      p_\be(\texttt{H})
@@ -304,16 +304,16 @@ Eq~\eqref{eq:prob:nb0} is that it's a distribution over a \emph{lot}
 of variables.  You can try to simplify it by applying the
 \concept{chain rule} of probabilities:
 %
-\begin{align} 
+\begin{align}
   \pth( x_1, x_2, \dots, x_D, y )
- &= \pth(y) \pth(x_1 \| y) 
-    \pth(x_2 \| y, x_1) 
+ &= \pth(y) \pth(x_1 \| y)
+    \pth(x_2 \| y, x_1)
     \pth(x_3 \| y, x_1, x_2) \nonumber\\
- &\quad\quad   \cdots 
+ &\quad\quad   \cdots
     \pth(x_D \| y, x_1, x_2, \dots, x_{D-1})
   \\
-&= \pth(y) \prod_d \pth(x_d \| y, x_1, \dots, x_{d-1}) 
-\label{eq:prob:nbchain} 
+&= \pth(y) \prod_d \pth(x_d \| y, x_1, \dots, x_{d-1})
+\label{eq:prob:nbchain}
 \end{align}
 %
 At this point, this equality is \emph{exact} for any probability
@@ -339,7 +339,7 @@ Under this assumption, you can simplify Eq~\eqref{eq:prob:nbchain} to:
 %
 \begin{align} \label{eq:prob:nb}
   \pth( (y, \vec x) )
-&= \pth(y) \prod_d \pth(x_d \| y) 
+&= \pth(y) \prod_d \pth(x_d \| y)
 \becauseof{naive Bayes assumption}
 \end{align}
 %
@@ -376,7 +376,7 @@ set:
 
 % \log \pth( (y, \vec x) )
 % &= \textcolor{darkergreen}{[y=+1] \log \th_0
-%    + [y=-1] \log (1-\th_0)} 
+%    + [y=-1] \log (1-\th_0)}
 % \becauseof{take logs}
 % \nonumber\\
 % &\quad\quad +
@@ -387,7 +387,7 @@ set:
 % \log\pth(D)
 % &= \sum_n \Big[
 % \textcolor{darkergreen}{[y_n=+1] \log \th_0
-%    + [y_n=-1] \log (1-\th_0)} 
+%    + [y_n=-1] \log (1-\th_0)}
 % \becauseof{i.i.d. assumption}
 % \nonumber\\
 % &\quad\quad +
@@ -424,8 +424,8 @@ inject your knowledge of the problem into the learning algorithm.
   There are a few common probability distributions that we use in this book.
   The first is the Bernouilli distribution, which models binary outcomes (like coin flips).
   A Bernouilli distribution, $\Ber(\th)$ is parameterized by a single scalar value $\th \in [0,1]$ that represents the probability of heads. The likelihood function is $\Ber(x \| \th) = \th^x (1-\th)^{1-x}$.
-  The generalization of the Bernouilli to more than two possible outcomes (like rolls of a die) is the Discrete distribution, $\Disc(\vec th)$. If the die has $K$ sides, then $\vec \th \in \R^K$ with all entries non-negative and $\sum_k \th_k = 1$. $\th_k$ is the probabability that the die comes up on side $k$. The likelihood function is $\Disc(x \| \vec\th) = \prod_k \th_k^{\Ind[x=k]}$.
-  The Binomial distribution is just like the Bernouilli distribution but for multiple flips of the rather than a single flip; it's likelihood is $\Bin(k \| n, \th) = n \choose k \th^k (1-\th)^{n-k}$, where $n$ is the number of flips and $k$ is the number of heads.
+  The generalization of the Bernouilli to more than two possible outcomes (like rolls of a die) is the Discrete distribution, $\Disc(\vec \th)$. If the die has $K$ sides, then $\vec \th \in \R^K$ with all entries non-negative and $\sum_k \th_k = 1$. $\th_k$ is the probabability that the die comes up on side $k$. The likelihood function is $\Disc(x \| \vec\th) = \prod_k \th_k^{\Ind[x=k]}$.
+  The Binomial distribution is just like the Bernouilli distribution but for multiple flips of the rather than a single flip; its likelihood is $\Bin(k \| n, \th) = n \choose k \th^k (1-\th)^{n-k}$, where $n$ is the number of flips and $k$ is the number of heads.
   The Multinomial distribution extends the Discrete distribution also to multiple rolls; it's likelihood is $\Mult(\vec x \| n, \vec\th) = \frac {n!} {\prod_k x_k!} \prod_k \th_k^{x_k}$, where $n$ is the total number of rolls and $x_k$ is the number of times the die came up on side $k$ (so $\sum_k x_k = n$).
   The preceding distributions are all discrete.
   ~\\~\\
@@ -469,7 +469,7 @@ p(y=-1,\vx)$, computed below:
 w_d &= \log \frac {\th_{(+1),d} (1-\th_{(-1),d})} {\th_{(-1),d} (1-\th_{(+1),d})}
 \quad,\quad
 b   = \sum_d \log \frac {1-\th_{(+1),d}} {1-\th_{(-1),d}}
- + \log \frac {\th_0} {1-\th_0} 
+ + \log \frac {\th_0} {1-\th_0}
 \end{align}
 %
 The result of the algebra is that the naive Bayes model has precisely
@@ -493,11 +493,11 @@ other models you've previous studied, the decision boundary is linear.
 % if $p(y=+1\|\vx) > \be$ or equivalent $p(y=-1\|\vx) < 1-\be$.
 % %
 % \begin{align}
-%    \Ep_{(\vx,y) \sim p} \left[ \al^{[y=+1]} [ p(y\|\vx) 
+%    \Ep_{(\vx,y) \sim p} \left[ \al^{[y=+1]} [ p(y\|\vx)
 
 % f(\vx) \neq y \right]
 % &= \Ep_{(\vx,y) \sim p} \left[ \al^{[y=+1]} \frac {p(y=+1,\vx)} {p(y=-1,\vx)}
-    
+
 
 \section{Generative Stories}
 
@@ -543,10 +543,10 @@ You can take logs to arrive at the log-likelihood:
 %
 \begin{align}
 \log p(D)
-&= 
+&=
 \sum_n
   \left[
-    \log \th_{y_n} + 
+    \log \th_{y_n} +
     \sum_d
       -\frac 1 2 \log(\si_{y_n,d}^2)
       -\frac 1 {2 \si_{y_n,d}^2} (x_{n,d} - \mu_{y_n,d})^2
@@ -566,9 +566,9 @@ say $\mu_{k,i}$ and obtain:
      - \sum_n \sum_d \frac 1 {2 \si_{y_n,d}^2} (x_{n,d} - \mu_{y_n,d})^2
    \becauseof{ignore irrelevant terms} \\
 &= \frac {\partial} {\partial \mu_{k,i}}
-     - \sum_{n:y_n=k} \frac 1 {2 \si_{k,d}^2} (x_{n,i} - \mu_{k,i})^2
+     - \sum_{n:y_n=k} \frac 1 {2 \si_{k,i}^2} (x_{n,i} - \mu_{k,i})^2
    \becauseof{ignore irrelevant terms} \\
-&= \sum_{n:y_n=k} \frac 1 {\si_{k,d}^2} (x_{n,i} - \mu_{k,i})
+&= \sum_{n:y_n=k} \frac 1 {\si_{k,i}^2} (x_{n,i} - \mu_{k,i})
    \becauseof{take derivative}
 \end{align}
 %
@@ -584,7 +584,7 @@ fall in class $k$.  A similar analysis for $\si_{k,i}^2$ yields:
 \begin{align}
    \frac {\partial \log p(D)} {\partial \si^2_{k,i}}
 &= \frac {\partial} {\partial \si^2_{k,i}}
-     - \sum_{y:y_n=k} \left[ \frac 1 2 \log(\si_{k,i}^2) + 
+     - \sum_{y:y_n=k} \left[ \frac 1 2 \log(\si_{k,i}^2) +
                             \frac 1 {2 \si_{k,i}^2} (x_{n,i} - \mu_{k,i})^2\right]
    \becauseof{ignore irrelevant terms} \\
 &= - \sum_{y:y_n=k} \left[
@@ -773,7 +773,7 @@ data.  Namely, maximize $p(\th \| D)$.  This term is known as the
 Bayes' rule:
 %
 \begin{align}
-  \underbrace{p(\th \| D)}_{\text{posterior}} 
+  \underbrace{p(\th \| D)}_{\text{posterior}}
   &= \frac {
        \overbrace{p(\th)}^{\text{prior}}
        \overbrace{p(D \| \th)}^{\text{likelihood}}
@@ -829,7 +829,7 @@ TODO
    - Naive Bayes as a linear model
 \end{comment}
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "courseml"
-%%% End: 
+%%% End:

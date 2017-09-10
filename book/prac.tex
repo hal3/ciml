@@ -53,6 +53,8 @@ But, like so many problems in the world, there is a significant
 you give it is trash, the learning algorithm is unlikely to be able to
 overcome it.
 
+\Figure{prac_imagepix}{object recognition in pixels}
+
 Consider a problem of object recognition from images.  If you start
 with a $100 \times 100$ pixel image, a very easy feature
 representation of this image is as a $30,000$ dimensional vector,
@@ -60,8 +62,6 @@ where each dimension corresponds to the red, green or blue component
 of some pixel in the image.  So perhaps feature 1 is the amount of red
 in pixel $(1,1)$; feature 2 is the amount of green in that pixel; and
 so on.  This is the \concept{pixel representation} of images.
-
-\Figure{prac_imagepix}{object recognition in pixels}
 
 One thing to keep in mind is that the pixel representation
 \emph{throws away} all locality information in the image.  Learning
@@ -98,7 +98,7 @@ data ~ knn ~ dimensions ~ points ~ feature ~ figure ~ decision ~ features ~ poin
 }
 
 
-    
+
 \TODOFigure{prac:bow}{BOW repr of one positive and one negative review}
 
 In the context of \concept{text categorization} (for instance, the
@@ -120,7 +120,7 @@ irrelevant feature is one that is completely uncorrelated with the
 prediction task.  A feature $f$ whose expectation does not depend on
 the label $\Ep[f \| Y] = \Ep[f]$ might be irrelevant.  For instance,
 the presence of the word ``the'' might be largely irrelevant for
-predicting whether a course review is positive or negative.  
+predicting whether a course review is positive or negative.
 
 A secondary issue is how well these algorithms deal with
 \concept{redundant features}.  Two features are redundant if they are
@@ -141,7 +141,7 @@ is usually not worthwhile thinking of the case where one has $999$
 great features and $1$ bad feature.  The interesting case is when the
 bad features outnumber the good features, and often outnumber by a
 large degree.  %For instance, perhaps the number of good features is
-%something like $\log D$ out of a set of $D$ total features.  
+%something like $\log D$ out of a set of $D$ total features.
 The
 question is how robust are algorithms in this case.\sidenote{You might
   think it's absurd to have so many irrelevant features, but the cases
@@ -197,7 +197,7 @@ examples.
 Unfortunately, the situation is actually worse than this.  In the
 above analysis we only considered the case of \emph{perfect}
 correlation.  We could also consider the case of \emph{partial}
-correlation, which would yield even higher probabilities.  
+correlation, which would yield even higher probabilities.
 Suffice it to say that even
 decision trees can become confused.
 
@@ -232,7 +232,7 @@ least, it should be small.
 \section{Feature Pruning and Normalization}
 
 In text categorization problems, some words simply do not appear very
-often.  Perhaps the word ``groovy''\sidenote{This is typically
+often.  Perhaps the word ``groovy''\sidenote{This is typically a
   positive indicator, or at least it was back in the US in the 1970s.}
 appears in exactly one training document, which is positive.  Is it
 really worth keeping this word around as a feature?  It's a dangerous
@@ -273,13 +273,13 @@ words and performance suffers.
   Suppose we have $N$ real valued numbers $z_1, z_2, \dots, z_N$.
   The \concept{sample mean} (or just \concept{mean}) of these numbers is just their average value, or expected value: $\mu = \frac 1 N \sum_n z_n$.
   The \concept{sample variance} (or just \concept{variance}) measures how much they vary around their mean: $\si^2 = \frac 1 {N-1} \sum_n (z_n - \mu)^2$, where $\mu$ is the sample mean.
-  
+
 ~\\
 
   The mean and variance have convenient interpretations in terms of prediction.
   Suppose we wanted to choose a single constant value to ``predict'' the next $z$, and were minimizing squared error.
   Call this constant value $a$.
-  Then $a = \argmin_{a \in \R} \frac 1 2 \sum_n (a - z_n)^2$. 
+  Then $a = \argmin_{a \in \R} \frac 1 2 \sum_n (a - z_n)^2$.
   (Here, the $\frac 1 2$ is for convenience and does not change the answer.)
   To solve for $a$, we can take derivatives and set to zero:
     $\frac \partial {\partial a} \frac 1 2 \sum_n (a - z_n)^2
@@ -502,13 +502,14 @@ not-X'' problems often have more of the feel of ``X spotting'' rather
 than a true distinction between X and Y.  (Can you spot the spam?  can
 you spot the relevant documents?)
 
+
 For spotting problems (X versus not-X), there are often more
 appropriate success metrics than accuracy.  A very popular one from
 information retrieval is the \concept{precision}/\concept{recall}
 metric.  Precision asks the question: of all the X's that you found,
 how many of them were actually X's?  Recall asks: of all the X's that
 were out there, how many of them did you find?\sidenote{A colleague
-  make the analogy to the US court system's saying ``Do you promise to
+  made the analogy to the US court system's saying ``Do you promise to
   tell the whole truth and nothing but the truth?''  In this case, the
   ``whole truth'' means high recall and ``nothing but the truth''
   means high precision.''}  Formally, precision and recall are defined
@@ -526,8 +527,6 @@ that $0/0 = 1$ in these definitions.  Thus, if you system found
 nothing, your precision is always perfect; and if there is nothing to
 find, your recall is always perfect.
 
-\TODOFigure{prac:spam}{show a bunch of emails spam/nospam sorted by model predicion, not perfect}
-
 Once you can compute precision and recall, you are often able to
 produce \concept{precision/recall curves}.  Suppose that you are
 attempting to identify spam.  You run a learning algorithm to make
@@ -541,6 +540,8 @@ in Figure~\ref{fig:prac:spam}.
 
 \thinkaboutit{How would you get a confidence out of a decision tree or KNN?}
 
+\TODOFigure{prac:spam}{show a bunch of emails spam/nospam sorted by model predicion, not perfect}
+
 \TODOFigure{prac:prcurve}{precision recall curve}
 
 Once you have this sorted list, you can choose how aggressively you
@@ -551,7 +552,7 @@ the threshold very low, you'll have high recall (but low precision).
 By considering \emph{every possible} place you could put this
 threshold, you can trace out a curve of precision/recall values, like
 the one in Figure~\ref{fig:prac:prcurve}.  This allows us to ask the
-question: for some fixed precision, what sort of recall can I get.
+question: for some fixed precision, what sort of recall can I get?
 Obviously, the closer your curve is to the upper-right corner, the
 better.  And when comparing learning algorithms A and B you can say
 that A \concept{dominates} B if A's precision/recall curve is always
@@ -628,7 +629,7 @@ plots the sensitivity against $1 - \text{specificity}$.  Given an ROC
 curve, you can compute the \concept{area under the curve} (or
 \concept{AUC}) metric, which also provides a meaningful single number
 for a system's performance.  Unlike f-measures, which tend to be low
-because the require agreement, AUC scores tend to be very high, even
+because they require agreement, AUC scores tend to be very high, even
 for not great systems.  This is because random chance will give you an
 AUC of $0.5$ and the best possible AUC is $1.0$.
 
@@ -698,7 +699,7 @@ have two choices.  You can either select one of the $K$ trained models
 as your final model to make predictions with, or you can train a
 \emph{new} model on all of the data, using the hyperparameters
 selected by cross-validation.  If you have the time, the latter is
-probably a better options.
+probably a better option.
 
 \newalgorithm{prac:loo}%
   {\FUN{KNN-Train-LOO}(\VAR{$\mat D$})}
@@ -827,12 +828,12 @@ $\geq 1.96$ & $97.5\%$ \\
 $\geq 2.58$ & $99.5\%$
 }
 
-Suppose that you evaluate two algorithm on $N$-many examples.  On each
+Suppose that you evaluate two algorithms on $N$-many examples.  On each
 example, you can compute whether the algorithm made the correct
 prediction.  Let $a_1, \dots, a_N$ denote the error of the first
 algorithm on each example.  Let $b_1, \dots, b_N$ denote the error of
 the second algorithm.  You can compute $\mu_a$ and $\mu_b$ as the
-means of $\vec a$ and $\vec b$, respecitively.  Finally, center the
+means of $\vec a$ and $\vec b$, respectively.  Finally, center the
 data as $\hat a = \vec a - \mu_a$ and $\hat b = \vec b - \mu_b$.
 The t-statistic is defined as:
 \begin{equation} \label{eq:prac:t}
@@ -892,7 +893,7 @@ One disadvantage to cross validation is that it is computationally
 expensive.  More folds typically leads to better estimates, but every
 new fold requires training a new classifier.  This can get very time
 consuming.  The technique of \concept{bootstrapping} (and closely
-related idea of \concept{jack-knifing} can address this problem.
+related idea of \concept{jack-knifing}) can address this problem.
 
 Suppose that you didn't want to run cross validation.  All you have is
 a single held-out test set with $1000$ data points in it.  You can run
@@ -967,7 +968,7 @@ Can your learning system do well on fitting the training data? If so, then the p
 
 \textbf{Do you have train/test mismatch?} If you can fit the training data, but it doesn't generalize, it could be because there's something different about your test data. Try shuffling your training data and test data together and then randomly selecting a new test set. If you do well in that condition, then probably the test distribution is strange in some way. If reselecting the test data doesn't help, you have other generalization problems.
 
-\textbf{Is your learning algorithm implemented correctly?} This often means: is it optimizing what you think it's optimizing. Instead of measuring accuracy, try measuring whatever-quantity-your-algorithm-is-supposedly-optimizing (like log loss or hinge loss) and make sure that the optimizer is successfully minimizing this quantity. It is usually useful to hand-craft some datasets on which you know the desired behavior. 
+\textbf{Is your learning algorithm implemented correctly?} This often means: is it optimizing what you think it's optimizing. Instead of measuring accuracy, try measuring whatever-quantity-your-algorithm-is-supposedly-optimizing (like log loss or hinge loss) and make sure that the optimizer is successfully minimizing this quantity. It is usually useful to hand-craft some datasets on which you know the desired behavior.
 For instance, you could run KNN on the XOR data.  Or you
 could run perceptron on some easily linearly separable data (for
 instance positive points along the line $x_2 = x_1 + 1$ and negative
@@ -975,7 +976,7 @@ points along the line $x_2 = x_1 - 1$).  Or a decision tree on nice
 axis-aligned data.
 Finally, can you compare against a reference implementation?
 
-\textbf{Do you have an adequate representation?} 
+\textbf{Do you have an adequate representation?}
 If you cannot even fit the training data, you might not have a rich enough feature set.
 The easiest way to try to get a learning algorithm to overfit is to
 add a new feature to it.  You can call this feature the
@@ -1003,10 +1004,10 @@ Because one of the key questions in machine learning is the question of represen
 ~
 \begin{align}
 \text{error}(f)
-&= 
+&=
 \underbrace{\left[ \text{error}(f) - \min_{f^* \in \cF} \text{error}(f^*) \right]}_{\text{\concept{estimation error}}}
 +
-\underbrace{\left[ \min_{f^* \in \cF} \text{error}(f) \right]}_{\text{\concept{approximation error}}}
+\underbrace{\left[ \min_{f^* \in \cF} \text{error}(f^*) \right]}_{\text{\concept{approximation error}}}
 \end{align}
 ~
 Here, the second term, the \concept{approximation error}, measures the quality of the model family\footnote{The ``model family'' (such as depth 20 decision trees, or linear classifiers) is often refered to as the \concept{hypothesis class}. The hypothesis class $\cF$ denotes the set of all possible classifiers we consider, such as all linear classifiers. An classifier $f \in \cF$ is sometimes called a \concept{hypothesis}, though we generally avoid this latter terminology here.}. One way of thinking of approximation error is: suppose someone gave me infinite data to train on---how well could I do with this representation?
@@ -1061,7 +1062,7 @@ TODO
 % and performance drops.
 
 % One can take this idea further.  Instead of sequences of characters,
-% we can consider sequences of \emph{bits}.  
+% we can consider sequences of \emph{bits}.
 
 % \thinkaboutit{Can you think of a text categorization problem where bag
 %   of characters might actually be a reasonable representation?}
@@ -1094,7 +1095,7 @@ TODO
 %TODO: answers to image questions
 
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "courseml"
-%%% End: 
+%%% End:

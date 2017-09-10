@@ -26,7 +26,7 @@ In the imitation learning setting, we assume that we have access to an \concept{
 We want to watch the expert driving, and learn to imitate their behavior.
 Hence: \concept{imitation learning} (sometimes called \concept{learning by demonstration} or \concept{programming by example}, in the sense that programs are learned, and not implemented).
 
-At each point in time $t = 1 \dots T$, the car recieves sensor information $\vx_t$ (for instance, a camera photo ahead of the car, or radar readings).
+At each point in time $t = 1 \dots T$, the car receives sensor information $\vx_t$ (for instance, a camera photo ahead of the car, or radar readings).
 It then has to take an action, $a_t$; in the case of the car, this is one of the three available steering actions.
 The car then suffers some loss $\ell_t$; this might be zero in the case that it's driving well, or large in the case that it crashes.
 The world then changes, moves to time step $t+1$, sensor readings $\vx_{t+1}$ are observed, action $a_{t+1}$ is taken, loss $\ell_{t+1}$ is suffered, and the process continues.
@@ -108,11 +108,11 @@ Similarly, if our multiclass classification algorithm $\cA$ is crummy, we also l
 So part of the question ``how well does this work'' is the more basic question of: what are we even trying to measure?
 
 There is a nice theorem\mycite{ross} that gives an upper bound on the loss suffered by the SupervisedIL algorithm (Algorithm~\ref{alg:imit:supertrain}) as a function of (a) the quality of the expert, and (b) the error rate of the learned classifier.
-To be clear, we need to distinguish between the loss of the policy when run for $T$ steps to form a full trajectory, and the error rate of the learned classifier, which is just it's average multiclass classification error.
+To be clear, we need to distinguish between the loss of the policy when run for $T$ steps to form a full trajectory, and the error rate of the learned classifier, which is just its average multiclass classification error.
 The theorem states, roughly, that the loss of the learned \emph{policy} is at most the loss of the expert plus $T^2$ times the error rate of the classifier.
 
 \begin{theorem}[Loss of SupervisedIL]
-  Suppose that one runs Algorithm~\ref{alg:imit:supertrain} using a multiclass classifier that optimizes the 0-1 loss (or an upperbound thereof).
+  Suppose that one runs Algorithm~\ref{alg:imit:supertrain} using a multiclass classifier that optimizes the 0-1 loss (or an upper bound thereof).
   Let $\ep$ be the error rate of the underlying classifier (in expectation) and assume that all instantaneous losses are in the range $[0, \ell\xth{max}]$.
   Let $f$ be the learned policy; then:
   \begin{align}
@@ -124,10 +124,10 @@ The theorem states, roughly, that the loss of the learned \emph{policy} is at mo
 \end{theorem}
 
 Intuitively, this bound on the loss is about a factor of $T$ away from what we might hope for.
-In particular, the multiclass classifier makes errors on an $\ep$ fraction of it's actions, measured by zero/one loss.
+In particular, the multiclass classifier makes errors on an $\ep$ fraction of its actions, measured by zero/one loss.
 In the worst case, this will lead to a loss of $\ell\xth{max}\ep$ for a single step.
 Summing all these errors over the entire trajectory would lead to a loss on the order of $\ell\xth{max}T\ep$, which is a factor $T$ better than this theorem provides.
-A natural question (addressed in the next section) is whether this is analysis is tight.
+A natural question (addressed in the next section) is whether this analysis is tight.
 A related question (addressed in the section after that) is whether we can do better.
 Before getting there, though, it's worth highlighting that an extra factor of $T$ is \emph{really bad.} It can cause even very small multiclass error rates to blow up; in particular, if $\ep \geq 1/T$, we lose, and $T$ can be in the hundreds or more.
 
@@ -140,7 +140,7 @@ If it \emph{ever} veers from that state distribution, it may have no idea how to
 As a concrete example, perhaps the expert driver never ever gets themselves into a state where they are directly facing a wall.
 Moreover, the expert driver probably tends to drive forward more than backward.
 If the imperfect learner manages to make a few errors and get stuck next to a wall, it's likely to resort to the general ``drive forward'' rule and stay there forever.
-This is the problem of \concept{compounding error}; 
+This is the problem of \concept{compounding error};
 and yes, it does happen in practice.
 
 It turns out that it's possible to construct an imitation learning problem on which the $T^2$ compounding error is unavoidable.
@@ -150,7 +150,7 @@ You have two possible actions: press a button marked ``zero'' or press a button 
 The ``correct'' thing to do at $t=1$ is to press the button that corresponds to the image you've been shown.
 Pressing the correct button leads to $\ell_1=0$; the incorrect leads to $\ell_1=1$.
 Now, at time $t=2$ you are shown another image, again of a zero or one.
-The correct thing to do in this time step is the xor of (a) the number written on the picture you see right now, and (b) the correct answer from the previous time step.
+The ``correct'' thing to do in this time step is the xor of (a) the number written on the picture you see right now, and (b) the correct answer from the previous time step.
 This holds in general for $t>1$.
 
 There are two important things about this construction.
@@ -253,7 +253,7 @@ Intuitively, Dagger should be less sensitive to compounding error than Supervise
 This is formalized in the following theorem:
 
 \begin{theorem}[Loss of Dagger]
-  Suppose that one runs Algorithm~\ref{alg:imit:dagger} using a multiclass classifier that optimizes the 0-1 loss (or an upperbound thereof).
+  Suppose that one runs Algorithm~\ref{alg:imit:dagger} using a multiclass classifier that optimizes the 0-1 loss (or an upper bound thereof).
   Let $\ep$ be the error rate of the underlying classifier (in expectation) and assume that all instantaneous losses are in the range $[0, \ell\xth{max}]$.
   Let $f$ be the learned policy; then:
   \begin{align}
@@ -287,10 +287,10 @@ Here are two prototypical examples:
 \end{enumerate}
 
 Consider the game playing example, and for concreteness, suppose you are trying to learn to play solitaire (this is an easier example because it's a single player game).
-When running DaggerTrain (Algorithm~\ref{alg:imit:dagger} to learn a chess-playing policy, the algorithm will repeatedly ask for $\VARm{\text{expert}}(\VARm{\vx})$, where $\vx$ is the current state of the game.
+When running DaggerTrain (Algorithm~\ref{alg:imit:dagger}) to learn a solitaire-playing policy, the algorithm will repeatedly ask for $\VARm{\text{expert}}(\VARm{\vx})$, where $\vx$ is the current state of the game.
 What should this function return?
 Ideally, it should return the/an action $a$ such that, if $a$ is taken, and then the rest of the game is played optimally, the player wins.
-Computing this exactly is going to be very difficult for anything except the simplest games, so we need to restort to an approxiamtion.
+Computing this exactly is going to be very difficult for anything except the simplest games, so we need to resort to an approximation.
 
 \newalgorithm%
   {imit:dldfs}%
@@ -319,7 +319,7 @@ Computing this exactly is going to be very difficult for anything except the sim
 
 \TODOFigure{imit:dldfs}{Depth limited depth-first search}
 
-A common strategy is to run a depth-limited depth first search, starting at state $\vx$, and terminating after at most three of four moves (see Figure~\ref{fig:imit:dldfs}).
+A common strategy is to run a depth-limited depth first search, starting at state $\vx$, and terminating after at most three or four moves (see Figure~\ref{fig:imit:dldfs}).
 This will generate a search tree.
 Unless you are very near the end of the game, none of the leaves of this tree will correspond to the end of the game.
 So you'll need some heuristic, $h$, for evaluating states that are non-terminals.
@@ -375,7 +375,7 @@ Given that notion of best, the expert is easy to define:
   &= \argmin_a \text{best}(\ell, \vy, \hat\vy \circ a)
 \end{align}
 ~
-Namely, it is the action that leads to the best possible completion \emph{after} taking that action. 
+Namely, it is the action that leads to the best possible completion \emph{after} taking that action.
 So in the example above, the expert action is ``adj''.
 For some problems and some loss functions, computing the expert is easy.
 In particular, for sequence labeling under Hamming loss, it's trivial.
@@ -392,7 +392,7 @@ You define a feature vector $\phi(\vx,\hat\vy)$, which will typically consist of
 The expert label for the $t$th word is just the corresponding label in the ground truth $\vy$.
 Given all this, one can run Dagger (Algorithm~\ref{alg:imit:dldfs}) exactly as specified.
 
-Moving to structured prediction problems other than sequence labeling problems is beyond the scope of this book. 
+Moving to structured prediction problems other than sequence labeling problems is beyond the scope of this book.
 The general framework is to cast your structured prediction problem as a sequential decision making problem.
 Once you've done that, you need to decide on features (this is the easy part) and an expert (this is often the harder part).
 However, once you've done so, there are generic libraries for ``compiling'' your specification down to code.
@@ -402,7 +402,7 @@ However, once you've done so, there are generic libraries for ``compiling'' your
 TODO further reading
 
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "courseml"
-%%% End: 
+%%% End:

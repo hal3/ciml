@@ -144,7 +144,7 @@ single layer networks (i.e., perceptrons).  To see this, you can
 construct a very small two-layer network for solving the XOR problem.
 For simplicity, suppose that the data set consists of four data
 points, given in Table~\ref{tab:nnet:xor}.  The classification rule is
-that $y=+1$ if an only if $x_1=x_2$, where the features are just $\pm
+that $y=+1$ if and only if $x_1=x_2$, where the features are just $\pm
 1$.
 
 You can solve this problem using a two layer network with two hidden
@@ -215,7 +215,7 @@ regularization.  In both view, the number of hidden units controls how
 complex your function will be.  Lots of hidden units $\Rightarrow$
 very complicated function.  %Figure~\ref{fig:nnet:units} shows training
 %and test error for neural networks trained with different numbers of
-%hidden units.  
+%hidden units.
 As the number increases, training performance continues
 to get better.  But at some point, test performance gets worse because
 the network has overfit the data.
@@ -252,7 +252,7 @@ squared error with your loss function of choice.  Our overall
 objective is:
 %
 \optimizeuc{nnet:twolayer}{\mat W,\vec v}{%
-  \sum_n \frac 1 2 \left( \textcolor{darkblue}{y_n - 
+  \sum_n \frac 1 2 \left( \textcolor{darkblue}{y_n -
      \sum_i v_i f(\dotp{\vec w_i}{\vx_n})}
      \right)^2}
 %
@@ -273,7 +273,7 @@ $\vec h_n$ denote the vector of hidden unit activations on that
 example.  Then:
 %
 \begin{equation}
-\grad_{\vec v} = -\sum_n e_n \vec h_n 
+\grad_{\vec v} = -\sum_n e_n \vec h_n
 \end{equation}
 %
 This is exactly like the linear case.  One way of interpreting this
@@ -293,8 +293,8 @@ Thankfully, the chain rule of calculus saves us.  Ignoring the sum
 over data points, we can compute:
 %
 \begin{align}
-\cL(\mat W) &= 
-\frac 1 2 \left( \textcolor{darkblue}{y - 
+\cL(\mat W) &=
+\frac 1 2 \left( \textcolor{darkblue}{y -
      \sum_i v_i f(\dotp{\vec w_i}{\vx})}
      \right)^2
 \\
@@ -469,7 +469,7 @@ difficult to interpret.  You've seen that, for linear networks, you
 can often interpret high weights as indicative of positive examples
 and low weights as indicative of negative examples.  In multilayer
 networks, it becomes very difficult to try to understand what the
-different hidden units are doing.  
+different hidden units are doing.
 
 %TODO: maybe have something about doing images?
 
@@ -734,7 +734,7 @@ TODO further reading
 \end{comment}
 
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "courseml"
-%%% End: 
+%%% End:
