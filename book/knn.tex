@@ -200,7 +200,7 @@ Despite its simplicity, this nearest neighbor classifier is incredibly
 effective.  (Some might say \emph{frustratingly} effective.)  However,
 it is particularly prone to overfitting label noise.  Consider the
 data in Figure~\ref{fig:knn_classifyitbad}.  You would probably want
-to label the test point positive.  Unfortunately, it's nearest
+to label the test point positive.  Unfortunately, its nearest
 neighbor happens to be negative.  Since the nearest neighbor algorithm
 only looks at the \emph{single} nearest neighbor, it cannot consider
 the ``preponderance of evidence'' that this point should probably
@@ -327,7 +327,7 @@ power to decide which features are important.
   A (real-valued) \textbf{vector} is just an array of real values, for
   instance $\vx = \langle 1, 2.5, -6 \rangle$ is a three-dimensional
   vector. In general, if $\vx = \langle x_1, x_2, \dots, x_D \rangle$,
-  then $x_d$ is it's $d$th component. So $x_3 = -6$ in the previous
+  then $x_d$ is its $d$th component. So $x_3 = -6$ in the previous
   example.
   
 ~
@@ -358,7 +358,7 @@ power to decide which features are important.
 The standard way that we've been thinking about learning algorithms up
 to now is in the \emph{query model}.  Based on training data, you
 learn something.  I then give you a query example and you have to
-guess it's label.
+guess its label.
 
 \Figure{knn:db}{decision boundary for 1nn.}
 
@@ -457,7 +457,7 @@ same as mine.
 The $K$-means clustering algorithm is a particularly simple and
 effective approach to producing clusters on data like you see in
 Figure~\ref{fig:knn:clustering}.  The idea is to represent each
-cluster by it's cluster center.  Given cluster centers, we can simply
+cluster by its cluster center.  Given cluster centers, we can simply
 assign each point to its nearest center.  Similarly, if we know the
 assignment of points to clusters, we can compute the centers.  This
 introduces a chicken-and-egg problem.  If we knew the clusters, we
