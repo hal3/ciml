@@ -391,7 +391,7 @@ Expanding out the definition of $s()$ and adding slack back in, we can replace t
 \end{align}
 We can now apply the same trick as before to remove $\xi_n$ from the analysis.
 In particular, because $\xi_n$ is constrained to be $\geq 0$ and because we are
-trying to minimize it's sum, we can figure out that out the optimum, it will be the case that:
+trying to minimize its sum, we can figure out that out the optimum, it will be the case that:
 \begin{align}
   \xi_n &=
     \max \left\{ 0, 
@@ -477,7 +477,7 @@ The only differences are: (1) on line~\ref{eq:srl:algolossaug} you use loss-augm
 
 The challenge that arises is that we now have a more complicated argmax problem that before.
 In structured perceptron, we only needed to compute $\hat\vy_n$ as the output that maximized its score (see Eq~\ref{eq:srl:argmax}).
-Here, we need to find the output that maximizes it score \emph{plus} it's loss (Eq~\eqref{eq:srl:lossaug}).
+Here, we need to find the output that maximizes it score \emph{plus} its loss (Eq~\eqref{eq:srl:lossaug}).
 This optimization problem is refered to as \concept{loss-augmented search} or \concept{loss-augmented inference}.
 
 Before solving the loss-augmented inference problem, it's worth thinking about why it makes sense.
@@ -680,7 +680,7 @@ Putting this all together gives Algorithm~\ref{alg:srl:argmax}.
   }
 
 The main benefit of Algorithm~\ref{alg:srl:argmax} is that it is guaranteed to exactly compute the argmax output for sequences required in the structured perceptron algorithm, \emph{efficiently}.
-In particular, it's runtime is $O(LK^2)$, which is an exponential improvement on the naive $O(K^L)$ runtime if one were to enumerate every possible output sequence.
+In particular, its runtime is $O(LK^2)$, which is an exponential improvement on the naive $O(K^L)$ runtime if one were to enumerate every possible output sequence.
 The algorithm can be naturally extended to handle ``higher order'' Markov assumptions, where features depend on triples or quadruples of the output.
 The memoization becomes notationally cumbersome, but the algorithm remains essentially the same.
 In order to handle a length $M$ Markov features, the resulting algorithm will take $O(LK^M)$ time.
