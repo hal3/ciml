@@ -235,7 +235,7 @@ examples exceeds that of negative examples, $f(\vx) = +1$ for all
 $\vx$; otherwise $f(\vx) = -1$ for all $\vx$.  To make the problem
 moderately interesting, suppose that in the original training set,
 there are $80$ positive examples and $20$ negative examples.  In this
-case, $f\oth(\vx)=+1$.  It's weighted error rate will be $\hat\ep\oth
+case, $f\oth(\vx)=+1$.  Its weighted error rate will be $\hat\ep\oth
 = 0.2$ because it gets every negative example wrong.  Computing, we
 get $\al\oth = \frac12\log 4$.  Before normalization, we get the new
 weight for each positive (correct) example to be $1 \exp[-\frac12\log
@@ -271,7 +271,7 @@ iterations, very shallow trees are quite effective.
 
 In fact, a very popular weak learner is a decision \concept{decision
   stump}: a decision tree that can only ask \emph{one} question.  This
-may seem like a silly model (and, in fact, it is on it's own), but
+may seem like a silly model (and, in fact, it is on its own), but
 when combined with boosting, it becomes very effective.  To understand
 why, suppose for a moment that our data consists only of binary
 features, so that any question that a decision tree might ask is of
