@@ -47,7 +47,7 @@ incoming neurons are firing at different rates (i.e., have different
 \concept{activations}).  Based on how much these incoming neurons are
 firing, and how ``strong'' the neural connections are, our main neuron
 will ``decide'' how strongly it wants to fire.  And so on through the
-whole brain.  Learning in the brain happens by neurons becomming
+whole brain.  Learning in the brain happens by neurons becoming
 connected to other neurons, and the strengths of connections adapting
 over time.
 
@@ -66,7 +66,7 @@ sum, it decides whether to ``fire'' or not.  Firing is interpreted as
 being a positive example and not firing is interpreted as being a
 negative example.  In particular, if the weighted sum is positive, it
 ``fires'' and otherwise it doesn't fire.  This is shown
-diagramatically in Figure~\ref{fig:perc:example}.
+diagrammatically in Figure~\ref{fig:perc:example}.
 
 Mathematically, an input vector $\vx = \langle x_1, x_2, \dots, x_D
 \rangle$ arrives.  The neuron stores $D$-many weights, $w_1, w_2,
@@ -74,7 +74,7 @@ Mathematically, an input vector $\vx = \langle x_1, x_2, \dots, x_D
 \begin{equation} \label{eq:perc:sum}
 a = \sum_{d=1}^D w_d x_d
 \end{equation}
-to determine it's amount of ``activation.''  If this activiation is
+to determine its amount of ``activation.''  If this activation is
 positive (i.e., $a > 0$) it predicts that this example is a positive
 example.  Otherwise it predicts a negative example.
 
@@ -84,7 +84,7 @@ weight.  Then the activation is the same regardless of the value of
 this feature.  So features with zero weight are ignored.  Features
 with positive weights are indicative of positive examples because they
 cause the activation to increase.  Features with negative weights are
-indicative of negative examples because they cause the activiation to
+indicative of negative examples because they cause the activation to
 decrease.
 
 \thinkaboutit{What would happen if we encoded binary features like
@@ -264,7 +264,7 @@ as fast.
   between $20\%$ and $50\%$ of your time, are there any cases in which
   you might \emph{not} want to permute the data every iteration?}
 
-\section{Geometric Intrepretation}
+\section{Geometric Interpretation}
 
 \begin{mathreview}{Dot Products}
   \parpic[r][t]{\includegraphics[width=1.5in]{figs/perc_dotprojection}}
@@ -343,7 +343,7 @@ Figure~\ref{fig:perc:proj}.  In that figure, all the data points are
 projected onto $\vw$.  Below, we can think of this as a
 one-dimensional version of the data, where each data point is placed
 according to its projection along $\vw$.  This distance along $\vw$ is
-exactly the \emph{activiation} of that example, with no bias.
+exactly the \emph{activation} of that example, with no bias.
 
 From here, you can start thinking about the role of the bias term.
 Previously, the threshold would be at zero.  Any example with a
@@ -545,7 +545,7 @@ between them has to be shrinking.  The rest is algebra.
   after the \emph{first update}, and $\vw\kth$ the weight vector after
   the $k$th update.  (We are essentially ignoring data points on which
   the perceptron doesn't update itself.)  First, we will show that
-  $\dotp{\vw^*}{\vw\kth}$ grows quicky as a function of $k$.  Second,
+  $\dotp{\vw^*}{\vw\kth}$ grows quickly as a function of $k$.  Second,
   we will show that $\norm{\vw\kth}$ does not grow quickly.
 
   First, suppose that the $k$th update happens on example $(\vx,y)$.
@@ -698,7 +698,7 @@ voting.  In particular, the prediction is:
 \end{equation}
 The only difference between the voted prediction,
 Eq~\eqref{eq:perc:vote}, and the averaged prediction,
-Eq~\eqref{eq:perc:avg}, is the presense of the interior $\sign$
+Eq~\eqref{eq:perc:avg}, is the presence of the interior $\sign$
 operator.  With a little bit of algebra, we can rewrite the test-time
 prediction as:
 \begin{equation}
