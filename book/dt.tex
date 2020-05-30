@@ -247,7 +247,7 @@ answer is ``yes,'' you can be pretty confident that this student will
 like this course.
 
 More formally, you will consider each feature in turn.  You might
-consider the feature ``Is this a System's course?''  This feature has
+consider the feature ``Is this a Systems course?''  This feature has
 two possible value: no and yes.  Some of the training examples have an
 answer of ``no'' -- let's call that the ``NO'' set.  Some of the
 training examples have an answer of ``yes'' -- let's call that the
@@ -269,16 +269,16 @@ you guessed ``like'') you would classify all $10$ of them correctly.
 In the YES set (where you guessed ``hate'') you would classify $8$
 (out of $10$) of them correctly.  So overall you would classify $18$
 (out of $20$) correctly.  Thus, we'll say that the \emph{score} of the
-``Is this a System's course?'' question is $18/20$.
+``Is this a Systems course?'' question is $18/20$.
 
 \thinkaboutit{How many training examples would you classify correctly
   for each of the other three features from
   Figure~\ref{fig:dt_histogram}?}
 
 You will then repeat this computation for each of the available
-features to us, compute the scores for each of them.  When you must
-choose which feature consider first, you will want to choose the one
-with the highest score.
+features to us and compute the scores for each of them.  When you must
+choose which feature you should consider first, you will want to choose
+the one with the highest score.
 
 But this only lets you choose the \emph{first} feature to ask about.
 This is the feature that goes at the \emph{root} of the decision tree.
