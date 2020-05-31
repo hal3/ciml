@@ -118,9 +118,9 @@ One big difference between learning models is how robust they are to
 the addition of noisy or irrelevant features.  Intuitively, an
 irrelevant feature is one that is completely uncorrelated with the
 prediction task.  A feature $f$ whose expectation does not depend on
-the label $\Ep[f \| Y] = \Ep[f]$ might be irrelevant.  For instance,
-the presence of the word ``the'' might be largely irrelevant for
-predicting whether a course review is positive or negative.  
+the label $Y$, that is $\Ep[f \| Y] = \Ep[f]$ might be irrelevant.
+For instance, the presence of the word ``the'' might be largely irrelevant for
+predicting whether a course review is positive or negative.
 
 A secondary issue is how well these algorithms deal with
 \concept{redundant features}.  Two features are redundant if they are
@@ -158,7 +158,7 @@ Redundant features are almost certainly thrown out: once you select
 one feature, the second feature now looks mostly useless.  The only
 possible issue with irrelevant features is that even though they're
 irrelevant, they \emph{happen to} correlate with the class label on
-the training data, but chance.
+the training data, by chance.
 
 As a thought experiment, suppose that we have $N$ training examples,
 and exactly half are positive examples and half are negative
@@ -628,7 +628,7 @@ plots the sensitivity against $1 - \text{specificity}$.  Given an ROC
 curve, you can compute the \concept{area under the curve} (or
 \concept{AUC}) metric, which also provides a meaningful single number
 for a system's performance.  Unlike f-measures, which tend to be low
-because the require agreement, AUC scores tend to be very high, even
+because they require agreement, AUC scores tend to be very high, even
 for not great systems.  This is because random chance will give you an
 AUC of $0.5$ and the best possible AUC is $1.0$.
 
