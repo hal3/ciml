@@ -13,8 +13,6 @@
   regression.
 \end{learningobjectives}
 
-\dependencies{}
-
 \newthought{In the preceeding chapters,} you have learned all about a
 very simple form of prediction: predicting bits.  In the real world,
 however, we often need to predict much more complex objects.  You may
@@ -70,9 +68,9 @@ subsampling, you \emph{throw out} some of your negative examples so
 that you are left with a balanced data set ($50\%$ positive, $50\%$
 negative).  This might scare you a bit since throwing out data seems
 like a bad idea, but at least it makes learning much more efficient.
-In weighting, instead of throwing out positive examples, we just give
+In weighting, instead of throwing out negative examples, we just give
 them lower weight.  If you assign an \concept{importance weight} of
-$0.00101$ to each of the positive examples, then there will be as much
+$0.00101$ to each of the negative examples, then there will be as much
 \emph{weight} associated with positive examples as negative examples.
 
 Before formally defining these heuristics, we need to have a mechanism
