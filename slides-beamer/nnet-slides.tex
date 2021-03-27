@@ -85,8 +85,7 @@
 % or whatever
 \usetikzlibrary{shapes,snakes}
 \include{halbook}
-\usepackage{times}
-\usepackage[T1]{fontenc}
+
 % Or whatever. Note that the encoding and the font should match. If T1
 % does not look nice, try deleting the line with the fontenc.
 \newcommand{\myalert}[1]{{%\color{red}
@@ -963,7 +962,7 @@ computes derivatives of the edge weights for a given input.
 \begin{itemize}
 \item
 The key aspect of the \concept{forward-propagation} algorithm is to
-iteratively compute activations, going deeper and deeper in the DAG.
+iteratively compute activations bottom-up in the DAG.
 \item Once the activations of all the parents of a node $u$ have been
 computed, you can compute the activation of node $u$.  
 \Figure{nnet:forwardprop}{picture of forward prop}{0.4}

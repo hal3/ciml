@@ -1,4 +1,5 @@
-\documentclass[trans]{beamer}
+\documentclass[trans,aspectratio=169]{beamer}
+
 \usepackage{etex}
 \usepackage{amsthm}
 \usepackage{xcolor}
@@ -85,8 +86,7 @@
 % or whatever
 \usetikzlibrary{shapes,snakes}
 \include{halbook}
-\usepackage{times}
-\usepackage[T1]{fontenc}
+
 % Or whatever. Note that the encoding and the font should match. If T1
 % does not look nice, try deleting the line with the fontenc.
 \newcommand{\myalert}[1]{{%\color{red}
@@ -193,7 +193,7 @@ over time.
 \item However, our goal isn't to build a brain, but to simply be
 \emph{inspired} by how they work. 
 \item We are going to think of our
-learning algorithm as a \emph{single} neuron. 
+classifier as a \emph{single} neuron. 
 \item It receives input from
 $D$-many other neurons, one for each input feature.  
 \item The strength of
@@ -229,7 +229,7 @@ Mathematically, an input vector $\vx = \langle x_1, x_2, \dots, x_D
 a = \sum_{d=1}^D w_d x_d
 \end{equation}
 to determine its amount of ``activation.''
-\item  If this activiation is
+\item  If this activation is
 positive (i.e., $a > 0$) it predicts that this example is a positive
 example.  Otherwise it predicts a negative example.
 \end{itemize}
@@ -284,7 +284,7 @@ this feature.  So features with zero weight are ignored.
 with positive weights are indicative of positive examples because they
 cause the activation to increase.
 \item  Features with negative weights are
-indicative of negative examples because they cause the activiation to
+indicative of negative examples because they cause the activation to
 decrease.
 \end{itemize}
 \end{frame}
@@ -645,7 +645,7 @@ is just the distance of $\vx$ from the origin when projected
 \item We can think of this as a
 one-dimensional version of the data, where each data point is placed
 according to its projection along $\vw$.  This distance along $\vw$ is
-exactly the \emph{activiation} of that example, with no bias.
+exactly the \emph{activation} of that example, with no bias.
 \end{itemize}
 \end{frame}
 
@@ -985,7 +985,7 @@ algorithms, you need to modify it a bit to get better generalization.
 \item Consider a data set with $10,000$ examples.  Suppose that
 after the first $100$ examples, the perceptron has learned a really
 good classifier. 
-\item It's so good that it goes over the next $9999$
+\item It's so good that it goes over the next $9899$
 examples without making \emph{any} updates.  
 \item It reaches the $10,000$th
 example and makes an error.  It updates.  
