@@ -1,4 +1,4 @@
-\documentclass[trans]{beamer}
+\documentclass[trans,aspectratio=169]{beamer}
 
 \usepackage{etex}
 \usepackage{amsthm}
@@ -391,7 +391,7 @@ parameters.
 \item 
 Plots that relate
 \emph{margin} to \emph{loss}.
-\Figure{loss:zeroone}{plot of zero/one versus margin}{0.4}
+\Figure{loss:zeroone}{plot of zero/one versus margin}{0.3}
 \item For zero/one loss, if you get a positive margin (i.e., $y(\dotp{\vw}{\vx}+b)>0$)
 then you get a loss of zero.  Otherwise you get a loss of one. 
 \end{itemize}
@@ -431,7 +431,7 @@ above it.
 \end{itemize}
 \end{itemize}
 \Figure{loss:convex}{plot of convex and non-convex functions
-  with two chords each}{0.4}
+  with two chords each}{0.3}
 \end{frame}
 
 \begin{frame}
@@ -469,7 +469,7 @@ Four common surrogate loss functions: \concept{hinge loss}, \concept{logistic lo
 %\Figure{loss:surrogate}{surrogate loss fns}{0.4}
 \end{itemize}
 \begin{center}
- \includegraphics[width=0.65\textwidth]{loss}
+ \includegraphics[width=0.6\textwidth]{loss}
 \end{center}
 \end{frame}
 
@@ -1038,7 +1038,7 @@ differentiation by parts:
 \end{align}
 %
 \end{itemize}
-\Figure{loss:sub}{hinge loss with sub}{0.3}
+\Figure{loss:sub}{hinge loss with sub}{0.2}
 \end{frame}
 
 \begin{frame}
@@ -1467,7 +1467,7 @@ than simply greater than \emph{zero}.
 \item However, the problem doesn't
 fundamentally change if you replace the ``1'' with any other positive
 constant
-\Figure{loss:margin}{hyperplane with margins on sides}{0.28}
+\Figure{loss:margin}{hyperplane with margins on sides}{0.2}
 \item The constant one can be interpreted
 visually as ensuring that there is a non-trivial margin between the
 positive points and negative points.
