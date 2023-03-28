@@ -622,12 +622,12 @@ gradients backward through the network, starting at the end.
   \begin{tiny}
 \FUN{TwoLayerNetworkTrain}(\VAR{$\mat D$}, \VAR{$\eta$}, \VAR{K}, \VAR{MaxIter})
  \begin{algorithmic}[1]
-\SETST{$\mat W$}{$D \times K$ matrix of small random values}
+\SETST{$\mat W$}{$K \times D$ matrix of small random values}
 \COMMENT{initialize input layer weights}
 \SETST{$\vec v$}{$K$-vector of small random values}
 \COMMENT{initialize output layer weights}
 \FOR{\VAR{iter} = \CON{1} \dots \VAR{MaxIter}}
-\SETST{$\mat G$}{$D \times K$ matrix of zeros}
+\SETST{$\mat G$}{$K \times D$ matrix of zeros}
 \COMMENT{initialize input layer gradient}
 \SETST{$\vec g$}{$K$-vector of zeros}
 \COMMENT{initialize output layer gradient}
