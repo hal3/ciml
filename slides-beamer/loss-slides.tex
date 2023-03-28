@@ -1115,17 +1115,17 @@ $2$-norm regularizer)}
   \COMMENT{initialize gradient of weights and bias}
 \FORALL{(\VAR{$\vx$},\VAR{$y$}) $\in$ \VAR{$\mat D$}}
 \IF{\VAR{$y$}$\left( \dotp{\VARm{\vw}}{\VARm{\vx}} + \VARm{b} \right) \leq \CON{1}$}
-\SETST{$\vg$}{\VAR{$\vg$} + \VAR{$y$} \VAR{$\vx$}}
+\SETST{$\vg$}{\VAR{$\vg$} - \VAR{$y$} \VAR{$\vx$}}
   \COMMENT{update weight gradient}
-\SETST{$g$}{\VAR{$g$} + \VAR{$y$}}
+\SETST{$g$}{\VAR{$g$} - \VAR{$y$}}
   \COMMENT{update bias derivative}
 \ENDIF
 \ENDFOR
-\SETST{$\vg$}{$\VARm{\vg} - \VARm{\la} \VARm{\vw}$}
+\SETST{$\vg$}{$\VARm{\vg} + \VARm{\la} \VARm{\vw}$}
   \COMMENT{add in regularization term}
-\SETST{$\vw$}{$\VARm{\vw} + \VARm{\eta} \VARm{\vg}$}
+\SETST{$\vw$}{$\VARm{\vw} - \VARm{\eta} \VARm{\vg}$}
   \COMMENT{update weights}
-\SETST{$b$}{$\VARm{b} + \VARm{\eta} \VARm{g}$}
+\SETST{$b$}{$\VARm{b} - \VARm{\eta} \VARm{g}$}
   \COMMENT{update bias}
 \ENDFOR
 \RETURN \VAR{$\vw$}, \VAR{$b$}
@@ -1677,9 +1677,6 @@ small weights means having large margins!
 \begin{frame}
   \frametitle{Support Vector Machines}
 \begin{itemize}
-\item 
-However, our goal wasn't to justify the regularizer: it was to
-understand hinge loss.
 \item   Let us go back to the soft-margin SVM and
 plug in our new knowledge about margins:
 %

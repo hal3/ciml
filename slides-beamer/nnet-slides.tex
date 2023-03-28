@@ -1,4 +1,4 @@
-\documentclass[trans]{beamer}
+\documentclass[trans,aspectratio=169]{beamer}
 \usepackage{etex}
 \usepackage{amsthm}
 \usepackage{xcolor}
@@ -182,7 +182,7 @@ One approach to doing this is to chain together a collection of
 perceptrons to build more complex \concept{neural networks}. 
 \item \concept{Two-layer network} 
 \Figure{nnet:twolayer}{picture of a two-layer network with 5
-  inputs and two hidden units}{0.4}
+  inputs and two hidden units}{0.3}
 \end{itemize}
 \end{frame}
 
@@ -619,7 +619,7 @@ gradients backward through the network, starting at the end.
 
 \begin{frame}
   \frametitle{The Back-propagation Algorithm}
-  \begin{scriptsize}
+  \begin{tiny}
 \FUN{TwoLayerNetworkTrain}(\VAR{$\mat D$}, \VAR{$\eta$}, \VAR{K}, \VAR{MaxIter})
  \begin{algorithmic}[1]
 \SETST{$\mat W$}{$D \times K$ matrix of small random values}
@@ -655,7 +655,7 @@ gradients backward through the network, starting at the end.
 \ENDFOR
 \RETURN \VAR{$\mat W$}, \VAR{$\vec v$}
       \end{algorithmic}  
-\end{scriptsize}
+\end{tiny}
 \end{frame}
 
 \begin{frame}
@@ -805,7 +805,7 @@ held-out data.
 
 \begin{frame}
   \frametitle{Initialization and Convergence of Neural Networks}
-\Figure{nnet:converge}{convergence of randomly initialized networks}{0.4}
+\Figure{nnet:converge}{convergence of randomly initialized networks}{0.3}
 \begin{itemize}
 \item
 Prototypical
@@ -868,7 +868,7 @@ can be generalized beyond two layers to any arbitrary directed acyclic
 graph. 
 \item In practice, it is most common to use a layered network unless one has a very
 strong reason (aka inductive bias) to do something different.
-\Figure{nnet:layered}{multi-layer network}{0.35}
+\Figure{nnet:layered}{multi-layer network}{0.3}
 \end{itemize}
 \end{frame}
 
@@ -880,7 +880,7 @@ The view as a directed graph sheds a different sort of
 insight on the back-propagation algorithm.
 \item Suppose that your network structure is stored in some directed acyclic
 graph
-\Figure{nnet:dag}{DAG network}{0.35}
+\Figure{nnet:dag}{DAG network}{0.3}
 \end{itemize}
 \end{frame}
 
@@ -944,6 +944,9 @@ computes derivatives of the edge weights for a given input.
   {
 \STATE{run \FUN{ForwardPropagation}(\VAR{$\vx$}) to compute activations}
 \SETST{$e_y$}{$y - a_y$}
+\FORALL{nodes $v$ in the network except $y$}
+\SETST{$e_v$}{$0$}
+\ENDFOR
   \COMMENT{compute overall network error}
 \FORALL{nodes $v$ in the network whose error $e_v$ is computed}
 \FORALL{$u \in \textit{par}(v)$}
@@ -965,7 +968,7 @@ The key aspect of the \concept{forward-propagation} algorithm is to
 iteratively compute activations bottom-up in the DAG.
 \item Once the activations of all the parents of a node $u$ have been
 computed, you can compute the activation of node $u$.  
-\Figure{nnet:forwardprop}{picture of forward prop}{0.4}
+\Figure{nnet:forwardprop}{picture of forward prop}{0.3}
 \end{itemize}
 \end{frame}
 
@@ -990,7 +993,7 @@ gradients themselves.
 
 \begin{frame}
   \frametitle{Beyond Two Layers}
-\Figure{nnet:backprop}{picture of back prop}{0.4}
+\Figure{nnet:backprop}{picture of back prop}{0.3}
 \begin{itemize}
 \item
 Given the back-propagation algorithm, you can directly run gradient
